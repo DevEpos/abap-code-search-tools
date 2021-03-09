@@ -5,16 +5,16 @@ ABAP Code Search
 
 ## Description
 Searches Code in ABAP sources like
-- Classes (CLAS) 
-- Interfaces (INTF)
-- Programs (PROG)
-- Function Groups (FUGR)
+- [ ] Classes (CLAS) 
+- [ ] Interfaces (INTF)
+- [ ] Programs (PROG)
+- [ ] Function Groups (FUGR)
   - Functions (FUGR/F)
   - Function Group Includes (FUGR/I)
-- Data Definitions (DDLS)
-- Access Controls (DCLA)
-- Behavior Definitions (BDEV)
-- Service Definition (SRVD)
+- [ ] Data Definitions (DDLS)
+- [ ] Access Controls (DCLA)
+- [ ] Behavior Definitions (BDEV)
+- [ ] Service Definition (SRVD)
 
 The search will be done entirely via ABAP (as opposed to the ADT Source Search). There is an option to run the search in parallel for better performance
 
