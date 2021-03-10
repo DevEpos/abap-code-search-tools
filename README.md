@@ -1,5 +1,5 @@
 ![](https://img.shields.io/badge/version-WIP-red)
-![](https://img.shields.io/badge/ABAP-v7.40sp08-orange)
+![](https://img.shields.io/badge/ABAP-v7.40sp08+-orange)
 # abap-code-search
 ABAP Code Search
 > **ATTENTION**: This repository is not yet ready to be used
