@@ -1,5 +1,5 @@
 "! <p class="shorttext synchronized" lang="en">Code Search Engine</p>
-CLASS zcl_cearch_engine DEFINITION
+CLASS zcl_adcoset_engine DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC .
@@ -11,5 +11,5 @@ ENDCLASS.
 
 
 
-CLASS zcl_cearch_engine IMPLEMENTATION.
+CLASS zcl_adcoset_engine IMPLEMENTATION.
 ENDCLASS.

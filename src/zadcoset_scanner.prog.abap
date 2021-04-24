@@ -3,7 +3,7 @@
 *&---------------------------------------------------------------------*
 *&
 *&---------------------------------------------------------------------*
-REPORT zcearch_scanner.
+REPORT zadcoset_scanner.
 
 "! <p class="shorttext synchronized" lang="en">Code Scanner</p>
 CLASS zcl_codesrch_code_scanner DEFINITION.
@@ -528,8 +528,7 @@ ENDCLASS.
 
 START-OF-SELECTION.
   DATA(scanner) = NEW zcl_codesrch_code_scanner( '$DB_BROWSER' ).
-*  scanner->print_results( ).
-  DATA(search_string) = `stuff`.
-  DATA(regex) = `[^"]*+abc`.
-  FIND ALL OCCURRENCES OF REGEX regex IN search_string
-   RESULTS DATA(results).
+  scanner->start_scan(
+      find_string = `if_reset_table_in_alv`
+      ignore_case = abap_true ).
+  scanner->print_results( ).
