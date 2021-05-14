@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_INTF" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOINTERF>
+    <CLSNAME>ZIF_ADCOSET_CLS_SEARCH_SETTNGS</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Code search settings for classes</DESCRIPT>
+    <EXPOSURE>2</EXPOSURE>
+    <STATE>1</STATE>
+    <UNICODE>X</UNICODE>
+   </VSEOINTERF>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_CLS_SEARCH_SETTNGS</CLSNAME>
+     <CMPNAME>IS_SEARCH_LOCAL_DEF_INCL</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns the setting value of &apos;search_local_def_incl&apos;</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_CLS_SEARCH_SETTNGS</CLSNAME>
+     <CMPNAME>IS_SEARCH_LOCAL_IMPL_INCL</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns the setting value of &apos;search_local_impl_incl&apos;</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_CLS_SEARCH_SETTNGS</CLSNAME>
+     <CMPNAME>IS_SEARCH_MACRO_INCL</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns the setting value of &apos;search_macro_incl&apos;</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_CLS_SEARCH_SETTNGS</CLSNAME>
+     <CMPNAME>IS_SEARCH_TEST_INCL</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns the setting value of &apos;search_test_incl&apos;</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
