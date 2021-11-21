@@ -19,6 +19,12 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZIF_ADCOSET_SEARCH_SETTINGS</CLSNAME>
+     <CMPNAME>GET_TYPE_SPECIFIC_SETTINGS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns type specific search settings</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_SEARCH_SETTINGS</CLSNAME>
      <CMPNAME>IS_IGNORE_COMMENT_LINES</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Returns the setting value of &apos;ignore_comment_lines&apos;</DESCRIPT>
@@ -43,7 +49,7 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZIF_ADCOSET_SEARCH_SETTINGS</CLSNAME>
-     <CMPNAME>IS_USE_REGEX</CMPNAME>
+     <CMPNAME>IS_REGEX</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Returns the setting value of &apos;use_regex&apos;</DESCRIPT>
     </SEOCOMPOTX>

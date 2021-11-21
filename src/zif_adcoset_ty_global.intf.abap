@@ -3,18 +3,26 @@ INTERFACE zif_adcoset_ty_global
   PUBLIC .
 
   TYPES:
-    ty_server_group  TYPE rzlli_apcl,
-    ty_package_name  TYPE devclass,
-    ty_package_names TYPE STANDARD TABLE OF devclass WITH EMPTY KEY,
-    ty_tadir_types   TYPE STANDARD TABLE OF trobjtype WITH EMPTY KEY,
-    ty_obj_names     TYPE STANDARD TABLE OF sobj_name WITH EMPTY KEY,
+    ty_server_group   TYPE rzlli_apcl,
+    ty_package_name   TYPE devclass,
+    ty_package_names  TYPE STANDARD TABLE OF devclass WITH EMPTY KEY,
+    ty_tadir_types    TYPE STANDARD TABLE OF trobjtype WITH EMPTY KEY,
+    ty_obj_names      TYPE STANDARD TABLE OF sobj_name WITH EMPTY KEY,
+    ty_search_results TYPE STANDARD TABLE OF REF TO zif_adcoset_search_result,
 
     BEGIN OF ty_wb_obj_type,
       type     TYPE trobjtype,
       sub_type TYPE seu_objtyp,
     END OF ty_wb_obj_type,
 
-    ty_wb_obj_types TYPE STANDARD TABLE OF ty_wb_obj_type,
+    ty_wb_obj_types TYPE STANDARD TABLE OF ty_wb_obj_type WITH EMPTY KEY,
+
+    BEGIN OF ty_object,
+      name TYPE sobj_name,
+      type TYPE ty_wb_obj_type,
+    END OF ty_object,
+
+    ty_objects TYPE STANDARD TABLE OF ty_object WITH EMPTY KEY,
 
     "! General settings for code based search
     BEGIN OF ty_search_settings,

@@ -3,21 +3,13 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOINTERF>
-    <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
+    <CLSNAME>ZIF_ADCOSET_STRING_MATCHER</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Defines the scope of a code search</DESCRIPT>
+    <DESCRIPT>Finds matches in a string for a given (RegExp) pattern</DESCRIPT>
     <EXPOSURE>2</EXPOSURE>
     <STATE>1</STATE>
     <UNICODE>X</UNICODE>
    </VSEOINTERF>
-   <DESCRIPTIONS>
-    <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
-     <CMPNAME>GET_OBJECTS</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Returns the packages of the scope</DESCRIPT>
-    </SEOCOMPOTX>
-   </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
 </abapGit>

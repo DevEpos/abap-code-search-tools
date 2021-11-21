@@ -4,7 +4,7 @@ INTERFACE zif_adcoset_search_settings
 
   METHODS:
     "! <p class="shorttext synchronized" lang="en">Returns the setting value of 'use_regex'</p>
-    is_use_regex
+    is_regex
       RETURNING
         VALUE(result) TYPE abap_bool,
 
@@ -41,5 +41,10 @@ INTERFACE zif_adcoset_search_settings
     "! <p class="shorttext synchronized" lang="en">Returns the setting value of 'parallel_processing'</p>
     is_parallel_processing
       RETURNING
-        VALUE(result) TYPE abap_bool.
+        VALUE(result) TYPE abap_bool,
+
+        "! <p class="shorttext synchronized" lang="en">Returns type specific search settings</p>
+        get_type_specific_settings
+        returning
+          value(result) type ref to object.
 ENDINTERFACE.

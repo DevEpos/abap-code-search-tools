@@ -196,7 +196,7 @@ CLASS zcl_codesrch_code_scanner IMPLEMENTATION.
 
   METHOD load_classes.
 
-    DATA(tadir_reader) = zcl_advoea_reader_factory=>create_repo_reader( ).
+    DATA(tadir_reader) = zcl_advoat_reader_factory=>create_repo_reader( ).
     me->tadir_objs = tadir_reader->include_by_package(
         packages            = VALUE #( ( me->packname ) )
         resolve_subpackages = abap_true
