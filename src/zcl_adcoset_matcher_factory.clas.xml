@@ -18,6 +18,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Creates matcher for the given type and pattern</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_MATCHER_FACTORY</CLSNAME>
+     <CMPNAME>IS_PCRE_SUPPORTED</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Checks if PCRE is supported in the system</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

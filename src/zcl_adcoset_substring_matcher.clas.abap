@@ -11,11 +11,13 @@ CLASS zcl_adcoset_substring_matcher DEFINITION
     METHODS:
       constructor
         IMPORTING
-          pattern TYPE string.
+          pattern     TYPE string
+          ignore_case TYPE abap_bool.
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
-      pattern TYPE string.
+      pattern     TYPE string,
+      ignore_case TYPE abap_bool.
 ENDCLASS.
 
 
@@ -25,11 +27,28 @@ CLASS zcl_adcoset_substring_matcher IMPLEMENTATION.
 
   METHOD constructor.
     me->pattern = pattern.
+    me->ignore_case = ignore_case.
   ENDMETHOD.
 
 
   METHOD zif_adcoset_pattern_matcher~get_matches.
+    ASSERT ( text IS NOT INITIAL AND table IS INITIAL ) OR
+           ( text IS INITIAL AND table IS NOT INITIAL ).
 
+    IF text IS NOT INITIAL.
+
+      IF ignore_case = abap_true.
+        FIND ALL OCCURRENCES OF pattern IN text IGNORING CASE RESULTS result.
+      ELSE.
+        FIND ALL OCCURRENCES OF pattern IN text RESPECTING CASE RESULTS result.
+      ENDIF.
+    ELSE.
+      IF ignore_case = abap_true.
+        FIND ALL OCCURRENCES OF pattern IN TABLE table IGNORING CASE RESULTS result.
+      ELSE.
+        FIND ALL OCCURRENCES OF pattern IN TABLE table RESPECTING CASE RESULTS result.
+      ENDIF.
+    ENDIF.
   ENDMETHOD.
 
 

@@ -33,11 +33,12 @@ INTERFACE zif_adcoset_ty_global
       new_line_character    TYPE string,
       parallel_processing   TYPE abap_bool,
       parl_processing_group TYPE ty_server_group,
+      custom_settings       TYPE REF TO data,
     END OF ty_search_settings,
 
     "! Settings for code based class search
     BEGIN OF ty_cls_search_settings,
-      serach_test_incl       TYPE abap_bool,
+      search_test_incl       TYPE abap_bool,
       search_macro_incl      TYPE abap_bool,
       search_local_def_incl  TYPE abap_bool,
       search_local_impl_incl TYPE abap_bool,

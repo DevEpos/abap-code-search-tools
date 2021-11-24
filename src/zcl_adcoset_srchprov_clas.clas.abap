@@ -8,8 +8,8 @@ CLASS zcl_adcoset_srchprov_clas DEFINITION
     METHODS:
       constructor
         IMPORTING
-          search_settings     TYPE REF TO zif_adcoset_search_settings
-          cls_search_settings TYPE REF TO zif_adcoset_cls_search_settngs,
+          search_settings TYPE zif_adcoset_ty_global=>ty_search_settings
+          matchers        TYPE REF TO zif_adcoset_pattern_matcher=>ty_ref_tab,
       search
         IMPORTING
           object TYPE zif_adcoset_ty_global=>ty_object.
@@ -27,9 +27,38 @@ CLASS zcl_adcoset_srchprov_clas DEFINITION
         private_section   TYPE string VALUE 'Private Section',
         method            TYPE string VALUE `Method `,
       END OF c_section_texts.
+
+    TYPES:
+      BEGIN OF ty_line_index,
+        number               TYPE i,
+        offset               TYPE i,
+        method_name          TYPE seocpdname,
+        previous_method_line TYPE i,
+        is_class_def_end     TYPE abap_bool,
+      END OF ty_line_index,
+      ty_line_indexes TYPE TABLE OF ty_line_index WITH KEY number
+                                                  WITH UNIQUE HASHED KEY offset COMPONENTS offset,
+      BEGIN OF ty_source_code,
+        code                    TYPE string,
+        class_def_end_line      TYPE i,
+        first_method_begin_line TYPE i,
+        last_method_begin_line  TYPE i,
+        line_indexes            TYPE ty_line_indexes,
+      END OF ty_source_code,
+
+      BEGIN OF ty_parse_settings,
+        determine_class_def_begin TYPE abap_bool,
+        determine_method_begin    TYPE abap_bool,
+      END OF ty_parse_settings,
+
+      BEGIN OF ty_method_pos,
+        offset TYPE i,
+        method TYPE seocpdname,
+      END OF ty_method_pos.
+
     DATA:
-      custom_settings TYPE REF TO zif_adcoset_cls_search_settngs,
-      search_settings TYPE REF TO zif_adcoset_search_settings.
+      custom_settings TYPE zif_adcoset_ty_global=>ty_cls_search_settings,
+      search_settings TYPE zif_adcoset_ty_global=>ty_search_settings.
 ENDCLASS.
 
 
@@ -39,7 +68,11 @@ CLASS zcl_adcoset_srchprov_clas IMPLEMENTATION.
 
   METHOD constructor.
     me->search_settings = search_settings.
-    me->custom_settings = cls_search_settings.
+
+    ASSIGN search_settings-custom_settings->* TO FIELD-SYMBOL(<custom_settings>).
+    IF sy-subrc = 0.
+      custom_settings = CORRESPONDING #( <custom_settings> ).
+    ENDIF.
   ENDMETHOD.
 
 

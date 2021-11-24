@@ -10,6 +10,14 @@
     <STATE>1</STATE>
     <UNICODE>X</UNICODE>
    </VSEOINTERF>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_PATTERN_MATCHER</CLSNAME>
+     <CMPNAME>GET_MATCHES</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Retrieves the matches in the given string(s)</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
 </abapGit>
