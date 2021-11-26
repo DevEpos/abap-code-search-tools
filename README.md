@@ -13,9 +13,9 @@ Searches Code in ABAP sources like
   - Functions (FUGR/F)
   - Function Group Includes (FUGR/I)
 - [ ] Data Definitions (DDLS)
-- [ ] Access Controls (DCLA)
+- [ ] Access Controls (DCLS)
+- [ ] Metadata Extension (DDLX)
 - [ ] Behavior Definitions (BDEV)
-- [ ] Service Definition (SRVD)
 
 The search will be done entirely via ABAP (as opposed to the ADT Source Search). There is an option to run the search in parallel for better performance
 
