@@ -1,5 +1,5 @@
 "! <p class="shorttext synchronized" lang="en">Search Provider for Classes</p>
-CLASS zcl_adcoset_srchprov_clas DEFINITION
+CLASS zcl_adcoset_csp_clas DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC .
@@ -63,7 +63,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_adcoset_srchprov_clas IMPLEMENTATION.
+CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
 
 
   METHOD constructor.

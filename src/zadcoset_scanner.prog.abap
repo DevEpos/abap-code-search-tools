@@ -214,43 +214,45 @@ CLASS zcl_codesrch_code_scanner IMPLEMENTATION.
   METHOD scan_clas.
     DATA(cls_naming) = CAST if_oo_class_incl_naming( cl_oo_include_naming=>get_instance_by_cifkey( VALUE #( clsname = name ) ) ).
 
-*    DATA(meth_includes) = cls_naming->get_all_method_includes( ).
-*    LOOP AT meth_includes ASSIGNING FIELD-SYMBOL(<meth_incl>).
-*      search_include(
-*        incl_info   = VALUE #(
-*          program_name = <meth_incl>-incname
-*          object_type  = c_types-class
-*          object_name  = name
-*          method_name  = <meth_incl>-cpdkey-cpdname
-*          display_name = c_cls_method && <meth_incl>-cpdkey-cpdname )
-*        find_string = find_string ).
-*    ENDLOOP.
+    DATA(meth_includes) = cls_naming->get_all_method_includes( ).
+    LOOP AT meth_includes ASSIGNING FIELD-SYMBOL(<meth_incl>).
+      search_include(
+        incl_info   = VALUE #(
+          program_name = <meth_incl>-incname
+          object_type  = c_types-class
+          object_name  = name
+          method_name  = <meth_incl>-cpdkey-cpdname
+          display_name = c_cls_method && <meth_incl>-cpdkey-cpdname )
+        find_string = find_string ).
+    ENDLOOP.
 
-    search_main_class_source(
-      program_name = cls_naming->main_source
-      class_name   = name
-      find_string  = find_string ).
-*    search_include(
-*      incl_info   = VALUE #(
-*        program_name = cls_naming->public_section
-*        object_type  = c_types-class
-*        object_name  = name
-*        display_name = c_cls_public_section )
-*      find_string = find_string ).
-*    search_include(
-*      incl_info   = VALUE #(
-*        program_name = cls_naming->protected_section
-*        object_type  = c_types-class
-*        object_name  = name
-*        display_name = c_cls_protected_section )
-*      find_string = find_string ).
-*    search_include(
-*      incl_info   = VALUE #(
-*        program_name = cls_naming->private_section
-*        object_type  = c_types-class
-*        object_name  = name
-*        display_name = c_cls_private_section )
-*      find_string = find_string ).
+*    search_main_class_source(
+*      program_name = cls_naming->main_source
+*      class_name   = name
+*      find_string  = find_string ).
+
+    search_include(
+      incl_info   = VALUE #(
+        program_name = cls_naming->public_section
+        object_type  = c_types-class
+        object_name  = name
+        display_name = c_cls_public_section )
+      find_string = find_string ).
+    search_include(
+      incl_info   = VALUE #(
+        program_name = cls_naming->protected_section
+        object_type  = c_types-class
+        object_name  = name
+        display_name = c_cls_protected_section )
+      find_string = find_string ).
+    search_include(
+      incl_info   = VALUE #(
+        program_name = cls_naming->private_section
+        object_type  = c_types-class
+        object_name  = name
+        display_name = c_cls_private_section )
+      find_string = find_string ).
+
     search_include(
       incl_info   = VALUE #(
         program_name = cls_naming->locals_def
@@ -529,6 +531,7 @@ ENDCLASS.
 START-OF-SELECTION.
   DATA(scanner) = NEW zcl_codesrch_code_scanner( '$DB_BROWSER' ).
   scanner->start_scan(
-      find_string = `if_reset_table_in_alv`
+*      find_string = `if_reset_table_in_alv`
+      find_string = `^.*\blf_.*$`
       ignore_case = abap_true ).
   scanner->print_results( ).

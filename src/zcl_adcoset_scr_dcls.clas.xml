@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ADCOSET_SRCHPROV_CLAS</CLSNAME>
+    <CLSNAME>ZCL_ADCOSET_SCR_DCLS</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Search Provider for Classes</DESCRIPT>
+    <DESCRIPT>Source code reader for CDS Access Controls</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

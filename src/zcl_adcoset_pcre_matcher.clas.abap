@@ -34,16 +34,16 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
 
     CALL METHOD cl_abap_regex=>('CREATE_PCRE')
       EXPORTING
-        ignore_case      = ignore_case
-*       enable_jit       = abap_true
-        enable_multiline = abap_false
+        ignore_case = ignore_case
+*       enable_jit  = abap_true
+*       enable_multiline = abap_false
 *       no_submatches    = abap_false
 *       newline_mode     = cl_abap_regex=>('C_NEWLINE_MODE-CRLFANY')
 *       unicode_handling = cl_abap_regex=>('C_UNICODE_HANDLING-STRICT')
-*       extended         = abap_true
-*       dot_all          = abap_false
+*       extended    = abap_true
+*       dot_all     = abap_false
       RECEIVING
-        regex            = regex.
+        regex       = regex.
   ENDMETHOD.
 
 
