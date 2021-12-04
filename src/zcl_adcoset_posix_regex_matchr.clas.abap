@@ -37,16 +37,9 @@ CLASS zcl_adcoset_posix_regex_matchr IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_adcoset_pattern_matcher~get_matches.
-    ASSERT ( text IS NOT INITIAL AND table IS INITIAL ) OR
-           ( text IS INITIAL AND table IS NOT INITIAL ).
-
+  METHOD zif_adcoset_pattern_matcher~find_matches.
     TRY.
-        IF text IS NOT INITIAL.
-          result = regex->create_matcher( text = text )->find_all( ).
-        ELSE.
-          result = regex->create_matcher( table = table )->find_all( ).
-        ENDIF.
+        result = regex->create_matcher( table = source )->find_all( ).
       CATCH cx_sy_matcher ##NO_HANDLER.
         " should not happen. The regex exceptions will be handled in the constructor
     ENDTRY.

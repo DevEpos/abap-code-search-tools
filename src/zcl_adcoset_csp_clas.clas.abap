@@ -2,17 +2,19 @@
 CLASS zcl_adcoset_csp_clas DEFINITION
   PUBLIC
   FINAL
-  CREATE PUBLIC .
+  CREATE PUBLIC.
 
   PUBLIC SECTION.
+    INTERFACES zif_adcoset_code_search_prov.
+
     METHODS:
+      "! <p class="shorttext synchronized" lang="en">Creates new instance of a class search provider</p>
       constructor
         IMPORTING
           search_settings TYPE zif_adcoset_ty_global=>ty_search_settings
-          matchers        TYPE REF TO zif_adcoset_pattern_matcher=>ty_ref_tab,
-      search
-        IMPORTING
-          object TYPE zif_adcoset_ty_global=>ty_object.
+          custom_settings TYPE zif_adcoset_ty_global=>ty_cls_search_settings
+          src_code_reader TYPE REF TO zif_adcoset_src_code_reader
+          matchers        TYPE REF TO zif_adcoset_pattern_matcher=>ty_ref_tab.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
@@ -30,26 +32,15 @@ CLASS zcl_adcoset_csp_clas DEFINITION
 
     TYPES:
       BEGIN OF ty_line_index,
-        number               TYPE i,
-        offset               TYPE i,
-        method_name          TYPE seocpdname,
-        previous_method_line TYPE i,
-        is_class_def_end     TYPE abap_bool,
+        number TYPE i,
+        offset TYPE i,
       END OF ty_line_index,
       ty_line_indexes TYPE TABLE OF ty_line_index WITH KEY number
                                                   WITH UNIQUE HASHED KEY offset COMPONENTS offset,
       BEGIN OF ty_source_code,
-        code                    TYPE string,
-        class_def_end_line      TYPE i,
-        first_method_begin_line TYPE i,
-        last_method_begin_line  TYPE i,
-        line_indexes            TYPE ty_line_indexes,
+        code         TYPE string,
+        line_indexes TYPE ty_line_indexes,
       END OF ty_source_code,
-
-      BEGIN OF ty_parse_settings,
-        determine_class_def_begin TYPE abap_bool,
-        determine_method_begin    TYPE abap_bool,
-      END OF ty_parse_settings,
 
       BEGIN OF ty_method_pos,
         offset TYPE i,
@@ -58,7 +49,8 @@ CLASS zcl_adcoset_csp_clas DEFINITION
 
     DATA:
       custom_settings TYPE zif_adcoset_ty_global=>ty_cls_search_settings,
-      search_settings TYPE zif_adcoset_ty_global=>ty_search_settings.
+      search_settings TYPE zif_adcoset_ty_global=>ty_search_settings,
+      src_code_reader TYPE REF TO zif_adcoset_src_code_reader.
 ENDCLASS.
 
 
@@ -68,15 +60,12 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
 
   METHOD constructor.
     me->search_settings = search_settings.
-
-    ASSIGN search_settings-custom_settings->* TO FIELD-SYMBOL(<custom_settings>).
-    IF sy-subrc = 0.
-      custom_settings = CORRESPONDING #( <custom_settings> ).
-    ENDIF.
+    me->src_code_reader = src_code_reader.
+    me->custom_settings = custom_settings.
   ENDMETHOD.
 
 
-  METHOD search.
+  METHOD zif_adcoset_code_search_prov~search.
 
   ENDMETHOD.
 

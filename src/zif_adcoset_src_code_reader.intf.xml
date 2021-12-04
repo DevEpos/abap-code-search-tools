@@ -13,15 +13,9 @@
    <DESCRIPTIONS>
     <SEOCOMPOTX>
      <CLSNAME>ZIF_ADCOSET_SRC_CODE_READER</CLSNAME>
-     <CMPNAME>GET_SOURCE_TABLE</CMPNAME>
+     <CMPNAME>GET_SOURCE_CODE</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Retrieves source code as string table</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SRC_CODE_READER</CLSNAME>
-     <CMPNAME>GET_SOURCE_TEXT</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Retrieves source code as string</DESCRIPT>
+     <DESCRIPT>Retrieves source code instance of object via name</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

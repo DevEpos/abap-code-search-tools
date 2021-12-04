@@ -3,22 +3,14 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ADCOSET_CSP_CLAS</CLSNAME>
+    <CLSNAME>ZCL_ADCOSET_ADT_UTIL</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Search Provider for Classes</DESCRIPT>
+    <DESCRIPT>ADT Util</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
    </VSEOCLASS>
-   <DESCRIPTIONS>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_ADCOSET_CSP_CLAS</CLSNAME>
-     <CMPNAME>CONSTRUCTOR</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Creates new instance of a class search provider</DESCRIPT>
-    </SEOCOMPOTX>
-   </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
 </abapGit>

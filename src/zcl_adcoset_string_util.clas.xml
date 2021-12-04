@@ -10,6 +10,7 @@
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
+    <WITH_UNIT_TESTS>X</WITH_UNIT_TESTS>
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
@@ -20,15 +21,15 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_ADCOSET_STRING_UTIL</CLSNAME>
-     <CMPNAME>CONCAT_WITH_LINE_FEED</CMPNAME>
+     <CMPNAME>DETERMINE_LINE_INDEXES</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Concatenates lines with the given line feed type</DESCRIPT>
+     <DESCRIPT>Determines the line indexes in the source</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_ADCOSET_STRING_UTIL</CLSNAME>
-     <CMPNAME>SPLIT_AT_LINE_FEED</CMPNAME>
+     <CMPNAME>TRANSFORM_TO_STRING</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Splits string into table at given line feed type</DESCRIPT>
+     <DESCRIPT>Transforms tabular source into single string</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

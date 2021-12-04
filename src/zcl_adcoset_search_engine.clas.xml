@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ADCOSET_CSP_CLAS</CLSNAME>
+    <CLSNAME>ZCL_ADCOSET_SEARCH_ENGINE</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Search Provider for Classes</DESCRIPT>
+    <DESCRIPT>Code Search Engine</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
@@ -13,10 +13,16 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_ADCOSET_CSP_CLAS</CLSNAME>
-     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_ENGINE</CLSNAME>
+     <CMPNAME>GET_INSTANCE</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Creates new instance of a class search provider</DESCRIPT>
+     <DESCRIPT>Retrieves instance of search engine</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_ENGINE</CLSNAME>
+     <CMPNAME>SEARCH_CODE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Search source code</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

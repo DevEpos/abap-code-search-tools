@@ -9,10 +9,11 @@ CLASS zcl_adcoset_scr_factory DEFINITION
       "! <p class="shorttext synchronized" lang="en">Retrieves source code reader for type</p>
       get_reader
         IMPORTING
-          type           TYPE trobjtype
-          line_feed_type TYPE zif_adcoset_ty_global=>ty_line_feed_type
+          type          TYPE trobjtype
+          is_multiline  TYPE abap_bool
+          line_feed     TYPE string
         RETURNING
-          VALUE(result)  TYPE REF TO zif_adcoset_src_code_reader.
+          VALUE(result) TYPE REF TO zif_adcoset_src_code_reader.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
@@ -35,10 +36,11 @@ CLASS zcl_adcoset_scr_factory DEFINITION
           VALUE(result) TYPE trobjtype,
       create_reader
         IMPORTING
-          type           TYPE trobjtype
-          line_feed_type TYPE zif_adcoset_ty_global=>ty_line_feed_type
+          type          TYPE trobjtype
+          line_feed     TYPE string
+          is_multiline  TYPE abap_bool
         RETURNING
-          VALUE(result)  TYPE REF TO zif_adcoset_src_code_reader.
+          VALUE(result) TYPE REF TO zif_adcoset_src_code_reader.
 ENDCLASS.
 
 
@@ -54,8 +56,9 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
         INSERT VALUE #(
           type = mapped_type
           ref  = create_reader(
-            type           = mapped_type
-            line_feed_type = line_feed_type ) ) INTO TABLE readers ASSIGNING FIELD-SYMBOL(<reader>).
+            type         = mapped_type
+            is_multiline = is_multiline
+            line_feed    = line_feed ) ) INTO TABLE readers ASSIGNING FIELD-SYMBOL(<reader>).
         result = <reader>-ref.
     ENDTRY.
   ENDMETHOD.
@@ -80,16 +83,24 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
     result = SWITCH #( type
 
       WHEN c_generic_trdir_type THEN
-        NEW zcl_adcoset_scr_trdir( line_feed_type = line_feed_type )
+        NEW zcl_adcoset_scr_trdir(
+              is_multiline = is_multiline
+              line_feed    = line_feed )
 
       WHEN zif_adcoset_c_global=>c_source_code_type-data_definition THEN
-        NEW zcl_adcoset_scr_ddls( line_feed_type = line_feed_type )
+        NEW zcl_adcoset_scr_ddls(
+              is_multiline = is_multiline
+              line_feed    = line_feed )
 
       WHEN zif_adcoset_c_global=>c_source_code_type-metadata_extension THEN
-        NEW zcl_adcoset_scr_ddlx( line_feed_type = line_feed_type )
+        NEW zcl_adcoset_scr_ddlx(
+              is_multiline = is_multiline
+              line_feed    = line_feed )
 
       WHEN zif_adcoset_c_global=>c_source_code_type-access_control THEN
-        NEW zcl_adcoset_scr_dcls( line_feed_type = line_feed_type ) ).
+        NEW zcl_adcoset_scr_dcls(
+              is_multiline = is_multiline
+              line_feed    = line_feed ) ).
   ENDMETHOD.
 
 ENDCLASS.

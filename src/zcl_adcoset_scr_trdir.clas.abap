@@ -11,10 +11,13 @@ CLASS zcl_adcoset_scr_trdir DEFINITION
     METHODS:
       constructor
         IMPORTING
-          line_feed_type TYPE zif_adcoset_ty_global=>ty_line_feed_type.
+          is_multiline TYPE abap_bool
+          line_feed    TYPE string.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    DATA: line_feed_type TYPE zif_adcoset_ty_global=>ty_line_feed_type.
+    DATA:
+      line_feed    TYPE string,
+      is_multiline TYPE abap_bool.
 ENDCLASS.
 
 
@@ -23,16 +26,12 @@ CLASS zcl_adcoset_scr_trdir IMPLEMENTATION.
 
 
   METHOD constructor.
-    me->line_feed_type = line_feed_type.
+    me->line_feed = line_feed.
+    me->is_multiline = is_multiline.
   ENDMETHOD.
 
 
-  METHOD zif_adcoset_src_code_reader~get_source_table.
-    READ REPORT name INTO result.
-  ENDMETHOD.
-
-
-  METHOD zif_adcoset_src_code_reader~get_source_text.
+  METHOD zif_adcoset_src_code_reader~get_source_code.
     DATA: source TYPE string_table.
 
     READ REPORT name INTO source.
@@ -40,10 +39,22 @@ CLASS zcl_adcoset_scr_trdir IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    result = zcl_adcoset_string_util=>concat_with_line_feed(
-      table          = source
-      line_feed_type = line_feed_type ).
-  ENDMETHOD.
+    IF is_multiline = abap_true.
+      zcl_adcoset_string_util=>transform_to_string(
+        EXPORTING
+          source_table = source
+          line_feed    = line_feed
+        IMPORTING
+          source_text  = DATA(source_text)
+          indexes      = DATA(indexes) ).
 
+      source = VALUE #( ( source_text ) ).
+    ENDIF.
+
+    result = NEW zcl_adcoset_source_code(
+      source  = source
+      indexes = indexes ).
+
+  ENDMETHOD.
 
 ENDCLASS.

@@ -5,20 +5,11 @@ CLASS zcl_adcoset_matcher_factory DEFINITION
   CREATE PRIVATE.
 
   PUBLIC SECTION.
-    TYPES: ty_matcher_type TYPE c LENGTH 1.
-    CONSTANTS:
-      BEGIN OF c_matcher_type,
-        substring   TYPE ty_matcher_type VALUE '1',
-        posix_regex TYPE ty_matcher_type VALUE '2',
-        "! Perl compatible regular expression pattern
-        pcre        TYPE ty_matcher_type VALUE '3',
-      END OF c_matcher_type.
-
     CLASS-METHODS:
       "! <p class="shorttext synchronized" lang="en">Creates matcher for the given type and pattern</p>
       create_matcher
         IMPORTING
-          type          TYPE ty_matcher_type
+          type          TYPE zif_adcoset_ty_global=>ty_matcher_type
           pattern       TYPE string
           ignore_case   TYPE abap_bool OPTIONAL
         RETURNING
@@ -45,17 +36,17 @@ CLASS zcl_adcoset_matcher_factory IMPLEMENTATION.
   METHOD create_matcher.
     result = SWITCH #( type
 
-      WHEN c_matcher_type-posix_regex THEN
+      WHEN zif_adcoset_c_global=>c_matcher_type-posix_regex THEN
         NEW zcl_adcoset_posix_regex_matchr(
           pattern     = pattern
           ignore_case = ignore_case )
 
-      WHEN c_matcher_type-pcre THEN
+      WHEN zif_adcoset_c_global=>c_matcher_type-pcre THEN
         NEW zcl_adcoset_pcre_matcher(
           pattern     = pattern
           ignore_case = ignore_case )
 
-      WHEN c_matcher_type-substring THEN
+      WHEN zif_adcoset_c_global=>c_matcher_type-substring THEN
         NEW zcl_adcoset_substring_matcher(
           pattern     = pattern
           ignore_case = ignore_case )

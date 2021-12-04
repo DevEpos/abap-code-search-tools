@@ -36,6 +36,7 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
       EXPORTING
         ignore_case = ignore_case
 *       enable_jit  = abap_true
+        " useful to search long string line by line e.g. "^[\d+]\s{1,3}$"
 *       enable_multiline = abap_false
 *       no_submatches    = abap_false
 *       newline_mode     = cl_abap_regex=>('C_NEWLINE_MODE-CRLFANY')
@@ -47,16 +48,9 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_adcoset_pattern_matcher~get_matches.
-    ASSERT ( text IS NOT INITIAL AND table IS INITIAL ) OR
-           ( text IS INITIAL AND table IS NOT INITIAL ).
-
+  METHOD zif_adcoset_pattern_matcher~find_matches.
     TRY.
-        IF text IS NOT INITIAL.
-          result = regex->create_matcher( text = text )->find_all( ).
-        ELSE.
-          result = regex->create_matcher( table = table )->find_all( ).
-        ENDIF.
+        result = regex->create_matcher( table = source )->find_all( ).
       CATCH cx_sy_matcher ##NO_HANDLER.
         " should not happen. The regex exceptions will be handled in the constructor
     ENDTRY.

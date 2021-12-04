@@ -31,23 +31,11 @@ CLASS zcl_adcoset_substring_matcher IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_adcoset_pattern_matcher~get_matches.
-    ASSERT ( text IS NOT INITIAL AND table IS INITIAL ) OR
-           ( text IS INITIAL AND table IS NOT INITIAL ).
-
-    IF text IS NOT INITIAL.
-
-      IF ignore_case = abap_true.
-        FIND ALL OCCURRENCES OF pattern IN text IGNORING CASE RESULTS result.
-      ELSE.
-        FIND ALL OCCURRENCES OF pattern IN text RESPECTING CASE RESULTS result.
-      ENDIF.
+  METHOD zif_adcoset_pattern_matcher~find_matches.
+    IF ignore_case = abap_true.
+      FIND ALL OCCURRENCES OF pattern IN TABLE source IGNORING CASE RESULTS result.
     ELSE.
-      IF ignore_case = abap_true.
-        FIND ALL OCCURRENCES OF pattern IN TABLE table IGNORING CASE RESULTS result.
-      ELSE.
-        FIND ALL OCCURRENCES OF pattern IN TABLE table RESPECTING CASE RESULTS result.
-      ENDIF.
+      FIND ALL OCCURRENCES OF pattern IN TABLE source RESPECTING CASE RESULTS result.
     ENDIF.
   ENDMETHOD.
 
