@@ -17,7 +17,7 @@ CLASS zcl_adcoset_scr_factory DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
-      c_generic_trdir_type TYPE trobjtype VALUE '$REP'.
+      c_generic_reposrc_type TYPE trobjtype VALUE '$REP'.
 
     TYPES:
       BEGIN OF ty_readers,
@@ -68,11 +68,12 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
     result = SWITCH #( original
       WHEN zif_adcoset_c_global=>c_source_code_type-class OR
            zif_adcoset_c_global=>c_source_code_type-interface OR
+           zif_adcoset_c_global=>c_source_code_type-program OR
+           zif_adcoset_c_global=>c_source_code_type-type_group OR
            zif_adcoset_c_global=>c_source_code_type-function_group OR
-           zif_adcoset_c_global=>c_source_code_type-function_module OR
            zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
            zif_adcoset_c_global=>c_source_code_type-behavior_definition THEN
-        c_generic_trdir_type
+        c_generic_reposrc_type
 
       ELSE
         original ).
@@ -82,8 +83,8 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
   METHOD create_reader.
     result = SWITCH #( type
 
-      WHEN c_generic_trdir_type THEN
-        NEW zcl_adcoset_scr_trdir(
+      WHEN c_generic_reposrc_type THEN
+        NEW zcl_adcoset_scr_reposrc(
               is_multiline = is_multiline
               line_feed    = line_feed )
 

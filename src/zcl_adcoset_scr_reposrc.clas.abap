@@ -1,5 +1,5 @@
 "! <p class="shorttext synchronized" lang="en">Source code reader for objects stored in TRDIR</p>
-CLASS zcl_adcoset_scr_trdir DEFINITION
+CLASS zcl_adcoset_scr_reposrc DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC.
@@ -22,7 +22,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_adcoset_scr_trdir IMPLEMENTATION.
+CLASS zcl_adcoset_scr_reposrc IMPLEMENTATION.
 
 
   METHOD constructor.

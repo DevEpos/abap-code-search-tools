@@ -63,6 +63,7 @@ INTERFACE zif_adcoset_c_global
       class                 TYPE trobjtype VALUE 'CLAS',
       interface             TYPE trobjtype VALUE 'INTF',
       program               TYPE trobjtype VALUE 'PROG',
+      type_group            TYPE trobjtype VALUE 'TYPE',
       data_definition       TYPE trobjtype VALUE 'DDLS',
       metadata_extension    TYPE trobjtype VALUE 'DDLX',
       access_control        TYPE trobjtype VALUE 'DCLS',

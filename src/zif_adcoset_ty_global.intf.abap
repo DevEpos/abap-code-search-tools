@@ -43,6 +43,8 @@ INTERFACE zif_adcoset_ty_global
       ignore_comment_lines TYPE abap_bool,
       match_all_patterns   TYPE abap_bool,
       multiline_search     TYPE abap_bool,
+      max_results          TYPE i,
+      all_results          TYPE abap_bool,
     END OF ty_search_settings,
 
     "! <p class="shorttext synchronized" lang="en">Ranges for search scope</p>
@@ -53,6 +55,7 @@ INTERFACE zif_adcoset_ty_global
       owner_range       TYPE RANGE OF uname,
       created_on_range  TYPE RANGE OF tadir-created_on,
       appl_comp_range   TYPE RANGE OF df14l-ps_posid,
+      max_objects       TYPE i,
     END OF ty_search_scope,
 
     BEGIN OF ty_match_identifier,
@@ -78,8 +81,8 @@ INTERFACE zif_adcoset_ty_global
   TYPES BEGIN OF ty_search_settings_extended.
   INCLUDE TYPE ty_search_settings.
   TYPES:
-    use_regex TYPE abap_bool,
-    use_pcre  TYPE abap_bool,
+    ignore_case  TYPE abap_bool,
+    matcher_type TYPE ty_matcher_type,
     BEGIN OF parallel_processing,
       enabled      TYPE abap_bool,
       server_group TYPE ty_server_group,

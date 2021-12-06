@@ -43,11 +43,10 @@ CLASS zcl_adcoset_string_util IMPLEMENTATION.
   METHOD adjust_line_endings.
     CHECK text IS NOT INITIAL.
 
-    " at this time it is assumed that a source will only contain one type of line ending
     IF line_feed = |\r\n|.
-      IF find( val = text sub = line_feed ) <= 0.
+      IF find( val = text sub = line_feed ) = -1.
         result = replace( val = text sub = |\n| with = line_feed occ = 0 ).
-      ELSEIF find( val = text sub = |\n| ) <= 0.
+      ELSEIF find( val = text regex = `^\n|[^\r]\n` ) = -1.
         result = text.
       ELSE.
         result = replace( val = text sub = |\r\n| with = |\n| occ = 0 ).
