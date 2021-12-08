@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ADCOSET_PARL_PROC_UTILS</CLSNAME>
+    <CLSNAME>ZCL_ADCOSET_SEARCH_QUERY_FAC</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Utilities for parallel processing</DESCRIPT>
+    <DESCRIPT>Factory for creating search queries</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
@@ -13,16 +13,16 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_ADCOSET_PARL_PROC_UTILS</CLSNAME>
-     <CMPNAME>DETERMINE_MAX_TASKS</CMPNAME>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_QUERY_FAC</CLSNAME>
+     <CMPNAME>CREATE_QUERY</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Determines the maximum number of threads for group</DESCRIPT>
+     <DESCRIPT>Creates standard query</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_ADCOSET_PARL_PROC_UTILS</CLSNAME>
-     <CMPNAME>GET_PARALLEL_HANDLER</CMPNAME>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_QUERY_FAC</CLSNAME>
+     <CMPNAME>CREATE_QUERY_FOR_PARALLEL</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Retrieves parallel handler definition</DESCRIPT>
+     <DESCRIPT>Create query for parallel processing</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

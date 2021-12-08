@@ -24,6 +24,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Search source code</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_ENGINE</CLSNAME>
+     <CMPNAME>SEARCH_CODE_IN_PACKAGE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Code search for a given package</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

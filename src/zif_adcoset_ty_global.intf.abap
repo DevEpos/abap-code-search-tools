@@ -12,18 +12,23 @@ INTERFACE zif_adcoset_ty_global
     ty_cls_main_incl_search_mode TYPE string,
     ty_matcher_type              TYPE c LENGTH 1,
 
-    BEGIN OF ty_wb_obj_type,
-      type     TYPE trobjtype,
-      sub_type TYPE seu_objtyp,
-    END OF ty_wb_obj_type,
+    BEGIN OF ty_method_param_info,
+      name        TYPE seocmpname,
+      type_handle TYPE REF TO cl_abap_datadescr,
+    END OF ty_method_param_info,
 
-    ty_wb_obj_types TYPE STANDARD TABLE OF ty_wb_obj_type WITH EMPTY KEY,
+    " <p class="shorttext synchronized" lang="en">Param definitions for parallel processing handler</p>
+    BEGIN OF ty_parallel_handler,
+      classname    TYPE string,
+      method       TYPE seocpdname,
+      input_param  TYPE ty_method_param_info,
+      output_param TYPE ty_method_param_info,
+    END OF ty_parallel_handler,
 
     BEGIN OF ty_object,
       name TYPE sobj_name,
-      type TYPE ty_wb_obj_type,
+      type TYPE wbobjtype,
     END OF ty_object,
-
 
     ty_objects TYPE STANDARD TABLE OF ty_object WITH EMPTY KEY,
 
@@ -58,6 +63,7 @@ INTERFACE zif_adcoset_ty_global
       max_objects       TYPE i,
     END OF ty_search_scope,
 
+    "! <p class="shorttext synchronized" lang="en">Uniquely identifies a match</p>
     BEGIN OF ty_match_identifier,
       object_name  TYPE sobj_name,
       object_type  TYPE wbobjtype,
@@ -93,6 +99,19 @@ INTERFACE zif_adcoset_ty_global
     pattern_range TYPE RANGE OF string,
     search_scope  TYPE ty_search_scope.
   TYPES END OF ty_search_settings_extended.
+
+  "! <p class="shorttext synchronized" lang="en">Defines search package for parallel search</p>
+  TYPES BEGIN OF ty_search_package.
+  INCLUDE TYPE ty_search_settings.
+  TYPES:
+    ignore_case   TYPE abap_bool,
+    matcher_type  TYPE ty_matcher_type,
+    pattern_range TYPE RANGE OF string,
+    BEGIN OF custom_settings,
+      class TYPE ty_cls_search_settings,
+    END OF custom_settings,
+    objects TYPE ty_objects.
+  TYPES END OF ty_search_package.
 
   TYPES:
     "! <p class="shorttext synchronized" lang="en">Value range for search option</p>

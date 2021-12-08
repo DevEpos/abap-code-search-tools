@@ -10,6 +10,7 @@
    <FUNCTIONS>
     <item>
      <FUNCNAME>ZADCOSET_NEW_TASK</FUNCNAME>
+     <REMOTE_CALL>R</REMOTE_CALL>
      <SHORT_TEXT>Starts new parallel task</SHORT_TEXT>
      <IMPORT>
       <RSIMP>
@@ -18,11 +19,11 @@
       </RSIMP>
       <RSIMP>
        <PARAMETER>HANDLER_CLASS</PARAMETER>
-       <TYP>CLASSNAME</TYP>
+       <TYP>STRING</TYP>
       </RSIMP>
       <RSIMP>
        <PARAMETER>HANDLER_METHOD</PARAMETER>
-       <TYP>SEOCMPNAME</TYP>
+       <TYP>SEOCPDNAME</TYP>
       </RSIMP>
      </IMPORT>
      <EXPORT>
@@ -31,6 +32,14 @@
        <TYP>XSTRING</TYP>
       </RSEXP>
      </EXPORT>
+     <EXCEPTION>
+      <RSEXC>
+       <EXCEPTION>INVALID_HANDLER</EXCEPTION>
+      </RSEXC>
+      <RSEXC>
+       <EXCEPTION>ERROR</EXCEPTION>
+      </RSEXC>
+     </EXCEPTION>
      <DOCUMENTATION>
       <RSFDO>
        <PARAMETER>INPUT</PARAMETER>
@@ -47,6 +56,14 @@
       <RSFDO>
        <PARAMETER>OUTPUT</PARAMETER>
        <KIND>P</KIND>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>INVALID_HANDLER</PARAMETER>
+       <KIND>X</KIND>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>ERROR</PARAMETER>
+       <KIND>X</KIND>
       </RSFDO>
      </DOCUMENTATION>
     </item>

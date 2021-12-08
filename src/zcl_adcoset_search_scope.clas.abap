@@ -12,12 +12,14 @@ CLASS zcl_adcoset_search_scope DEFINITION
     METHODS:
       constructor
         IMPORTING
-          search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
+          search_scope TYPE zif_adcoset_ty_global=>ty_search_scope
+          parallel_mode type abap_bool optional.
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
       search_scope TYPE zif_adcoset_ty_global=>ty_search_scope,
-      object_count TYPE i.
+      object_count TYPE i,
+      parallel_mode type abap_bool.
 
     METHODS:
       determine_count.
@@ -30,11 +32,22 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
   METHOD constructor.
     me->search_scope = search_scope.
+    me->parallel_mode = parallel_mode.
     determine_count( ).
   ENDMETHOD.
 
 
-  METHOD zif_adcoset_search_scope~get_objects.
+  METHOD zif_adcoset_search_scope~count.
+
+  ENDMETHOD.
+
+
+  METHOD zif_adcoset_search_scope~has_next_package.
+
+  ENDMETHOD.
+
+
+  METHOD zif_adcoset_search_scope~next_package.
 
   ENDMETHOD.
 
@@ -51,5 +64,6 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       INTO @object_count
       UP TO @search_scope-max_objects ROWS.
   ENDMETHOD.
+
 
 ENDCLASS.

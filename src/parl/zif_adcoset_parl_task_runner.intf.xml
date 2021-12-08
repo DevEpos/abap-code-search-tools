@@ -3,31 +3,31 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOINTERF>
-    <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
+    <CLSNAME>ZIF_ADCOSET_PARL_TASK_RUNNER</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Defines the scope of a code search</DESCRIPT>
+    <DESCRIPT>Represents task to be run in parallel</DESCRIPT>
     <EXPOSURE>2</EXPOSURE>
     <STATE>1</STATE>
     <UNICODE>X</UNICODE>
    </VSEOINTERF>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
-     <CMPNAME>COUNT</CMPNAME>
+     <CLSNAME>ZIF_ADCOSET_PARL_TASK_RUNNER</CLSNAME>
+     <CMPNAME>HAS_ENOUGH_TASKS</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Retrieves number of objects in scope</DESCRIPT>
+     <DESCRIPT>Returns &apos;X&apos; if there are enough tasks</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
-     <CMPNAME>HAS_NEXT_PACKAGE</CMPNAME>
+     <CLSNAME>ZIF_ADCOSET_PARL_TASK_RUNNER</CLSNAME>
+     <CMPNAME>RUN</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Returns &apos;X&apos; if another package exists</DESCRIPT>
+     <DESCRIPT>Starts a new task</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
-     <CMPNAME>NEXT_PACKAGE</CMPNAME>
+     <CLSNAME>ZIF_ADCOSET_PARL_TASK_RUNNER</CLSNAME>
+     <CMPNAME>WAIT_UNTIL_FINISHED</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Retrieves the next package of objects in scope</DESCRIPT>
+     <DESCRIPT>Waits until all tasks are finished</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

@@ -6,6 +6,15 @@ CLASS zcl_adcoset_parl_proc_utils DEFINITION
 
   PUBLIC SECTION.
     CLASS-METHODS:
+      " <p class="shorttext synchronized" lang="en">Retrieves parallel handler definition</p>
+      get_parallel_handler
+        IMPORTING
+          handler_class  TYPE string
+          handler_method TYPE seocpdname
+        RETURNING
+          VALUE(result)  TYPE zif_adcoset_ty_global=>ty_parallel_handler
+        RAISING
+          zcx_adcoset_static_error,
       "! <p class="shorttext synchronized" lang="en">Determines the maximum number of threads for group</p>
       determine_max_tasks
         IMPORTING
@@ -21,8 +30,9 @@ CLASS zcl_adcoset_parl_proc_utils DEFINITION
       END OF ty_server_group_info.
 
     CONSTANTS:
-
-      c_max_allowed_tasks TYPE i VALUE 32.
+      c_handler_importing_param TYPE abap_parmname VALUE 'INPUT',
+      c_handler_exporting_param TYPE abap_parmname VALUE 'OUTPUT',
+      c_max_allowed_tasks       TYPE i VALUE 32.
 
     CLASS-DATA:
       group_infos TYPE HASHED TABLE OF ty_server_group_info WITH UNIQUE KEY group.
@@ -79,5 +89,54 @@ CLASS zcl_adcoset_parl_proc_utils IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD get_parallel_handler.
+
+    cl_abap_typedescr=>describe_by_name(
+      EXPORTING
+        p_name         = to_upper( handler_class )
+      RECEIVING
+        p_descr_ref    = DATA(generic_handler_descr)
+      EXCEPTIONS
+        type_not_found = 1 ).
+
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error.
+    ENDIF.
+
+    DATA(handler_descr) = CAST cl_abap_classdescr( generic_handler_descr ).
+
+    TRY.
+        DATA(handler_method_info) = handler_descr->methods[ name = handler_method ].
+        " check handler visibility
+        IF handler_method_info-is_class <> abap_true OR
+            handler_method_info-visibility <> cl_abap_classdescr=>public.
+          RAISE EXCEPTION TYPE zcx_adcoset_static_error.
+        ENDIF.
+
+        DATA(input_param) = handler_method_info-parameters[
+          name = c_handler_importing_param
+          parm_kind = cl_abap_objectdescr=>importing ].
+        DATA(output_param) = handler_method_info-parameters[
+          name = c_handler_exporting_param
+          parm_kind = cl_abap_objectdescr=>exporting ].
+      CATCH cx_sy_itab_line_not_found.
+        RAISE EXCEPTION TYPE zcx_adcoset_static_error.
+    ENDTRY.
+
+    result = VALUE #(
+      classname   = to_upper( handler_class )
+      method      = to_upper( handler_method )
+      input_param = VALUE #(
+        name        = c_handler_importing_param
+        type_handle = handler_descr->get_method_parameter_type(
+          p_method_name    = handler_method
+          p_parameter_name = c_handler_importing_param ) )
+      output_param = VALUE #(
+        name        = c_handler_exporting_param
+        type_handle = handler_descr->get_method_parameter_type(
+          p_method_name    = handler_method
+          p_parameter_name = c_handler_exporting_param ) ) ).
+  ENDMETHOD.
 
 ENDCLASS.

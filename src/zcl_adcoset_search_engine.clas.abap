@@ -9,8 +9,15 @@ CLASS zcl_adcoset_search_engine DEFINITION
       "! <p class="shorttext synchronized" lang="en">Retrieves instance of search engine</p>
       get_instance
         RETURNING
-          VALUE(result) TYPE REF TO zcl_adcoset_search_engine.
-
+          VALUE(result) TYPE REF TO zcl_adcoset_search_engine,
+      "! <p class="shorttext synchronized" lang="en">Code search for a given package</p>
+      "! <strong>NOTE:</strong> <br>
+      "! This method should only be called from a parallel task
+      search_code_in_package
+        IMPORTING
+          input  TYPE zif_adcoset_ty_global=>ty_search_package
+        EXPORTING
+          output TYPE zif_adcoset_ty_global=>ty_search_matches.
     METHODS:
       "! <p class="shorttext synchronized" lang="en">Search source code</p>
       search_code
@@ -32,6 +39,7 @@ CLASS zcl_adcoset_search_engine DEFINITION
           zcx_adcoset_static_error,
       create_matchers
         IMPORTING
+
           matcher_type  TYPE zif_adcoset_ty_global=>ty_matcher_type
           ignore_case   TYPE abap_bool
           patterns      TYPE zif_adcoset_ty_global=>ty_search_settings_extended-pattern_range
@@ -55,20 +63,33 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD search_code_in_package.
+    " 1) create query from input data
+    DATA(query) = zcl_adcoset_search_query_fac=>create_query(
+      scope = zcl_adcoset_search_scope_fac=>create_final_scope( objects = input-objects ) ).
+
+    " 2) run query
+    query->run( ).
+
+    output = query->get_results( ).
+  ENDMETHOD.
+
+
   METHOD search_code.
-    " 1) create matchers / validate patterns (if regex is active)
+    " 1)  validate regex patterns (if regex is active)
     validate_matchers(
       matcher_type = search_config-matcher_type
       patterns     = search_config-pattern_range ).
 
     " 2) create scope
-    DATA(scope) = CAST zif_adcoset_search_scope( NEW zcl_adcoset_search_scope( search_config-search_scope ) ).
+    DATA(query) = zcl_adcoset_search_query_fac=>create_query(
+      scope = zcl_adcoset_search_scope_fac=>create_scope(
+        search_scope  = search_config-search_scope
+        parallel_mode = search_config-parallel_processing-enabled ) ).
 
-    " 3) create processing packages (if parallel processing)
+    query->run( ).
 
-    " 4) process objects in scope
-
-    " 5) collect / enrich results
+    DATA(results) = query->get_results( ).
   ENDMETHOD.
 
 
