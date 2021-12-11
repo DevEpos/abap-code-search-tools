@@ -13,7 +13,7 @@ Searches Code in ABAP sources like
 - [X] Function Groups (FUGR)
 - [X] Data Definitions (DDLS)
 - [X] Metadata Extensions (DDLX)
-- [X] Access Controls (DCLA)
+- [X] Access Controls (DCLS)
 - [X] Behavior Definitions (BDEV)
 - [X] Simple Transformations (XSLT)
 
