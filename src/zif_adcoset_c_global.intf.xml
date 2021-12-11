@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_INTF" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOINTERF>
+    <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Global constants for code search tools</DESCRIPT>
+    <EXPOSURE>2</EXPOSURE>
+    <STATE>1</STATE>
+    <UNICODE>X</UNICODE>
+   </VSEOINTERF>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
+     <CMPNAME>C_CLS_MAIN_SEARCH_MODES</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Search modes for main class include</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
+     <CMPNAME>C_CLS_SEARCH_SCOPE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Scope for class code search</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
+     <CMPNAME>C_MATCHER_TYPE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Matcher types</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
+     <CMPNAME>C_MAX_OBJECTS_ALL</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Use to signal that all objects in scope should be searched</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
+     <CMPNAME>C_SEARCH_PARAMS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Names of code search parameters</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
+     <CMPNAME>C_SOURCE_CODE_TYPE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Technical identifier for source code types</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

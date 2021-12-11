@@ -1,20 +1,20 @@
 "! <p class="shorttext synchronized" lang="en">Defines the scope of a code search</p>
 INTERFACE zif_adcoset_search_scope
-  PUBLIC .
+  PUBLIC.
 
   METHODS:
-    "! <p class="shorttext synchronized" lang="en">Returns the packages of the scope</p>
-    get_packages
+    "! <p class="shorttext synchronized" lang="en">Retrieves number of objects in scope</p>
+    count
       RETURNING
-        VALUE(result) TYPE zif_adcoset_ty_global=>ty_package_names,
+        VALUE(result) TYPE i,
 
-    "! <p class="shorttext synchronized" lang="en">Returns the types of the scope</p>
-    get_object_types
+    "! <p class="shorttext synchronized" lang="en">Retrieves the next package of objects in scope</p>
+    next_package
       RETURNING
-        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_types,
+        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects,
 
-    "! <p class="shorttext synchronized" lang="en">Returns the object names of the scope</p>
-    get_object_names
+    "! <p class="shorttext synchronized" lang="en">Returns 'X' if another package exists</p>
+    has_next_package
       RETURNING
-        VALUE(result) TYPE zif_adcoset_ty_global=>ty_obj_names.
+        VALUE(result) TYPE abap_bool.
 ENDINTERFACE.
