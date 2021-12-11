@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ADCOSET_SEARCH_QUERY_FAC</CLSNAME>
+    <CLSNAME>ZCL_ADCOSET_CSP_REPSRC_DEFAULT</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Factory for creating search queries</DESCRIPT>
+    <DESCRIPT>Default search provider for repository source code search</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
@@ -13,10 +13,10 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_ADCOSET_SEARCH_QUERY_FAC</CLSNAME>
-     <CMPNAME>CREATE_QUERY</CMPNAME>
+     <CLSNAME>ZCL_ADCOSET_CSP_REPSRC_DEFAULT</CLSNAME>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Creates query instance</DESCRIPT>
+     <DESCRIPT>Creates new instance of a default search provider</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

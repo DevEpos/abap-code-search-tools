@@ -61,7 +61,7 @@ CLASS zcl_adcoset_string_util IMPLEMENTATION.
   METHOD determine_line_indexes.
     DATA: l_source_table TYPE TABLE OF string.
 
-    DATA(line_offset) = 1.
+    DATA(line_offset) = 0.
 
     DATA(line_feed_length) = strlen( line_feed ).
 
@@ -73,15 +73,13 @@ CLASS zcl_adcoset_string_util IMPLEMENTATION.
 
     LOOP AT l_source_table ASSIGNING FIELD-SYMBOL(<code_line>).
       DATA(line_number) = sy-tabix.
+      DATA(line_length) = strlen( <code_line> ).
       result = VALUE #( BASE result
         ( number = sy-tabix
-          offset = line_offset ) ).
+          offset = line_offset
+          length = line_length ) ).
 
-      IF line_offset = 1.
-        line_offset = 0.
-      ENDIF.
-
-      line_offset = line_offset + strlen( <code_line> ) + line_feed_length.
+      line_offset = line_offset + line_length + line_feed_length.
     ENDLOOP.
 
   ENDMETHOD.

@@ -22,7 +22,9 @@ CLASS zcl_adcoset_search_engine DEFINITION
       "! <p class="shorttext synchronized" lang="en">Search source code</p>
       search_code
         IMPORTING
-          search_config TYPE zif_adcoset_ty_global=>ty_search_settings_extended
+          search_config TYPE zif_adcoset_ty_global=>ty_search_settings_external
+        returning
+          value(result) type zif_adcoset_ty_global=>ty_search_matches
         RAISING
           zcx_adcoset_static_error.
   PROTECTED SECTION.
@@ -34,17 +36,7 @@ CLASS zcl_adcoset_search_engine DEFINITION
       validate_matchers
         IMPORTING
           matcher_type TYPE zif_adcoset_ty_global=>ty_matcher_type
-          patterns     TYPE zif_adcoset_ty_global=>ty_search_settings_extended-pattern_range
-        RAISING
-          zcx_adcoset_static_error,
-      create_matchers
-        IMPORTING
-
-          matcher_type  TYPE zif_adcoset_ty_global=>ty_matcher_type
-          ignore_case   TYPE abap_bool
-          patterns      TYPE zif_adcoset_ty_global=>ty_search_settings_extended-pattern_range
-        RETURNING
-          VALUE(result) TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
+          patterns     TYPE zif_adcoset_ty_global=>ty_search_settings_external-pattern_range
         RAISING
           zcx_adcoset_static_error.
 ENDCLASS.
@@ -64,11 +56,13 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
 
 
   METHOD search_code_in_package.
-    " 1) create query from input data
-    DATA(query) = zcl_adcoset_search_query_fac=>create_query(
-      scope = zcl_adcoset_search_scope_fac=>create_final_scope( objects = input-objects ) ).
+    TRY.
+        DATA(query) = zcl_adcoset_search_query_fac=>create_query(
+          scope    = zcl_adcoset_search_scope_fac=>create_final_scope( objects = input-objects )
+          settings = input-settings ).
+      CATCH zcx_adcoset_static_error.
+    ENDTRY.
 
-    " 2) run query
     query->run( ).
 
     output = query->get_results( ).
@@ -76,40 +70,20 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
 
 
   METHOD search_code.
-    " 1)  validate regex patterns (if regex is active)
     validate_matchers(
       matcher_type = search_config-matcher_type
       patterns     = search_config-pattern_range ).
 
-    " 2) create scope
     DATA(query) = zcl_adcoset_search_query_fac=>create_query(
-      scope = zcl_adcoset_search_scope_fac=>create_scope(
+      parallel_processing = search_config-parallel_processing
+      scope               = zcl_adcoset_search_scope_fac=>create_scope(
         search_scope  = search_config-search_scope
-        parallel_mode = search_config-parallel_processing-enabled ) ).
+        parallel_mode = search_config-parallel_processing-enabled )
+      settings            = search_config-internal_settings ).
 
     query->run( ).
 
-    DATA(results) = query->get_results( ).
-  ENDMETHOD.
-
-
-  METHOD create_matchers.
-
-    LOOP AT patterns ASSIGNING FIELD-SYMBOL(<pattern_range>).
-      TRY.
-          result = VALUE #( BASE result
-            ( zcl_adcoset_matcher_factory=>create_matcher(
-                type        = matcher_type
-                pattern     = <pattern_range>-low
-                ignore_case = ignore_case ) ) ).
-        CATCH zcx_adcoset_no_matcher
-              cx_sy_regex INTO DATA(matcher_error).
-          RAISE EXCEPTION TYPE zcx_adcoset_static_error
-            EXPORTING
-              previous = matcher_error.
-      ENDTRY.
-    ENDLOOP.
-
+    result = query->get_results( ).
   ENDMETHOD.
 
 

@@ -6,6 +6,7 @@ INTERFACE zif_adcoset_source_code
     BEGIN OF ty_line_index,
       number TYPE i,
       offset TYPE i,
+      length TYPE i,
     END OF ty_line_index,
     ty_line_indexes TYPE TABLE OF ty_line_index WITH KEY number
                                                 WITH UNIQUE HASHED KEY offset COMPONENTS offset.

@@ -13,8 +13,7 @@ CLASS zcl_adcoset_csp_clas DEFINITION
         IMPORTING
           search_settings TYPE zif_adcoset_ty_global=>ty_search_settings
           custom_settings TYPE zif_adcoset_ty_global=>ty_cls_search_settings
-          src_code_reader TYPE REF TO zif_adcoset_src_code_reader
-          matchers        TYPE REF TO zif_adcoset_pattern_matcher=>ty_ref_tab.
+          matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
@@ -31,26 +30,29 @@ CLASS zcl_adcoset_csp_clas DEFINITION
       END OF c_section_texts.
 
     TYPES:
-      BEGIN OF ty_line_index,
-        number TYPE i,
-        offset TYPE i,
-      END OF ty_line_index,
-      ty_line_indexes TYPE TABLE OF ty_line_index WITH KEY number
-                                                  WITH UNIQUE HASHED KEY offset COMPONENTS offset,
-      BEGIN OF ty_source_code,
-        code         TYPE string,
-        line_indexes TYPE ty_line_indexes,
-      END OF ty_source_code,
-
-      BEGIN OF ty_method_pos,
-        offset TYPE i,
-        method TYPE seocpdname,
-      END OF ty_method_pos.
+      BEGIN OF ty_class_incl,
+        name        TYPE ris_v_prog_tadir-program_name,
+        method_name TYPE ris_v_prog_tadir-method_name,
+      END OF ty_class_incl,
+      ty_class_includes TYPE STANDARD TABLE OF ty_class_incl WITH KEY name.
 
     DATA:
       custom_settings TYPE zif_adcoset_ty_global=>ty_cls_search_settings,
       search_settings TYPE zif_adcoset_ty_global=>ty_search_settings,
-      src_code_reader TYPE REF TO zif_adcoset_src_code_reader.
+      matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+    METHODS:
+     get_class_includes
+      IMPORTING
+        name          TYPE sobj_name
+      RETURNING
+        VALUE(result) TYPE ty_class_includes,
+    assign_objects_to_matches
+      IMPORTING
+        unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
+        object             TYPE zif_adcoset_ty_global=>ty_tadir_object
+        include            TYPE ty_class_incl
+      CHANGING
+        all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
 ENDCLASS.
 
 
@@ -60,14 +62,79 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
 
   METHOD constructor.
     me->search_settings = search_settings.
-    me->src_code_reader = src_code_reader.
     me->custom_settings = custom_settings.
+    me->matchers = matchers.
   ENDMETHOD.
 
 
   METHOD zif_adcoset_code_search_prov~search.
 
+    DATA(class_includes) = get_class_includes( name = object-name ).
+    IF class_includes IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    LOOP AT class_includes ASSIGNING FIELD-SYMBOL(<include>).
+      TRY.
+          DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
+          DATA(matches) = source_code->find_matches( matchers ).
+
+          IF matches IS NOT INITIAL.
+            assign_objects_to_matches(
+              EXPORTING
+                unassigned_matches = matches
+                object             = object
+                include            = <include>
+              CHANGING
+                all_matches        = result ).
+          ENDIF.
+        CATCH zcx_adcoset_src_code_read.
+      ENDTRY.
+    ENDLOOP.
+
   ENDMETHOD.
 
+
+  METHOD get_class_includes.
+    SELECT program_name AS name,
+           method_name
+      FROM ris_v_prog_tadir
+      WHERE object_name = @name
+        AND object_type = @zif_adcoset_c_global=>c_source_code_type-class
+      INTO CORRESPONDING FIELDS OF TABLE @result.
+  ENDMETHOD.
+
+
+  METHOD assign_objects_to_matches.
+
+    LOOP AT unassigned_matches ASSIGNING FIELD-SYMBOL(<unassigned_match>).
+      APPEND <unassigned_match> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
+
+      <match>-include = include-name.
+      <match>-object_name = object-name.
+      <match>-object_type = object-type.
+
+      " set the display name
+      IF include-method_name IS NOT INITIAL.
+        <match>-display_name = include-method_name.
+      ELSEif include-name+31 = seop_inccode_public.
+        <match>-display_name = c_section_texts-public_section.
+      elseif include-name+31 = seop_inccode_private.
+        <match>-display_name = c_section_texts-private_section.
+      elseif include-name+31 = seop_inccode_protected.
+        <match>-display_name = c_section_texts-protected_section.
+      elseif include-name+30 = seop_incextapp_macros.
+        <match>-display_name = c_section_texts-macros.
+      elseif include-name+30 = seop_incextapp_definition.
+        <match>-display_name = c_section_texts-locals_def.
+      elseif include-name+30 = seop_incextapp_implementation.
+        <match>-display_name = c_section_texts-local_impl.
+      elseif include-name+30 = seop_incextapp_testclasses.
+        <match>-display_name = c_section_texts-test_cls.
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
 
 ENDCLASS.

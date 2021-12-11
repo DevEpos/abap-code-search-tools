@@ -13,7 +13,9 @@ CLASS zcl_adcoset_scr_factory DEFINITION
           is_multiline  TYPE abap_bool
           line_feed     TYPE string
         RETURNING
-          VALUE(result) TYPE REF TO zif_adcoset_src_code_reader.
+          VALUE(result) TYPE REF TO zif_adcoset_src_code_reader
+        RAISING
+          zcx_adcoset_no_src_code_reader.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
@@ -40,7 +42,9 @@ CLASS zcl_adcoset_scr_factory DEFINITION
           line_feed     TYPE string
           is_multiline  TYPE abap_bool
         RETURNING
-          VALUE(result) TYPE REF TO zif_adcoset_src_code_reader.
+          VALUE(result) TYPE REF TO zif_adcoset_src_code_reader
+        RAISING
+          zcx_adcoset_no_src_code_reader.
 ENDCLASS.
 
 
@@ -101,7 +105,10 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
       WHEN zif_adcoset_c_global=>c_source_code_type-access_control THEN
         NEW zcl_adcoset_scr_dcls(
               is_multiline = is_multiline
-              line_feed    = line_feed ) ).
+              line_feed    = line_feed )
+
+      ELSE
+        THROW zcx_adcoset_no_src_code_reader( ) ).
   ENDMETHOD.
 
 ENDCLASS.

@@ -25,7 +25,9 @@ CLASS zcl_adcoset_scr_ddls DEFINITION
         IMPORTING
           name          TYPE ddlname
         RETURNING
-          VALUE(result) TYPE string,
+          VALUE(result) TYPE string
+        RAISING
+          zcx_adcoset_src_code_read,
       check_base_info_support.
 ENDCLASS.
 
@@ -58,7 +60,7 @@ CLASS zcl_adcoset_scr_ddls IMPLEMENTATION.
 
     result = NEW zcl_adcoset_source_code(
       source  = source
-      indexes = indexes ).
+      line_indexes = indexes ).
   ENDMETHOD.
 
 
@@ -71,7 +73,9 @@ CLASS zcl_adcoset_scr_ddls IMPLEMENTATION.
         AND as4local = 'A' " only active source
       INTO @result.
 
-    IF sy-subrc <> 0 OR is_baseinfo_supported = abap_false.
+    IF sy-subrc <> 0 OR result IS INITIAL.
+      RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
+    ELSEIF is_baseinfo_supported = abap_false.
       RETURN.
     ENDIF.
 

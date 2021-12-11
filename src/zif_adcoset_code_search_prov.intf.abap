@@ -6,6 +6,9 @@ INTERFACE zif_adcoset_code_search_prov
     "! <p class="shorttext synchronized" lang="en">Searches for matches in the given object</p>
     search
       IMPORTING
-        object TYPE zif_adcoset_ty_global=>ty_object.
+        object          TYPE zif_adcoset_ty_global=>ty_tadir_object
+        src_code_reader TYPE REF TO zif_adcoset_src_code_reader
+      RETURNING
+        VALUE(result)   TYPE zif_adcoset_ty_global=>ty_search_matches.
 
 ENDINTERFACE.

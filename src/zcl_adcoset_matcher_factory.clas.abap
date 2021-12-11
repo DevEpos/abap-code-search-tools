@@ -18,6 +18,15 @@ CLASS zcl_adcoset_matcher_factory DEFINITION
           zcx_adcoset_no_matcher
           cx_sy_regex,
 
+      "! <p class="shorttext synchronized" lang="en">Creates matchers from pattern range</p>
+      create_matchers
+        IMPORTING
+          pattern_config TYPE zif_adcoset_ty_global=>ty_pattern_config
+        RETURNING
+          VALUE(result)  TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
+        RAISING
+          zcx_adcoset_static_error,
+
       "! <p class="shorttext synchronized" lang="en">Checks if PCRE is supported in the system</p>
       is_pcre_supported
         RETURNING
@@ -54,6 +63,27 @@ CLASS zcl_adcoset_matcher_factory IMPLEMENTATION.
       ELSE
         THROW zcx_adcoset_no_matcher( ) ).
   ENDMETHOD.
+
+
+  METHOD create_matchers.
+
+    LOOP AT pattern_config-pattern_range ASSIGNING FIELD-SYMBOL(<pattern_range>).
+      TRY.
+          result = VALUE #( BASE result
+            ( zcl_adcoset_matcher_factory=>create_matcher(
+                type        = pattern_config-matcher_type
+                pattern     = <pattern_range>-low
+                ignore_case = pattern_config-ignore_case ) ) ).
+        CATCH zcx_adcoset_no_matcher
+              cx_sy_regex INTO DATA(matcher_error).
+          RAISE EXCEPTION TYPE zcx_adcoset_static_error
+            EXPORTING
+              previous = matcher_error.
+      ENDTRY.
+    ENDLOOP.
+
+  ENDMETHOD.
+
 
   METHOD is_pcre_supported.
     IF pcre_supported = abap_undefined.

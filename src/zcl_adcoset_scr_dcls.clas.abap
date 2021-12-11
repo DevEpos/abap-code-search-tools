@@ -24,7 +24,9 @@ CLASS zcl_adcoset_scr_dcls DEFINITION
         IMPORTING
           name          TYPE acmdclsrc-dclname
         RETURNING
-          VALUE(result) TYPE string.
+          VALUE(result) TYPE string
+        RAISING
+          zcx_adcoset_src_code_read.
 ENDCLASS.
 
 
@@ -55,7 +57,7 @@ CLASS zcl_adcoset_scr_dcls IMPLEMENTATION.
 
     result = NEW zcl_adcoset_source_code(
       source  = source
-      indexes = indexes ).
+      line_indexes = indexes ).
   ENDMETHOD.
 
 
@@ -68,8 +70,8 @@ CLASS zcl_adcoset_scr_dcls IMPLEMENTATION.
         AND as4local = 'A' " only active source
       INTO @result.
 
-    IF sy-subrc <> 0.
-      RETURN.
+    IF sy-subrc <> 0 OR result IS INITIAL.
+      RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDIF.
 
     " handle line feed

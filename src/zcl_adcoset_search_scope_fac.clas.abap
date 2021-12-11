@@ -15,7 +15,7 @@ CLASS zcl_adcoset_search_scope_fac DEFINITION
 
       create_final_scope
         IMPORTING
-          objects       TYPE zif_adcoset_ty_global=>ty_objects
+          objects       TYPE zif_adcoset_ty_global=>ty_tadir_objects
         RETURNING
           VALUE(result) TYPE REF TO zif_adcoset_search_scope.
   PROTECTED SECTION.
@@ -28,12 +28,14 @@ CLASS zcl_adcoset_search_scope_fac IMPLEMENTATION.
 
 
   METHOD create_final_scope.
-
+    result = NEW zcl_adcoset_search_scope_final( objects = objects ).
   ENDMETHOD.
 
 
   METHOD create_scope.
-
+    result = NEW zcl_adcoset_search_scope(
+      search_scope  = search_scope
+      parallel_mode = parallel_mode ).
   ENDMETHOD.
 
 ENDCLASS.

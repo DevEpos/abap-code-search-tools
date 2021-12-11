@@ -3,14 +3,22 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ADCOSET_PARL_SEARCH_QUERY</CLSNAME>
+    <CLSNAME>ZCL_ADCOSET_CSP_FUGR</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Query for code search (with parallel processing)</DESCRIPT>
+    <DESCRIPT>Search provider for Function Groups</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
    </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_CSP_FUGR</CLSNAME>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Creates new instance of a function group search provider</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
 </abapGit>

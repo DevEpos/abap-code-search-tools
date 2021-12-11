@@ -35,8 +35,8 @@ CLASS zcl_adcoset_scr_reposrc IMPLEMENTATION.
     DATA: source TYPE string_table.
 
     READ REPORT name INTO source.
-    IF sy-subrc <> 0.
-      RETURN.
+    IF sy-subrc <> 0 or source is INITIAL.
+      RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDIF.
 
     IF is_multiline = abap_true.
@@ -53,7 +53,7 @@ CLASS zcl_adcoset_scr_reposrc IMPLEMENTATION.
 
     result = NEW zcl_adcoset_source_code(
       source  = source
-      indexes = indexes ).
+      line_indexes = indexes ).
 
   ENDMETHOD.
 

@@ -18,7 +18,7 @@ CLASS zcl_adcoset_parl_task_runner DEFINITION
           max_tasks        TYPE i DEFAULT 10
           handler_class    TYPE string
           handler_method   TYPE seocpdname
-          results_receiver TYPE REF TO zif_adcoset_parl_result_recv
+          results_receiver TYPE REF TO zif_adcoset_parl_result_recv OPTIONAL
         RETURNING
           VALUE(result)    TYPE REF TO zif_adcoset_parl_task_runner
         RAISING
@@ -68,6 +68,11 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
       results_receiver = results_receiver ).
 
     result = task_runner.
+  ENDMETHOD.
+
+
+  METHOD zif_adcoset_parl_task_runner~set_result_receiver.
+    me->result_receiver = receiver.
   ENDMETHOD.
 
 
@@ -123,30 +128,29 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_adcoset_parl_task_runner~has_enough_tasks.
-    result = xsdbool( max_tasks > 1 ).
-  ENDMETHOD.
-
-
   METHOD constructor.
-    me->max_tasks = max_tasks.
-    me->task_prefix = COND #(
-      WHEN task_prefix IS INITIAL THEN |ADCOSET_{ sy-datum }| ELSE task_prefix ).
-
-    me->server_group = server_group.
-    me->handler_def = zcl_adcoset_parl_proc_utils=>get_parallel_handler(
-      handler_class  = handler_class
-      handler_method = handler_method ).
-    me->result_receiver = results_receiver.
 
     DATA(max_group_tasks) = zcl_advoat_parl_proc_utils=>determine_max_tasks( server_group ).
-    IF me->max_tasks IS INITIAL OR me->max_tasks > max_group_tasks.
+    IF max_tasks IS INITIAL OR max_tasks > max_group_tasks.
       me->max_tasks = max_group_tasks.
     ELSEIF max_tasks > 0.
       me->max_tasks = max_tasks.
     ELSE.
       me->max_tasks = 1.
     ENDIF.
+
+    IF me->max_tasks = 1.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error.
+    ENDIF.
+
+    me->task_prefix = COND #(
+      WHEN task_prefix IS INITIAL THEN |ADCOSET_{ sy-datum }| ELSE task_prefix ).
+    me->server_group = server_group.
+
+    me->handler_def = zcl_adcoset_parl_proc_utils=>get_parallel_handler(
+      handler_class  = handler_class
+      handler_method = handler_method ).
+    me->result_receiver = results_receiver.
 
   ENDMETHOD.
 
@@ -172,7 +176,11 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
         ASSIGN output_typed->* TO FIELD-SYMBOL(<output>).
 
         IMPORT data = <output> FROM DATA BUFFER output_buffered.
-        result_receiver->send_results( <output> ).
+
+        " TODO: what to do if no receiver is set???
+        IF result_receiver IS BOUND.
+          result_receiver->send_results( <output> ).
+        ENDIF.
       ENDIF.
     ENDIF.
 

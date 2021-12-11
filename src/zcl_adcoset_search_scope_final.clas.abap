@@ -10,11 +10,11 @@ CLASS zcl_adcoset_search_scope_final DEFINITION
     METHODS:
       constructor
         IMPORTING
-          objects TYPE zif_adcoset_ty_global=>ty_objects.
+          objects TYPE zif_adcoset_ty_global=>ty_tadir_objects.
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
-      objects TYPE zif_adcoset_ty_global=>ty_objects.
+      objects TYPE zif_adcoset_ty_global=>ty_tadir_objects.
 ENDCLASS.
 
 
