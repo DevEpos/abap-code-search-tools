@@ -120,6 +120,10 @@ CLASS lcl_report IMPLEMENTATION.
       IF screen-group1 = 'TCH'.
         screen-input = type_checks_enabled.
         MODIFY SCREEN.
+      ELSEIF screen-name = 'P_IGNCOM' OR
+             screen-name = 'P_MATCHA'.
+        screen-input = '0'.
+        MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
 
