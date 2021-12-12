@@ -6,6 +6,7 @@ INTERFACE zif_adcoset_ty_global
     ty_server_group              TYPE rzlli_apcl,
     ty_package_name              TYPE devclass,
     ty_package_names             TYPE STANDARD TABLE OF devclass WITH EMPTY KEY,
+    ty_package_name_range        TYPE RANGE OF devclass,
     ty_tadir_types               TYPE STANDARD TABLE OF trobjtype WITH EMPTY KEY,
     ty_obj_names                 TYPE STANDARD TABLE OF sobj_name WITH EMPTY KEY,
     ty_search_results            TYPE STANDARD TABLE OF REF TO zif_adcoset_search_result,
@@ -41,7 +42,7 @@ INTERFACE zif_adcoset_ty_global
 
     "! <p class="shorttext synchronized" lang="en">Ranges for search scope</p>
     BEGIN OF ty_search_scope,
-      package_range     TYPE RANGE OF devclass,
+      package_range     TYPE ty_package_name_range,
       object_type_range TYPE RANGE OF trobjtype,
       object_name_range TYPE RANGE OF sobj_name,
       owner_range       TYPE RANGE OF uname,
