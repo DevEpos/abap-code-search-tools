@@ -95,10 +95,7 @@ CLASS lcl_report DEFINITION.
         RETURNING
           VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_scope-object_type_range
         RAISING
-          zcx_adcoset_static_error,
-      get_packages
-        RETURNING
-          VALUE(result) TYPE zif_adcoset_ty_global=>ty_package_name_range.
+          zcx_adcoset_static_error.
 ENDCLASS.
 
 INITIALIZATION.
@@ -211,7 +208,7 @@ CLASS lcl_report IMPLEMENTATION.
         object_type_range = get_object_types(  )
         created_on_range  = s_crtd[]
         owner_range       = s_auth[]
-        package_range     = get_packages( )
+        package_range     = s_pack[]
         max_objects       = COND #( WHEN p_maxo > 10000 THEN 10000 ELSE p_maxo ) ) ).
 
     IF p_pcre = abap_true.
@@ -290,19 +287,6 @@ CLASS lcl_report IMPLEMENTATION.
       MESSAGE e001(00) WITH 'You have to select at least one object type' INTO DATA(msg).
       RAISE EXCEPTION TYPE zcx_adcoset_static_error.
     ENDIF.
-  ENDMETHOD.
-
-
-  METHOD get_packages.
-    CHECK s_pack[] IS NOT INITIAL.
-
-    DATA(resolved_package_range) = zcl_adcoset_devc_reader=>resolve_packages( s_pack[] ).
-    result = VALUE #(
-      ( LINES OF resolved_package_range )
-      ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( resolved_package_range ) ) ).
-
-    SORT result BY low.
-    DELETE ADJACENT DUPLICATES FROM result COMPARING low.
   ENDMETHOD.
 
 ENDCLASS.

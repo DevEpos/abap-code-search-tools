@@ -25,7 +25,8 @@ CLASS zcl_adcoset_search_scope DEFINITION
 
     METHODS:
       determine_count,
-      set_package_size.
+      set_package_size,
+      resolve_packages.
 ENDCLASS.
 
 
@@ -36,6 +37,8 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   METHOD constructor.
     me->search_scope = search_scope.
     me->parallel_mode = parallel_mode.
+
+    resolve_packages( ).
     determine_count( ).
     set_package_size( ).
   ENDMETHOD.
@@ -99,6 +102,19 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       " fixed size during sequential mode regardless of full scope
       package_size = 100.
     ENDIF.
+  ENDMETHOD.
+
+
+  METHOD resolve_packages.
+    CHECK search_scope-package_range IS NOT INITIAL.
+
+    DATA(resolved_package_range) = zcl_adcoset_devc_reader=>resolve_packages( search_scope-package_range ).
+    search_scope-package_range = VALUE #(
+      ( LINES OF resolved_package_range )
+      ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( resolved_package_range ) ) ).
+
+    SORT search_scope-package_range BY low.
+    DELETE ADJACENT DUPLICATES FROM search_scope-package_range COMPARING low.
   ENDMETHOD.
 
 ENDCLASS.
