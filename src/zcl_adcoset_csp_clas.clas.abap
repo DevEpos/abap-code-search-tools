@@ -41,18 +41,18 @@ CLASS zcl_adcoset_csp_clas DEFINITION
       search_settings TYPE zif_adcoset_ty_global=>ty_search_settings,
       matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
     METHODS:
-     get_class_includes
-      IMPORTING
-        name          TYPE sobj_name
-      RETURNING
-        VALUE(result) TYPE ty_class_includes,
-    assign_objects_to_matches
-      IMPORTING
-        unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
-        object             TYPE zif_adcoset_ty_global=>ty_tadir_object
-        include            TYPE ty_class_incl
-      CHANGING
-        all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
+      get_class_includes
+        IMPORTING
+          name          TYPE sobj_name
+        RETURNING
+          VALUE(result) TYPE ty_class_includes,
+      assign_objects_to_matches
+        IMPORTING
+          unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
+          object             TYPE zif_adcoset_ty_global=>ty_tadir_object
+          include            TYPE ty_class_incl
+        CHANGING
+          all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
 ENDCLASS.
 
 
@@ -102,6 +102,8 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       WHERE object_name = @name
         AND object_type = @zif_adcoset_c_global=>c_source_code_type-class
       INTO CORRESPONDING FIELDS OF TABLE @result.
+
+    DELETE result WHERE name CP '*CP'.
   ENDMETHOD.
 
 
@@ -117,19 +119,19 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       " set the display name
       IF include-method_name IS NOT INITIAL.
         <match>-display_name = include-method_name.
-      ELSEif include-name+31 = seop_inccode_public.
+      ELSEIF include-name+31 = seop_inccode_public.
         <match>-display_name = c_section_texts-public_section.
-      elseif include-name+31 = seop_inccode_private.
+      ELSEIF include-name+31 = seop_inccode_private.
         <match>-display_name = c_section_texts-private_section.
-      elseif include-name+31 = seop_inccode_protected.
+      ELSEIF include-name+31 = seop_inccode_protected.
         <match>-display_name = c_section_texts-protected_section.
-      elseif include-name+30 = seop_incextapp_macros.
+      ELSEIF include-name+30 = seop_incextapp_macros.
         <match>-display_name = c_section_texts-macros.
-      elseif include-name+30 = seop_incextapp_definition.
+      ELSEIF include-name+30 = seop_incextapp_definition.
         <match>-display_name = c_section_texts-locals_def.
-      elseif include-name+30 = seop_incextapp_implementation.
+      ELSEIF include-name+30 = seop_incextapp_implementation.
         <match>-display_name = c_section_texts-local_impl.
-      elseif include-name+30 = seop_incextapp_testclasses.
+      ELSEIF include-name+30 = seop_incextapp_testclasses.
         <match>-display_name = c_section_texts-test_cls.
       ENDIF.
 
