@@ -150,6 +150,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_SINGPM</KEY>
+     <ENTRY>Single Pattern mode</ENTRY>
+     <LENGTH>27</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_TYPAL</KEY>
      <ENTRY>All Types</ENTRY>
      <LENGTH>17</LENGTH>

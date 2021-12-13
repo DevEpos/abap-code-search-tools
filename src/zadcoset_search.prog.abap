@@ -14,6 +14,8 @@
 *&---------------------------------------------------------------------*
 REPORT zadcoset_search.
 
+TABLES: sscrfields.
+
 CLASS lcl_report DEFINITION DEFERRED.
 
 DATA: pattern_var TYPE text255.
@@ -68,8 +70,9 @@ SELECTION-SCREEN END OF BLOCK scope.
 SELECTION-SCREEN BEGIN OF BLOCK settings WITH FRAME TITLE TEXT-b03.
   PARAMETERS:
     p_igncom TYPE abap_bool AS CHECKBOX,
-    p_multil TYPE abap_bool AS CHECKBOX,
-    p_matcha TYPE abap_bool AS CHECKBOX.
+    p_singpm TYPE abap_bool AS CHECKBOX USER-COMMAND single_pattern_mode,
+    p_multil TYPE abap_bool AS CHECKBOX MODIF ID spm,
+    p_matcha TYPE abap_bool AS CHECKBOX MODIF ID spm.
 SELECTION-SCREEN END OF BLOCK settings.
 
 SELECTION-SCREEN BEGIN OF BLOCK parallel_processing WITH FRAME TITLE TEXT-b04.
@@ -82,7 +85,8 @@ CLASS lcl_report DEFINITION.
   PUBLIC SECTION.
     METHODS:
       execute,
-      pbo.
+      pbo,
+      pai.
   PRIVATE SECTION.
     DATA:
       results TYPE zif_adcoset_ty_global=>ty_search_matches.
@@ -94,6 +98,11 @@ CLASS lcl_report DEFINITION.
       get_object_types
         RETURNING
           VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_scope-object_type_range
+        RAISING
+          zcx_adcoset_static_error,
+      get_patterns
+        RETURNING
+          VALUE(result) TYPE zif_adcoset_ty_global=>ty_pattern_config-pattern_range
         RAISING
           zcx_adcoset_static_error.
 ENDCLASS.
@@ -108,6 +117,9 @@ START-OF-SELECTION.
 AT SELECTION-SCREEN OUTPUT.
   report->pbo( ).
 
+AT SELECTION-SCREEN.
+  report->pai( ).
+
 CLASS lcl_report IMPLEMENTATION.
 
   METHOD pbo.
@@ -121,9 +133,25 @@ CLASS lcl_report IMPLEMENTATION.
              screen-name = 'P_MATCHA'.
         screen-input = '0'.
         MODIFY SCREEN.
+      ELSEIF screen-group1 = 'SPM'.
+        screen-input = COND #( WHEN p_singpm = abap_true THEN '0' ELSE '1' ).
+        MODIFY SCREEN.
+      ELSEIF screen-name = 'S_PATT-LOW'.
+        screen-required = '2'.
+        MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
 
+  ENDMETHOD.
+
+
+  METHOD pai.
+    IF sscrfields-ucomm = 'SINGLE_PATTERN_MODE'.
+      IF p_singpm = abap_true.
+        p_multil = abap_true.
+        p_matcha = abap_false.
+      ENDIF.
+    ENDIF.
   ENDMETHOD.
 
 
@@ -201,7 +229,7 @@ CLASS lcl_report IMPLEMENTATION.
       match_all_patterns   = p_matcha
       multiline_search     = p_multil
       ignore_case          = p_ignc
-      pattern_range        = VALUE #( FOR pattern IN s_patt[] ( sign = pattern-sign option = 'EQ' low = pattern-low ) )
+      pattern_range        = get_patterns( )
       parallel_processing  = VALUE #( enabled = p_parlp server_group = p_servg )
       search_scope         = VALUE #(
         object_name_range = s_objn[]
@@ -285,7 +313,32 @@ CLASS lcl_report IMPLEMENTATION.
 
     IF result IS INITIAL.
       MESSAGE e001(00) WITH 'You have to select at least one object type' INTO DATA(msg).
+      SET CURSOR FIELD p_class.
       RAISE EXCEPTION TYPE zcx_adcoset_static_error.
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD get_patterns.
+
+    IF p_singpm = abap_true.
+
+      DATA: text_table TYPE TABLE OF string.
+      text_table = VALUE #( FOR pattern IN s_patt[] ( CONV #( pattern-low ) ) ).
+      DATA(single_pattern) = concat_lines_of( table = text_table sep = |\r\n| ).
+      IF single_pattern IS NOT INITIAL.
+        result = VALUE #( ( sign = 'I' option = 'EQ' low = single_pattern ) ).
+      ENDIF.
+    ELSE.
+      result = VALUE #( FOR pattern IN s_patt[] ( sign = pattern-sign option = 'EQ' low = pattern-low ) ).
+    ENDIF.
+
+    IF result IS INITIAL.
+      MESSAGE e001(00) WITH 'You have to provide at least 1 pattern' INTO DATA(msg).
+      SET CURSOR FIELD s_patt-low.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error
+        EXPORTING
+          text = msg.
     ENDIF.
   ENDMETHOD.
 
