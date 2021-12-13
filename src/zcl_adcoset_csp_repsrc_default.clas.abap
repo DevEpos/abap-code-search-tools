@@ -45,8 +45,13 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
     ENDIF.
 
     TRY.
-        DATA(source) = src_code_reader->get_source_code( include_name ).
-        data(matches) = source->find_matches( matchers ).
+        DATA(source) = src_code_reader->get_source_code(
+          name = include_name
+          type = object-type ).
+        DATA(matches) = source->find_matches(
+          matchers             = matchers
+          match_all            = search_settings-match_all_patterns
+          ignore_comment_lines = search_settings-ignore_comment_lines ).
 
         LOOP AT matches ASSIGNING FIELD-SYMBOL(<match_without_source>).
           APPEND <match_without_source> TO result ASSIGNING FIELD-SYMBOL(<match>).

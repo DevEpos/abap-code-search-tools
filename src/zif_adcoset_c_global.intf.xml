@@ -13,6 +13,12 @@
    <DESCRIPTIONS>
     <SEOCOMPOTX>
      <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
+     <CMPNAME>C_CDS_COMMENT_REGEX</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Regex pattern to detect comment lines in CDS sources</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
      <CMPNAME>C_CLS_MAIN_SEARCH_MODES</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Search modes for main class include</DESCRIPT>

@@ -15,6 +15,10 @@ CLASS zcl_adcoset_scr_reposrc DEFINITION
           line_feed    TYPE string.
   PROTECTED SECTION.
   PRIVATE SECTION.
+    CONSTANTS:
+      c_default_comment_regex TYPE string VALUE '^(\*|\s*")',
+      c_bdef_comment_regex    TYPE string VALUE '^\s*(//|/\*)'.
+
     DATA:
       line_feed    TYPE string,
       is_multiline TYPE abap_bool.
@@ -35,7 +39,7 @@ CLASS zcl_adcoset_scr_reposrc IMPLEMENTATION.
     DATA: source TYPE string_table.
 
     READ REPORT name INTO source.
-    IF sy-subrc <> 0 or source is INITIAL.
+    IF sy-subrc <> 0 OR source IS INITIAL.
       RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDIF.
 
@@ -52,8 +56,13 @@ CLASS zcl_adcoset_scr_reposrc IMPLEMENTATION.
     ENDIF.
 
     result = NEW zcl_adcoset_source_code(
-      source  = source
-      line_indexes = indexes ).
+      source        = source
+      line_indexes  = indexes
+      comment_regex = COND #(
+        WHEN type = zif_adcoset_c_global=>c_source_code_type-behavior_definition THEN
+          c_bdef_comment_regex
+        ELSE
+          c_default_comment_regex ) ).
 
   ENDMETHOD.
 

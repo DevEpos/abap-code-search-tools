@@ -7,6 +7,7 @@ INTERFACE zif_adcoset_src_code_reader
     get_source_code
       IMPORTING
         name          TYPE sobj_name
+        type          TYPE trobjtype OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO zif_adcoset_source_code
       RAISING

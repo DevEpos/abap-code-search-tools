@@ -15,8 +15,10 @@ INTERFACE zif_adcoset_source_code
     "! <p class="shorttext synchronized" lang="en">Find matches with the given table of matchers</p>
     find_matches
       IMPORTING
-        matchers      TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
+        matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
+        match_all            TYPE abap_bool OPTIONAL
+        ignore_comment_lines TYPE abap_bool OPTIONAL
       RETURNING
-        VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_matches.
+        VALUE(result)        TYPE zif_adcoset_ty_global=>ty_search_matches.
 
 ENDINTERFACE.

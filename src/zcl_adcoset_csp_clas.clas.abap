@@ -77,7 +77,10 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     LOOP AT class_includes ASSIGNING FIELD-SYMBOL(<include>).
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
-          DATA(matches) = source_code->find_matches( matchers ).
+          DATA(matches) = source_code->find_matches(
+            matchers             = matchers
+            match_all            = search_settings-match_all_patterns
+            ignore_comment_lines = search_settings-ignore_comment_lines ).
 
           IF matches IS NOT INITIAL.
             assign_objects_to_matches(

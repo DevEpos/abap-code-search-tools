@@ -53,13 +53,25 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
 
 
   METHOD zif_adcoset_search_query~run.
+    DATA: processed_objects TYPE i.
+
+    DATA(scope_count) = scope->count( ).
 
     WHILE scope->has_next_package( ).
+      DATA(package) = scope->next_package( ).
+
+      processed_objects = processed_objects + lines( package ).
+      cl_progress_indicator=>progress_indicate(
+        i_text               = |Searching objects: { processed_objects NUMBER = USER }/{ scope_count NUMBER = USER }|
+        i_processed          = processed_objects
+        i_total              = scope_count
+        i_output_immediately = abap_true ).
+
       " process new package asynchronously
       task_runner->run(
         input = VALUE zif_adcoset_ty_global=>ty_search_package(
           settings = settings
-          objects  = scope->next_package( ) ) ).
+          objects  = package ) ).
     ENDWHILE.
 
     task_runner->wait_until_finished( ).

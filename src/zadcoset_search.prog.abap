@@ -166,10 +166,6 @@ CLASS lcl_report IMPLEMENTATION.
       IF screen-group1 = 'TCH'.
         screen-input = type_checks_enabled.
         MODIFY SCREEN.
-      ELSEIF screen-name = 'P_IGNCOM' OR
-             screen-name = 'P_MATCHA'.
-        screen-input = '0'.
-        MODIFY SCREEN.
       ELSEIF screen-group1 = 'SPM'.
         screen-input = COND #( WHEN p_singpm = abap_true THEN '0' ELSE '1' ).
         MODIFY SCREEN.

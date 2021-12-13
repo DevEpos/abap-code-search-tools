@@ -59,8 +59,9 @@ CLASS zcl_adcoset_scr_ddls IMPLEMENTATION.
     ENDIF.
 
     result = NEW zcl_adcoset_source_code(
-      source  = source
-      line_indexes = indexes ).
+      source        = source
+      line_indexes  = indexes
+      comment_regex = zif_adcoset_c_global=>c_cds_comment_regex ).
   ENDMETHOD.
 
 
