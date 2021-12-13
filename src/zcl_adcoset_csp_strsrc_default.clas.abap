@@ -1,7 +1,8 @@
+"! <p class="shorttext synchronized" lang="en">Default search provider for string sources</p>
 CLASS zcl_adcoset_csp_strsrc_default DEFINITION
   PUBLIC
   FINAL
-  CREATE PUBLIC .
+  CREATE PUBLIC.
 
   PUBLIC SECTION.
     INTERFACES zif_adcoset_code_search_prov.

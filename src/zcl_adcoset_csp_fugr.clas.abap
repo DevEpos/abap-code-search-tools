@@ -83,6 +83,9 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
 
   METHOD get_fugr_includes.
+    DATA: is_reserved_name TYPE abap_bool,
+          is_hidden_name   TYPE abap_bool.
+
     SELECT program_name AS name,
            func_name
       FROM ris_v_prog_tadir
@@ -90,7 +93,21 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         AND object_type = @zif_adcoset_c_global=>c_source_code_type-function_group
       INTO CORRESPONDING FIELDS OF TABLE @result.
 
-    " TODO: remove private/generated includes
+    LOOP AT result ASSIGNING FIELD-SYMBOL(<include>) WHERE func_name IS INITIAL.
+      CALL FUNCTION 'RS_PROGNAME_SPLIT'
+        EXPORTING
+          progname_with_namespace = <include>-name
+        IMPORTING
+          fugr_is_reserved_name   = is_reserved_name
+          fugr_is_hidden_name     = is_hidden_name
+        EXCEPTIONS
+          delimiter_error         = 1
+          OTHERS                  = 2.
+      IF sy-subrc <> 0 OR is_reserved_name = abap_true OR is_hidden_name = abap_true.
+        DELETE result.
+      ENDIF.
+    ENDLOOP.
+
   ENDMETHOD.
 
 
