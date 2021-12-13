@@ -54,8 +54,6 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
   METHOD zif_adcoset_code_search_prov~search.
 
-    " 1) retrieve all relevant includes
-
     DATA(fugr_includes) = get_fugr_includes( name = object-name ).
     IF fugr_includes IS INITIAL.
       RETURN.
