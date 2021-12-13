@@ -46,6 +46,8 @@ SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
     p_typsp TYPE abap_bool RADIOBUTTON GROUP rb1.
 
   SELECTION-SCREEN BEGIN OF BLOCK types WITH FRAME TITLE TEXT-b05.
+    SELECTION-SCREEN PUSHBUTTON  /1(6) pb_tsela USER-COMMAND all_types MODIF ID tch VISIBLE LENGTH 2.
+    SELECTION-SCREEN PUSHBUTTON  5(6) pb_tseln USER-COMMAND no_types MODIF ID tch VISIBLE LENGTH 2.
     PARAMETERS:
       p_class TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_intf  TYPE abap_bool AS CHECKBOX MODIF ID tch,
@@ -84,12 +86,14 @@ SELECTION-SCREEN END OF BLOCK parallel_processing.
 CLASS lcl_report DEFINITION.
   PUBLIC SECTION.
     METHODS:
+      constructor,
       execute,
       pbo,
       pai.
   PRIVATE SECTION.
     DATA:
-      results TYPE zif_adcoset_ty_global=>ty_search_matches.
+      results         TYPE zif_adcoset_ty_global=>ty_search_matches,
+      type_check_refs TYPE TABLE OF REF TO abap_bool.
     METHODS:
       run_search
         RAISING
@@ -104,12 +108,19 @@ CLASS lcl_report DEFINITION.
         RETURNING
           VALUE(result) TYPE zif_adcoset_ty_global=>ty_pattern_config-pattern_range
         RAISING
-          zcx_adcoset_static_error.
+          zcx_adcoset_static_error,
+      set_icon
+        IMPORTING
+          icon_name TYPE any
+        EXPORTING
+          target    TYPE any,
+      set_type_check_state
+        IMPORTING
+          checked TYPE abap_bool.
 ENDCLASS.
 
 INITIALIZATION.
   DATA(report) = NEW lcl_report( ).
-
 
 START-OF-SELECTION.
   report->execute( ).
@@ -121,6 +132,32 @@ AT SELECTION-SCREEN.
   report->pai( ).
 
 CLASS lcl_report IMPLEMENTATION.
+
+  METHOD constructor.
+    set_icon(
+      EXPORTING
+        icon_name = 'ICON_SELECT_ALL'
+      IMPORTING
+        target    = pb_tsela ).
+
+    set_icon(
+      EXPORTING
+        icon_name = 'ICON_DESELECT_ALL'
+      IMPORTING
+        target    = pb_tseln ).
+
+    type_check_refs = VALUE #(
+      ( REF #( p_class ) )
+      ( REF #( p_intf  ) )
+      ( REF #( p_xslt  ) )
+      ( REF #( p_prog  ) )
+      ( REF #( p_fugr  ) )
+      ( REF #( p_type  ) )
+      ( REF #( p_ddls  ) )
+      ( REF #( p_dcls  ) )
+      ( REF #( p_ddlx  ) )
+      ( REF #( p_bdef  ) ) ).
+  ENDMETHOD.
 
   METHOD pbo.
     DATA(type_checks_enabled) = COND #( WHEN p_typal = abap_true THEN '0' ELSE '1' ).
@@ -146,12 +183,21 @@ CLASS lcl_report IMPLEMENTATION.
 
 
   METHOD pai.
-    IF sscrfields-ucomm = 'SINGLE_PATTERN_MODE'.
-      IF p_singpm = abap_true.
-        p_multil = abap_true.
-        p_matcha = abap_false.
-      ENDIF.
-    ENDIF.
+    CASE sscrfields-ucomm.
+
+      WHEN 'ALL_TYPES'.
+        set_type_check_state( abap_true ).
+
+      WHEN 'NO_TYPES'.
+        set_type_check_state( abap_false ).
+
+      WHEN 'SINGLE_PATTERN_MODE'.
+        IF p_singpm = abap_true.
+          p_multil = abap_true.
+          p_matcha = abap_false.
+        ENDIF.
+    ENDCASE.
+
   ENDMETHOD.
 
 
@@ -340,6 +386,26 @@ CLASS lcl_report IMPLEMENTATION.
         EXPORTING
           text = msg.
     ENDIF.
+  ENDMETHOD.
+
+  METHOD set_icon.
+    CALL FUNCTION 'ICON_CREATE'
+      EXPORTING
+        name       = icon_name
+        text       = ''
+        add_stdinf = space
+      IMPORTING
+        result     = target
+      EXCEPTIONS
+        OTHERS     = 1 ##FM_SUBRC_OK.
+  ENDMETHOD.
+
+  METHOD set_type_check_state.
+
+    LOOP AT type_check_refs INTO DATA(type_check).
+      type_check->* = checked.
+    ENDLOOP.
+
   ENDMETHOD.
 
 ENDCLASS.
