@@ -23,8 +23,8 @@ CLASS zcl_adcoset_search_engine DEFINITION
       search_code
         IMPORTING
           search_config TYPE zif_adcoset_ty_global=>ty_search_settings_external
-        returning
-          value(result) type zif_adcoset_ty_global=>ty_search_matches
+        RETURNING
+          VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_matches
         RAISING
           zcx_adcoset_static_error.
   PROTECTED SECTION.
@@ -90,11 +90,17 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
   METHOD validate_matchers.
     CHECK matcher_type <> zif_adcoset_c_global=>c_matcher_type-substring.
 
-    LOOP AT patterns ASSIGNING FIELD-SYMBOL(<pattern_range>).
-      zcl_adcoset_matcher_factory=>create_matcher(
-        type    = matcher_type
-        pattern = <pattern_range>-low ).
-    ENDLOOP.
+    TRY.
+        LOOP AT patterns ASSIGNING FIELD-SYMBOL(<pattern_range>).
+          zcl_adcoset_matcher_factory=>create_matcher(
+            type    = matcher_type
+            pattern = <pattern_range>-low ).
+        ENDLOOP.
+      CATCH cx_sy_regex INTO DATA(error).
+        RAISE EXCEPTION TYPE zcx_adcoset_static_error
+          EXPORTING
+            text = error->get_text( ).
+    ENDTRY.
 
   ENDMETHOD.
 
