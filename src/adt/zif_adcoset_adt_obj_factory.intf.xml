@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_INTF" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOINTERF>
+    <CLSNAME>ZIF_ADCOSET_ADT_OBJ_FACTORY</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Factory for ADT links</DESCRIPT>
+    <EXPOSURE>2</EXPOSURE>
+    <STATE>1</STATE>
+    <UNICODE>X</UNICODE>
+   </VSEOINTERF>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_ADT_OBJ_FACTORY</CLSNAME>
+     <CMPNAME>ADD_POSITION_FRAGMENT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Add positional fragment to uri</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_ADT_OBJ_FACTORY</CLSNAME>
+     <CMPNAME>GET_OBJECT_REF_FOR_INCLUDE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Retrieves ADT object reference for a given include</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_ADT_OBJ_FACTORY</CLSNAME>
+     <CMPNAME>GET_OBJECT_REF_FOR_SUB_OBJECT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Retrieves ADT object reference for workbench object</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_ADT_OBJ_FACTORY</CLSNAME>
+     <CMPNAME>GET_OBJECT_REF_FOR_TROBJ</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Retrieves ADT object reference for tadir object</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

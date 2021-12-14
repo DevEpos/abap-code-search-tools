@@ -83,6 +83,10 @@ SELECTION-SCREEN BEGIN OF BLOCK parallel_processing WITH FRAME TITLE TEXT-b04.
     p_servg TYPE rzlli_apcl.
 SELECTION-SCREEN END OF BLOCK parallel_processing.
 
+SELECTION-SCREEN BEGIN OF BLOCK additional_settings WITH FRAME TITLE TEXT-b06.
+  PARAMETERS: p_adtn TYPE abap_bool AS CHECKBOX.
+SELECTION-SCREEN END OF BLOCK additional_settings.
+
 CLASS lcl_report DEFINITION.
   PUBLIC SECTION.
     METHODS:
@@ -116,7 +120,15 @@ CLASS lcl_report DEFINITION.
           target    TYPE any,
       set_type_check_state
         IMPORTING
-          checked TYPE abap_bool.
+          checked TYPE abap_bool,
+      on_link_click
+        FOR EVENT link_click OF cl_salv_events_table
+        IMPORTING
+          column
+          row,
+      navigate_to_adt
+        IMPORTING
+          match TYPE zif_adcoset_ty_global=>ty_search_match.
 ENDCLASS.
 
 INITIALIZATION.
@@ -250,6 +262,7 @@ CLASS lcl_report IMPLEMENTATION.
             WHEN 'SNIPPET'.
               <col>-r_column->set_medium_text( 'Snippet' ).
               <col>-r_column->set_output_length( 100 ).
+              CAST cl_salv_column_table( <col>-r_column )->set_cell_type( if_salv_c_cell_type=>hotspot ).
 
           ENDCASE.
         ENDLOOP.
@@ -257,6 +270,10 @@ CLASS lcl_report IMPLEMENTATION.
         salv->get_functions( )->set_default( ).
         salv->get_selections( )->set_selection_mode( if_salv_c_selection_mode=>row_column ).
         salv->get_display_settings( )->set_list_header( |Search Results { lines( results ) NUMBER = USER }| ).
+
+        SET HANDLER:
+          on_link_click FOR salv->get_event( ).
+
         salv->display( ).
       CATCH cx_salv_msg.
     ENDTRY.
@@ -402,6 +419,117 @@ CLASS lcl_report IMPLEMENTATION.
       type_check->* = checked.
     ENDLOOP.
 
+  ENDMETHOD.
+
+
+  METHOD on_link_click.
+    ASSIGN results[ row ] TO FIELD-SYMBOL(<selected_row>).
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    IF p_adtn = abap_true.
+      navigate_to_adt( match = <selected_row> ).
+      RETURN.
+    ENDIF.
+
+    CASE <selected_row>-object_type.
+
+      WHEN zif_adcoset_c_global=>c_source_code_type-class OR
+           zif_adcoset_c_global=>c_source_code_type-interface OR
+           zif_adcoset_c_global=>c_source_code_type-function_group OR
+           zif_adcoset_c_global=>c_source_code_type-program OR
+           zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
+           zif_adcoset_c_global=>c_source_code_type-type_group.
+
+        CALL FUNCTION 'EDITOR_PROGRAM'
+          EXPORTING
+            appid   = 'PG'
+            display = abap_true
+            program = <selected_row>-include
+            line    = <selected_row>-start_line
+            topline = <selected_row>-start_line
+          EXCEPTIONS
+            OTHERS  = 0.
+
+      WHEN zif_adcoset_c_global=>c_source_code_type-data_definition OR
+           zif_adcoset_c_global=>c_source_code_type-access_control OR
+           zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
+           zif_adcoset_c_global=>c_source_code_type-behavior_definition.
+
+        CALL FUNCTION 'RS_TOOL_ACCESS'
+          EXPORTING
+            operation           = 'SHOW'
+            object_name         = <selected_row>-object_name
+            object_type         = <selected_row>-object_type
+            include             = <selected_row>-include
+            position            = <selected_row>-start_line
+          EXCEPTIONS
+            not_executed        = 1
+            invalid_object_type = 2
+            OTHERS              = 3.
+
+    ENDCASE.
+  ENDMETHOD.
+
+
+  METHOD navigate_to_adt.
+    DATA: adt_obj TYPE sadt_object_reference.
+
+    DATA(adt_obj_factory) = zcl_adcoset_adt_obj_factory=>get_instance( ).
+
+    TRY.
+        CASE match-object_type.
+
+          WHEN zif_adcoset_c_global=>c_source_code_type-class OR
+               zif_adcoset_c_global=>c_source_code_type-function_group.
+
+            adt_obj = adt_obj_factory->get_object_ref_for_include(
+              main_program      = match-object_name
+              include           = match-include
+              start_line        = match-start_line
+              start_line_offset = match-start_column
+              end_line          = match-end_line
+              end_line_offset   = match-end_column ).
+
+          WHEN zif_adcoset_c_global=>c_source_code_type-interface OR
+               zif_adcoset_c_global=>c_source_code_type-access_control OR
+               zif_adcoset_c_global=>c_source_code_type-behavior_definition OR
+               zif_adcoset_c_global=>c_source_code_type-data_definition OR
+               zif_adcoset_c_global=>c_source_code_type-type_group OR
+               zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
+               zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
+               zif_adcoset_c_global=>c_source_code_type-program.
+
+            adt_obj = adt_obj_factory->get_object_ref_for_trobj(
+              type                   = match-object_type
+              name                   = match-object_name
+              append_source_uri_path = abap_true ).
+
+            adt_obj_factory->add_position_fragment(
+              EXPORTING
+                start_line   = match-start_line
+                start_column = match-start_column
+                end_line     = match-end_line
+                end_column   = match-end_column
+              CHANGING
+                link         = adt_obj-uri ).
+        ENDCASE.
+
+        IF adt_obj-uri IS NOT INITIAL.
+          cl_gui_frontend_services=>execute(
+            EXPORTING
+              document = |adt://{ sy-sysid }{ adt_obj-uri }|
+            EXCEPTIONS
+              OTHERS   = 1
+          ).
+          IF sy-subrc <> 0.
+            MESSAGE 'ADT Navigation error' TYPE 'S' DISPLAY LIKE 'E'.
+          ENDIF.
+        ENDIF.
+      CATCH zcx_adcoset_static_error.
+        MESSAGE 'ADT Navigation error' TYPE 'S' DISPLAY LIKE 'E'.
+    ENDTRY.
   ENDMETHOD.
 
 ENDCLASS.

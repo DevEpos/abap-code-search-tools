@@ -42,9 +42,21 @@
      <LENGTH>22</LENGTH>
     </item>
     <item>
+     <ID>I</ID>
+     <KEY>B06</KEY>
+     <ENTRY>Additional Settings</ENTRY>
+     <LENGTH>29</LENGTH>
+    </item>
+    <item>
      <ID>R</ID>
      <ENTRY>ABAP Code search</ENTRY>
      <LENGTH>16</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_ADTN</KEY>
+     <ENTRY>Enable ADT navigation</ENTRY>
+     <LENGTH>29</LENGTH>
     </item>
     <item>
      <ID>S</ID>
