@@ -20,7 +20,9 @@ CLASS zcl_adcoset_parl_proc_utils DEFINITION
         IMPORTING
           server_group  TYPE rzlli_apcl OPTIONAL
         RETURNING
-          VALUE(result) TYPE i.
+          VALUE(result) TYPE i,
+      "! <p class="shorttext synchronized" lang="en">Asserts if aRFC call is active</p>
+      assert_async_rfc_call.
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES:
@@ -137,6 +139,19 @@ CLASS zcl_adcoset_parl_proc_utils IMPLEMENTATION.
         type_handle = handler_descr->get_method_parameter_type(
           p_method_name    = handler_method
           p_parameter_name = c_handler_exporting_param ) ) ).
+  ENDMETHOD.
+
+
+  METHOD assert_async_rfc_call.
+    DATA: caller_async_type TYPE sy-batch.
+
+    CALL FUNCTION 'RFC_GET_ATTRIBUTES'
+      IMPORTING
+        caller_async_type = caller_async_type
+      EXCEPTIONS
+        OTHERS            = 0.
+
+    ASSERT caller_async_type IS NOT INITIAL.
   ENDMETHOD.
 
 ENDCLASS.

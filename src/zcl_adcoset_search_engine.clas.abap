@@ -56,6 +56,8 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
 
 
   METHOD search_code_in_package.
+    zcl_adcoset_parl_proc_utils=>assert_async_rfc_call( ).
+
     TRY.
         DATA(query) = zcl_adcoset_search_query_fac=>create_query(
           scope    = zcl_adcoset_search_scope_fac=>create_final_scope( objects = input-objects )
