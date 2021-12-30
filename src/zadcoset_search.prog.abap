@@ -97,7 +97,8 @@ CLASS lcl_report DEFINITION.
   PRIVATE SECTION.
     DATA:
       results         TYPE zif_adcoset_ty_global=>ty_search_matches,
-      type_check_refs TYPE TABLE OF REF TO abap_bool.
+      type_check_refs TYPE TABLE OF REF TO abap_bool,
+      duration        TYPE string.
     METHODS:
       run_search
         RAISING
@@ -269,7 +270,8 @@ CLASS lcl_report IMPLEMENTATION.
 
         salv->get_functions( )->set_default( ).
         salv->get_selections( )->set_selection_mode( if_salv_c_selection_mode=>row_column ).
-        salv->get_display_settings( )->set_list_header( |Search Results { lines( results ) NUMBER = USER }| ).
+        salv->get_display_settings( )->set_list_header(
+          |Search Results { lines( results ) NUMBER = USER }, Duration: { duration }| ).
 
         SET HANDLER:
           on_link_click FOR salv->get_event( ).
@@ -310,7 +312,9 @@ CLASS lcl_report IMPLEMENTATION.
       search_config-matcher_type = zif_adcoset_c_global=>c_matcher_type-substring.
     ENDIF.
 
-    results = zcl_adcoset_search_engine=>get_instance( )->search_code( search_config ).
+    DATA(search_result) = zcl_adcoset_search_engine=>get_instance( )->search_code( search_config ).
+    results = search_result-matches.
+    duration = search_result-duration_in_s.
 
   ENDMETHOD.
 

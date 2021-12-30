@@ -9,20 +9,26 @@ INTERFACE zif_adcoset_ty_global
     ty_package_name_range        TYPE RANGE OF devclass,
     ty_tadir_types               TYPE STANDARD TABLE OF trobjtype WITH EMPTY KEY,
     ty_obj_names                 TYPE STANDARD TABLE OF sobj_name WITH EMPTY KEY,
-    ty_search_results            TYPE STANDARD TABLE OF REF TO zif_adcoset_search_result,
     ty_cls_main_incl_search_mode TYPE string,
     ty_matcher_type              TYPE c LENGTH 1,
+    ty_duration                  TYPE p LENGTH 15 DECIMALS 2,
 
     BEGIN OF ty_method_param_info,
+      "! Name of a method parameter
       name        TYPE seocmpname,
+      "! Type handle of the parameter
       type_handle TYPE REF TO cl_abap_datadescr,
     END OF ty_method_param_info,
 
     " <p class="shorttext synchronized" lang="en">Param definitions for parallel processing handler</p>
     BEGIN OF ty_parallel_handler,
+      "! Class name of the parallel handler
       classname    TYPE string,
+      "! Method name of the parallel handler
       method       TYPE seocpdname,
+      "! Information about input parameter
       input_param  TYPE ty_method_param_info,
+      "! Information about output parameter
       output_param TYPE ty_method_param_info,
     END OF ty_parallel_handler,
 
@@ -73,6 +79,12 @@ INTERFACE zif_adcoset_ty_global
   TYPES ty_search_matches TYPE STANDARD TABLE OF ty_search_match WITH EMPTY KEY.
 
   TYPES:
+    "! Code search result
+    BEGIN OF ty_search_result,
+      matches       TYPE ty_search_matches,
+      duration_in_s TYPE string,
+    END OF ty_search_result,
+
     "! <p class="shorttext synchronized" lang="en">Settings for code based class search</p>
     BEGIN OF ty_cls_search_settings,
       search_main_incl       TYPE abap_bool,

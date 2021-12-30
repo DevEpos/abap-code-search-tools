@@ -24,7 +24,7 @@ CLASS zcl_adcoset_search_engine DEFINITION
         IMPORTING
           search_config TYPE zif_adcoset_ty_global=>ty_search_settings_external
         RETURNING
-          VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_matches
+          VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_result
         RAISING
           zcx_adcoset_static_error.
   PROTECTED SECTION.
@@ -81,9 +81,13 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
         parallel_mode = search_config-parallel_processing-enabled )
       settings            = search_config-internal_settings ).
 
+    DATA(timer) = NEW zcl_adcoset_timer( )->start( ).
     query->run( ).
+    timer->stop( ).
 
-    result = query->get_results( ).
+    result = VALUE #(
+      matches       = query->get_results( )
+      duration_in_s = timer->get_duration_string( ) ).
   ENDMETHOD.
 
 
