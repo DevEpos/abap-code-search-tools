@@ -23,6 +23,9 @@ INTERFACE zif_adcoset_c_global
     BEGIN OF c_search_params,
       package               TYPE string VALUE 'packageName',
       owner                 TYPE string VALUE 'owner',
+      use_regex             TYPE string VALUE 'useRegex',
+      prefer_pcre           TYPE string VALUE 'preferPCRE',
+      appl_comp             TYPE string VALUE 'applComp',
       object_name           TYPE string VALUE 'objectName',
       object_type           TYPE string VALUE 'objectType',
       search_pattern        TYPE string VALUE 'searchPattern',
@@ -30,6 +33,7 @@ INTERFACE zif_adcoset_c_global
       class_search_scope    TYPE string VALUE 'classScope',
       main_incl_search_mode TYPE string VALUE 'mainClassInclMode',
       max_objects           TYPE string VALUE 'maxObjects',
+      max_results           TYPE string VALUE 'maxResults',
     END OF c_search_params,
 
     "! <p class="shorttext synchronized" lang="en">Use to signal that all objects in scope should be searched</p>
@@ -37,6 +41,7 @@ INTERFACE zif_adcoset_c_global
 
     "! <p class="shorttext synchronized" lang="en">Scope for class code search</p>
     BEGIN OF c_cls_search_scope,
+      all                  TYPE string VALUE 'all',
       global               TYPE string VALUE 'global',
       tests                TYPE string VALUE 'test',
       macros               TYPE string VALUE 'macros',
