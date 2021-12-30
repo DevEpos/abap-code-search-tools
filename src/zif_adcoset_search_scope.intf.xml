@@ -25,6 +25,12 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
+     <CMPNAME>MORE_OBJECTS_IN_SCOPE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns &apos;X&apos; if more results would have been in scope</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
      <CMPNAME>NEXT_PACKAGE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves the next package of objects in scope</DESCRIPT>

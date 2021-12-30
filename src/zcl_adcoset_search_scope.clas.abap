@@ -21,6 +21,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
       object_count   TYPE i,
       current_offset TYPE i,
       package_size   TYPE i,
+      is_more_objects_available  TYPE abap_bool,
       parallel_mode  TYPE abap_bool.
 
     METHODS:
@@ -73,7 +74,13 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD zif_adcoset_search_scope~more_objects_in_scope.
+    result = is_more_objects_available.
+  ENDMETHOD.
+
+
   METHOD determine_count.
+    DATA(selection_limit) = search_scope-max_objects + 1.
     SELECT COUNT(*)
       FROM zadcoset_repoobj
       WHERE object_type IN @search_scope-object_type_range
@@ -83,7 +90,12 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         AND owner IN @search_scope-owner_range
         AND created_date IN @search_scope-created_on_range
       INTO @object_count
-      UP TO @search_scope-max_objects ROWS.
+      UP TO @selection_limit ROWS.
+
+    IF object_count = selection_limit.
+      object_count = search_scope-max_objects.
+      is_more_objects_available = abap_true.
+    ENDIF.
   ENDMETHOD.
 
 
