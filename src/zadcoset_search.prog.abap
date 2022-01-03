@@ -39,8 +39,11 @@ SELECTION-SCREEN END OF BLOCK pattern.
 
 SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
   SELECT-OPTIONS:
-    s_objn FOR scope_vars-object_name.
-
+    s_objn FOR scope_vars-object_name,
+    s_auth FOR scope_vars-owner,
+    s_crtd FOR scope_vars-created_on,
+    s_pack FOR scope_vars-package,
+    s_appl FOR scope_vars-appl_comp.
   PARAMETERS:
     p_typal TYPE abap_bool RADIOBUTTON GROUP rb1 DEFAULT 'X' USER-COMMAND obj_type_sel,
     p_typsp TYPE abap_bool RADIOBUTTON GROUP rb1.
@@ -60,12 +63,6 @@ SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
       p_ddlx  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_bdef  TYPE abap_bool AS CHECKBOX MODIF ID tch.
   SELECTION-SCREEN END OF BLOCK types.
-
-  SELECT-OPTIONS:
-    s_auth FOR scope_vars-owner,
-    s_crtd FOR scope_vars-created_on,
-    s_pack FOR scope_vars-package,
-    s_appl FOR scope_vars-appl_comp.
   PARAMETERS: p_maxo TYPE n LENGTH 5 DEFAULT 500 OBLIGATORY.
 SELECTION-SCREEN END OF BLOCK scope.
 
@@ -98,7 +95,9 @@ CLASS lcl_report DEFINITION.
     DATA:
       results         TYPE zif_adcoset_ty_global=>ty_search_matches,
       type_check_refs TYPE TABLE OF REF TO abap_bool,
-      duration        TYPE string.
+      duration        TYPE string,
+      pcre_available  TYPE abap_bool.
+
     METHODS:
       run_search
         RAISING
@@ -147,6 +146,7 @@ AT SELECTION-SCREEN.
 CLASS lcl_report IMPLEMENTATION.
 
   METHOD constructor.
+    pcre_available = zcl_adcoset_matcher_factory=>is_pcre_supported( ).
     set_icon(
       EXPORTING
         icon_name = 'ICON_SELECT_ALL'
@@ -185,6 +185,9 @@ CLASS lcl_report IMPLEMENTATION.
       ELSEIF screen-name = 'S_PATT-LOW'.
         screen-required = '2'.
         MODIFY SCREEN.
+      ELSEIF screen-name = 'P_PCRE'.
+        screen-input = COND #( WHEN pcre_available = abap_true THEN '1' ELSE '0' ).
+        MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
 
@@ -215,7 +218,7 @@ CLASS lcl_report IMPLEMENTATION.
         run_search( ).
 
         IF results IS INITIAL.
-          MESSAGE 'No matches found' TYPE 'S'.
+          MESSAGE |No matches found, Duration: { duration }| TYPE 'S'.
         ELSE.
           display_results( ).
         ENDIF.
