@@ -12,6 +12,8 @@ INTERFACE zif_adcoset_ty_global
     ty_cls_main_incl_search_mode TYPE string,
     ty_matcher_type              TYPE c LENGTH 1,
     ty_duration                  TYPE p LENGTH 15 DECIMALS 2,
+    "! Type for DDLX Source name (not available on 7.40)
+    ty_ddlxname                  TYPE progname,
 
     BEGIN OF ty_method_param_info,
       "! Name of a method parameter

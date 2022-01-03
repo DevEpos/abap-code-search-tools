@@ -130,7 +130,7 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
 
   METHOD constructor.
 
-    DATA(max_group_tasks) = zcl_advoat_parl_proc_utils=>determine_max_tasks( server_group ).
+    DATA(max_group_tasks) = zcl_adcoset_parl_proc_utils=>determine_max_tasks( server_group ).
     IF max_tasks IS INITIAL OR max_tasks > max_group_tasks.
       me->max_tasks = max_group_tasks.
     ELSEIF max_tasks > 0.

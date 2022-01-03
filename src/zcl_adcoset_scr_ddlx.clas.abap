@@ -15,13 +15,15 @@ CLASS zcl_adcoset_scr_ddlx DEFINITION
           line_feed    TYPE string.
   PROTECTED SECTION.
   PRIVATE SECTION.
+    CONSTANTS:
+      c_ddlx_tabname TYPE tabname VALUE 'DDLXSRC_SRC'.
     DATA:
       line_feed    TYPE string,
       is_multiline TYPE abap_bool.
     METHODS:
       read_ddlx
         IMPORTING
-          name          TYPE ddlxsrc_src-ddlxname
+          name          TYPE zif_adcoset_ty_global=>ty_ddlxname
         RETURNING
           VALUE(result) TYPE string
         RAISING
@@ -65,7 +67,7 @@ CLASS zcl_adcoset_scr_ddlx IMPLEMENTATION.
     DATA(ddlx_name) = to_upper( name ).
 
     SELECT SINGLE source
-      FROM ddlxsrc_src
+      FROM (c_ddlx_tabname)
       WHERE ddlxname = @ddlx_name
         AND version = 'A' " only active source
       INTO @result.
