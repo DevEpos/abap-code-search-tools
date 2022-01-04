@@ -38,7 +38,27 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
           object             TYPE zif_adcoset_ty_global=>ty_tadir_object
           include            TYPE ty_fugr_incl
         CHANGING
-          all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
+          all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches,
+      get_function_includes
+        IMPORTING
+          fugr_program_name TYPE progname
+        CHANGING
+          includes          TYPE zcl_adcoset_csp_fugr=>ty_fugr_includes,
+      get_fugr_include_name
+        IMPORTING
+          fugr_name     TYPE rs38l_area
+        RETURNING
+          VALUE(result) TYPE progname,
+      get_all_includes
+        IMPORTING
+          fugr_program_name TYPE progname
+        RETURNING
+          VALUE(result)     TYPE ty_fugr_includes,
+      is_reserved_include
+        IMPORTING
+          include_name  TYPE progname
+        RETURNING
+          VALUE(result) TYPE abap_bool.
 ENDCLASS.
 
 
@@ -84,31 +104,41 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
 
   METHOD get_fugr_includes.
-    DATA: is_reserved_name TYPE abap_bool,
-          is_hidden_name   TYPE abap_bool.
 
-    SELECT program_name AS name,
-           func_name
-      FROM ris_v_prog_tadir
-      WHERE object_name = @name
-        AND object_type = @zif_adcoset_c_global=>c_source_code_type-function_group
-      INTO CORRESPONDING FIELDS OF TABLE @result.
+    IF sy-dbsys = 'HDB'.
+      SELECT program_name AS name,
+             func_name
+        FROM ris_v_prog_tadir
+        WHERE object_name = @name
+          AND object_type = @zif_adcoset_c_global=>c_source_code_type-function_group
+        INTO CORRESPONDING FIELDS OF TABLE @result.
 
-    LOOP AT result ASSIGNING FIELD-SYMBOL(<include>) WHERE func_name IS INITIAL.
-      CALL FUNCTION 'RS_PROGNAME_SPLIT'
-        EXPORTING
-          progname_with_namespace = <include>-name
-        IMPORTING
-          fugr_is_reserved_name   = is_reserved_name
-          fugr_is_hidden_name     = is_hidden_name
-        EXCEPTIONS
-          delimiter_error         = 1
-          OTHERS                  = 2.
-      IF sy-subrc <> 0 OR is_reserved_name = abap_true OR is_hidden_name = abap_true.
-        DELETE result.
+      " remove reserved includes (e.g. LCMS_BDT$08)
+      LOOP AT result ASSIGNING FIELD-SYMBOL(<include>) WHERE func_name IS INITIAL.
+        IF is_reserved_include( <include>-name ).
+          DELETE result.
+        ENDIF.
+      ENDLOOP.
+
+    ELSE.
+      DATA(fugr_name) = CONV rs38l_area( name ).
+      DATA(fugr_program_name) = get_fugr_include_name( fugr_name ).
+      IF fugr_program_name IS INITIAL.
+        RETURN.
       ENDIF.
-    ENDLOOP.
 
+      get_function_includes(
+        EXPORTING
+          fugr_program_name = fugr_program_name
+        CHANGING
+          includes          = result ).
+
+      result = value #( base result ( lines of get_all_includes( fugr_program_name ) ) ).
+
+      " remove duplicate function includes - they are also included from RS_GET_ALL_INCLUDES
+      SORT result BY name ASCENDING func_name DESCENDING.
+      DELETE ADJACENT DUPLICATES FROM result COMPARING name.
+    ENDIF.
   ENDMETHOD.
 
 
@@ -127,6 +157,83 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
+  ENDMETHOD.
+
+
+  METHOD get_function_includes.
+
+    "get_function_includes
+    SELECT funcname AS func_name
+      FROM tfdir
+      WHERE pname = @fugr_program_name
+      INTO CORRESPONDING FIELDS OF TABLE @includes.
+
+    LOOP AT includes ASSIGNING FIELD-SYMBOL(<function_include>).
+      CALL FUNCTION 'FUNCTION_INCLUDE_INFO'
+        CHANGING
+          funcname = <function_include>-func_name
+          include  = <function_include>-name
+        EXCEPTIONS
+          OTHERS   = 1.
+
+      IF <function_include>-name IS INITIAL.
+        DELETE includes.
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD get_fugr_include_name.
+    DATA(group_name) = fugr_name.
+
+    CALL FUNCTION 'FUNCTION_INCLUDE_INFO'
+      IMPORTING
+        pname               = result
+      CHANGING
+        group               = group_name
+      EXCEPTIONS
+        function_not_exists = 1
+        include_not_exists  = 2
+        group_not_exists    = 3
+        no_selections       = 4
+        no_function_include = 5
+        OTHERS              = 6.
+  ENDMETHOD.
+
+
+  METHOD get_all_includes.
+    data includes type table of sobj_name.
+
+    CALL FUNCTION 'RS_GET_ALL_INCLUDES'
+      EXPORTING
+        program      = fugr_program_name
+      TABLES
+        includetab   = includes
+      EXCEPTIONS
+        not_existent = 1
+        no_program   = 2
+        OTHERS       = 3.
+
+        result = value #( for incl in includes ( name = incl ) ).
+  ENDMETHOD.
+
+
+  METHOD is_reserved_include.
+    DATA: is_reserved_name TYPE abap_bool,
+          is_hidden_name   TYPE abap_bool.
+
+    CALL FUNCTION 'RS_PROGNAME_SPLIT'
+      EXPORTING
+        progname_with_namespace = include_name
+      IMPORTING
+        fugr_is_reserved_name   = is_reserved_name
+        fugr_is_hidden_name     = is_hidden_name
+      EXCEPTIONS
+        delimiter_error         = 1
+        OTHERS                  = 2.
+
+    result = xsdbool( sy-subrc <> 0 OR is_reserved_name = abap_true OR is_hidden_name = abap_true ).
   ENDMETHOD.
 
 ENDCLASS.

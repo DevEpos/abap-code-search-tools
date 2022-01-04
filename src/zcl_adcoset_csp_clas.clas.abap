@@ -99,14 +99,39 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
 
 
   METHOD get_class_includes.
-    SELECT program_name AS name,
-           method_name
-      FROM ris_v_prog_tadir
-      WHERE object_name = @name
-        AND object_type = @zif_adcoset_c_global=>c_source_code_type-class
-      INTO CORRESPONDING FIELDS OF TABLE @result.
+    IF sy-dbsys = 'HDB'.
+      SELECT program_name AS name,
+             method_name
+        FROM ris_v_prog_tadir
+        WHERE object_name = @name
+          AND object_type = @zif_adcoset_c_global=>c_source_code_type-class
+        INTO CORRESPONDING FIELDS OF TABLE @result.
 
-    DELETE result WHERE name CP '*CP'.
+      DELETE result WHERE name CP '*CP'.
+    ELSE.
+      DATA(class_name) = CONV classname( name ).
+      cl_oo_classname_service=>get_all_method_includes(
+        EXPORTING
+          clsname            = class_name
+        RECEIVING
+          result             = DATA(method_includes)
+        EXCEPTIONS
+          class_not_existing = 1 ).
+
+      SORT method_includes BY cpdkey-cpdname.
+
+      result = VALUE #(
+        ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) )
+        ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) )
+        ( name = cl_oo_classname_service=>get_ccau_name( class_name ) )
+        ( name = cl_oo_classname_service=>get_ccimp_name( class_name ) )
+        ( name = cl_oo_classname_service=>get_pubsec_name( class_name ) )
+        ( name = cl_oo_classname_service=>get_prosec_name( class_name ) )
+        ( name = cl_oo_classname_service=>get_prisec_name( class_name ) )
+        ( LINES OF VALUE #( FOR method IN method_includes
+          ( name        = method-incname
+            method_name = method-cpdkey-cpdname ) ) ) ).
+    ENDIF.
   ENDMETHOD.
 
 
