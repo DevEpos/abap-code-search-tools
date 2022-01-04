@@ -17,12 +17,12 @@ CLASS zcl_adcoset_search_scope DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
-      search_scope   TYPE zif_adcoset_ty_global=>ty_search_scope,
-      object_count   TYPE i,
-      current_offset TYPE i,
-      package_size   TYPE i,
-      is_more_objects_available  TYPE abap_bool,
-      parallel_mode  TYPE abap_bool.
+      search_scope              TYPE zif_adcoset_ty_global=>ty_search_scope,
+      object_count              TYPE i,
+      current_offset            TYPE i,
+      package_size              TYPE i,
+      is_more_objects_available TYPE abap_bool,
+      parallel_mode             TYPE abap_bool.
 
     METHODS:
       determine_count,
@@ -118,15 +118,39 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
 
   METHOD resolve_packages.
+    DATA: include_package_range TYPE zif_adcoset_ty_global=>ty_package_name_range,
+          exclude_package_range TYPE zif_adcoset_ty_global=>ty_package_name_range.
+
+    FIELD-SYMBOLS: <package_range> TYPE LINE OF zif_adcoset_ty_global=>ty_package_name_range.
+
     CHECK search_scope-package_range IS NOT INITIAL.
 
-    DATA(resolved_package_range) = zcl_adcoset_devc_reader=>resolve_packages( search_scope-package_range ).
-    search_scope-package_range = VALUE #(
-      ( LINES OF resolved_package_range )
-      ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( resolved_package_range ) ) ).
+    " only determine sub packages from ranges with option EQ
+    LOOP AT search_scope-package_range ASSIGNING <package_range> WHERE option = 'EQ'.
+      IF <package_range>-sign = 'I'.
+        include_package_range = VALUE #( BASE include_package_range ( <package_range> ) ).
+      ELSEIF <package_range>-sign = 'E'.
+        exclude_package_range = VALUE #( BASE exclude_package_range ( sign = 'I' option = 'EQ' low = <package_range>-low ) ).
+      ENDIF.
+      DELETE search_scope-package_range.
+    ENDLOOP.
 
-    SORT search_scope-package_range BY low.
-    DELETE ADJACENT DUPLICATES FROM search_scope-package_range COMPARING low.
+    " collect sub packages of packages that should be excluded
+    exclude_package_range = VALUE #( BASE exclude_package_range
+      ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( exclude_package_range ) ) ).
+
+    " convert sign back to 'E' for the excluded packages
+    LOOP AT exclude_package_range ASSIGNING <package_range>.
+      <package_range>-sign = 'E'.
+    ENDLOOP.
+
+    search_scope-package_range = VALUE #( BASE search_scope-package_range
+      ( LINES OF include_package_range )
+      ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( include_package_range ) )
+      ( LINES OF exclude_package_range ) ).
+
+    SORT search_scope-package_range BY sign option low high.
+    DELETE ADJACENT DUPLICATES FROM search_scope-package_range COMPARING sign option low high.
   ENDMETHOD.
 
 ENDCLASS.
