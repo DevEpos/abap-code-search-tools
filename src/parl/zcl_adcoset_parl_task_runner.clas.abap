@@ -29,6 +29,9 @@ CLASS zcl_adcoset_parl_task_runner DEFINITION
           p_task TYPE clike.
   PROTECTED SECTION.
   PRIVATE SECTION.
+    CONSTANTS:
+      c_max_wait TYPE i VALUE 180.
+
     DATA:
       server_group    TYPE zif_adcoset_ty_global=>ty_server_group,
       task_number     TYPE i,
@@ -124,7 +127,7 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
 
 
   METHOD zif_adcoset_parl_task_runner~wait_until_finished.
-    WAIT UNTIL free_tasks = max_tasks UP TO 120 SECONDS.
+    WAIT UNTIL free_tasks = max_tasks UP TO c_max_wait SECONDS.
   ENDMETHOD.
 
 
@@ -189,7 +192,7 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
 
 
   METHOD wait_until_free_task.
-    WAIT UNTIL free_tasks > 0 UP TO 120 SECONDS.
+    WAIT UNTIL free_tasks > 0 UP TO c_max_wait SECONDS.
   ENDMETHOD.
 
 
