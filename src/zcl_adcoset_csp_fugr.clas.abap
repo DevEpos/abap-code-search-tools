@@ -104,41 +104,23 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
 
   METHOD get_fugr_includes.
-
-    IF sy-dbsys = 'HDB'.
-      SELECT program_name AS name,
-             func_name
-        FROM ris_v_prog_tadir
-        WHERE object_name = @name
-          AND object_type = @zif_adcoset_c_global=>c_source_code_type-function_group
-        INTO CORRESPONDING FIELDS OF TABLE @result.
-
-      " remove reserved includes (e.g. LCMS_BDT$08)
-      LOOP AT result ASSIGNING FIELD-SYMBOL(<include>) WHERE func_name IS INITIAL.
-        IF is_reserved_include( <include>-name ).
-          DELETE result.
-        ENDIF.
-      ENDLOOP.
-
-    ELSE.
-      DATA(fugr_name) = CONV rs38l_area( name ).
-      DATA(fugr_program_name) = get_fugr_include_name( fugr_name ).
-      IF fugr_program_name IS INITIAL.
-        RETURN.
-      ENDIF.
-
-      get_function_includes(
-        EXPORTING
-          fugr_program_name = fugr_program_name
-        CHANGING
-          includes          = result ).
-
-      result = value #( base result ( lines of get_all_includes( fugr_program_name ) ) ).
-
-      " remove duplicate function includes - they are also included from RS_GET_ALL_INCLUDES
-      SORT result BY name ASCENDING func_name DESCENDING.
-      DELETE ADJACENT DUPLICATES FROM result COMPARING name.
+    DATA(fugr_name) = CONV rs38l_area( name ).
+    DATA(fugr_program_name) = get_fugr_include_name( fugr_name ).
+    IF fugr_program_name IS INITIAL.
+      RETURN.
     ENDIF.
+
+    get_function_includes(
+      EXPORTING
+        fugr_program_name = fugr_program_name
+      CHANGING
+        includes          = result ).
+
+    result = VALUE #( BASE result ( LINES OF get_all_includes( fugr_program_name ) ) ).
+
+    " remove duplicate function includes - they are also included from RS_GET_ALL_INCLUDES
+    SORT result BY name ASCENDING func_name DESCENDING.
+    DELETE ADJACENT DUPLICATES FROM result COMPARING name.
   ENDMETHOD.
 
 
@@ -203,7 +185,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
 
   METHOD get_all_includes.
-    data includes type table of sobj_name.
+    DATA includes TYPE TABLE OF sobj_name.
 
     CALL FUNCTION 'RS_GET_ALL_INCLUDES'
       EXPORTING
@@ -215,7 +197,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         no_program   = 2
         OTHERS       = 3.
 
-        result = value #( for incl in includes ( name = incl ) ).
+    result = VALUE #( FOR incl IN includes ( name = incl ) ).
   ENDMETHOD.
 
 
