@@ -21,7 +21,7 @@ CLASS zcl_adcoset_parl_search_query DEFINITION
       scope          TYPE REF TO zif_adcoset_search_scope,
       task_runner    TYPE REF TO zif_adcoset_parl_task_runner,
       settings       TYPE zif_adcoset_ty_global=>ty_search_settings_int,
-      search_results TYPE zif_adcoset_ty_global=>ty_search_matches.
+      search_results TYPE zif_adcoset_ty_global=>ty_search_result_objects.
 ENDCLASS.
 
 
@@ -44,10 +44,10 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
 
 
   METHOD zif_adcoset_parl_result_recv~send_results.
-    FIELD-SYMBOLS: <results> TYPE zif_adcoset_ty_global=>ty_search_matches.
+    FIELD-SYMBOLS: <results> TYPE zif_adcoset_ty_global=>ty_search_result_objects.
     ASSIGN results TO <results>.
     IF sy-subrc = 0.
-      APPEND LINES OF <results> TO search_results.
+      INSERT LINES OF <results> INTO TABLE search_results.
     ENDIF.
   ENDMETHOD.
 

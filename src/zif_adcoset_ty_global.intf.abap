@@ -35,8 +35,10 @@ INTERFACE zif_adcoset_ty_global
     END OF ty_parallel_handler,
 
     BEGIN OF ty_tadir_object,
-      name TYPE sobj_name,
-      type TYPE trobjtype,
+      name         TYPE sobj_name,
+      type         TYPE trobjtype,
+      owner        TYPE responsibl,
+      package_name TYPE devclass,
     END OF ty_tadir_object,
 
     ty_tadir_objects TYPE STANDARD TABLE OF ty_tadir_object WITH EMPTY KEY,
@@ -61,8 +63,8 @@ INTERFACE zif_adcoset_ty_global
 
     "! <p class="shorttext synchronized" lang="en">Uniquely identifies a match</p>
     BEGIN OF ty_match_identifier,
-      object_name  TYPE sobj_name,
-      object_type  TYPE trobjtype, "wbobjtype,
+*      object_name  TYPE sobj_name,
+*      object_type  TYPE trobjtype, "wbobjtype,
       display_name TYPE string,
       main_include TYPE program,
       include      TYPE program,
@@ -81,9 +83,17 @@ INTERFACE zif_adcoset_ty_global
   TYPES ty_search_matches TYPE STANDARD TABLE OF ty_search_match WITH EMPTY KEY.
 
   TYPES:
+    BEGIN OF ty_search_result_object,
+      object       TYPE ty_tadir_object,
+      text_matches TYPE ty_search_matches,
+      match_count  TYPE i,
+    END OF ty_search_result_object,
+
+    ty_search_result_objects TYPE SORTED TABLE OF ty_search_result_object WITH UNIQUE KEY object-name object-type,
+
     "! Code search result
     BEGIN OF ty_search_result,
-      matches       TYPE ty_search_matches,
+      results       TYPE ty_search_result_objects,
       duration_in_s TYPE string,
     END OF ty_search_result,
 

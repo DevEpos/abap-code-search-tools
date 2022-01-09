@@ -92,8 +92,17 @@ CLASS lcl_report DEFINITION.
       pbo,
       pai.
   PRIVATE SECTION.
+    TYPES BEGIN OF ty_search_match.
+    TYPES:
+      object_name  TYPE sobj_name,
+      object_type  TYPE trobjtype,
+      owner        TYPE responsibl,
+      package_name TYPE devclass.
+      INCLUDE TYPE zif_adcoset_ty_global=>ty_search_match.
+    TYPES END OF ty_search_match.
+
     DATA:
-      results         TYPE zif_adcoset_ty_global=>ty_search_matches,
+      results         TYPE TABLE OF ty_search_match,
       type_check_refs TYPE TABLE OF REF TO abap_bool,
       duration        TYPE string,
       pcre_available  TYPE abap_bool.
@@ -128,7 +137,7 @@ CLASS lcl_report DEFINITION.
           row,
       navigate_to_adt
         IMPORTING
-          match TYPE zif_adcoset_ty_global=>ty_search_match.
+          match TYPE ty_search_match.
 ENDCLASS.
 
 INITIALIZATION.
@@ -241,6 +250,10 @@ CLASS lcl_report IMPLEMENTATION.
 
         DATA(columns_table) = columns->get( ).
 
+        columns->set_column_position(
+          columnname = 'SNIPPET'
+          position   = 1 ).
+
         LOOP AT columns_table ASSIGNING FIELD-SYMBOL(<col>).
 
           CASE <col>-columnname.
@@ -316,7 +329,19 @@ CLASS lcl_report IMPLEMENTATION.
     ENDIF.
 
     DATA(search_result) = zcl_adcoset_search_engine=>get_instance( )->search_code( search_config ).
-    results = search_result-matches.
+
+    LOOP AT search_result-results ASSIGNING FIELD-SYMBOL(<result_object>).
+      DATA(flat_match) = CORRESPONDING ty_search_match( <result_object>-object
+        MAPPING object_name = name
+                object_type = type ).
+
+      LOOP AT <result_object>-text_matches ASSIGNING FIELD-SYMBOL(<text_match>).
+        flat_match = CORRESPONDING #( BASE ( flat_match ) <text_match> ).
+        results = VALUE #( BASE results ( flat_match ) ).
+      ENDLOOP.
+
+    ENDLOOP.
+
     duration = search_result-duration_in_s.
 
   ENDMETHOD.

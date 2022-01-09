@@ -22,7 +22,7 @@ CLASS zcl_adcoset_search_query DEFINITION
       settings        TYPE zif_adcoset_ty_global=>ty_search_settings,
       custom_settings TYPE zif_adcoset_ty_global=>ty_custom_search_settings,
       matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab,
-      search_results  TYPE zif_adcoset_ty_global=>ty_search_matches.
+      search_results  TYPE zif_adcoset_ty_global=>ty_search_result_objects.
 ENDCLASS.
 
 
@@ -57,9 +57,16 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
               is_multiline = settings-multiline_search
               line_feed    = settings-line_feed ).
 
-            APPEND LINES OF source_code_provider->search(
+            DATA(matches) = source_code_provider->search(
               object          = <object>
-              src_code_reader = source_code_reader ) TO search_results.
+              src_code_reader = source_code_reader ).
+
+            IF matches IS NOT INITIAL.
+              INSERT VALUE #(
+                object       = <object>
+                text_matches = matches
+                match_count  = lines( matches ) ) INTO TABLE search_results.
+            ENDIF.
           CATCH zcx_adcoset_static_error.
         ENDTRY.
       ENDLOOP.

@@ -17,7 +17,7 @@ CLASS zcl_adcoset_search_engine DEFINITION
         IMPORTING
           input  TYPE zif_adcoset_ty_global=>ty_search_package
         EXPORTING
-          output TYPE zif_adcoset_ty_global=>ty_search_matches.
+          output TYPE zif_adcoset_ty_global=>ty_search_result_objects.
     METHODS:
       "! <p class="shorttext synchronized" lang="en">Search source code</p>
       search_code
@@ -88,7 +88,7 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
     timer->stop( ).
 
     result = VALUE #(
-      matches       = query->get_results( )
+      results       = query->get_results( )
       duration_in_s = timer->get_duration_string( ) ).
   ENDMETHOD.
 

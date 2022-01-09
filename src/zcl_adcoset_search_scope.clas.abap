@@ -57,7 +57,9 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
   METHOD zif_adcoset_search_scope~next_package.
     SELECT object_type AS type,
-           object_name AS name
+           object_name AS name,
+           owner,
+           devclass as package_name
       FROM zadcoset_repoobj
       WHERE object_type IN @search_scope-object_type_range
         AND object_name IN @search_scope-object_name_range

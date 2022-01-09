@@ -33,16 +33,10 @@ CLASS zcl_adcoset_csp_strsrc_default IMPLEMENTATION.
   METHOD zif_adcoset_code_search_prov~search.
     TRY.
         DATA(source) = src_code_reader->get_source_code( object-name ).
-        DATA(matches) = source->find_matches(
+        result = source->find_matches(
           matchers             = matchers
           match_all            = search_settings-match_all_patterns
           ignore_comment_lines = search_settings-ignore_comment_lines ).
-
-        LOOP AT matches ASSIGNING FIELD-SYMBOL(<match_without_source>).
-          APPEND <match_without_source> TO result ASSIGNING FIELD-SYMBOL(<match>).
-          <match>-object_name = object-name.
-          <match>-object_type = object-type.
-        ENDLOOP.
 
       CATCH zcx_adcoset_src_code_read.
         "handle exception

@@ -131,8 +131,6 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       APPEND <unassigned_match> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
       <match>-include = include-name.
-      <match>-object_name = object-name.
-      <match>-object_type = object-type.
 
       " set the display name
       IF include-method_name IS NOT INITIAL.

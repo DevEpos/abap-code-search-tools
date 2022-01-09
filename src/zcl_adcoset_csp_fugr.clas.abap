@@ -58,11 +58,6 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
           fugr_program_name TYPE progname
         RETURNING
           VALUE(result)     TYPE ty_fugr_includes,
-      is_reserved_include
-        IMPORTING
-          include_name  TYPE progname
-        RETURNING
-          VALUE(result) TYPE abap_bool,
       mixin_function_names
         IMPORTING
           fugr_program_name TYPE progname
@@ -144,8 +139,6 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
     LOOP AT unassigned_matches ASSIGNING FIELD-SYMBOL(<match_without_source>).
       APPEND <match_without_source> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
-      <match>-object_name = object-name.
-      <match>-object_type = object-type.
 
       <match>-include = include-name.
 
@@ -218,24 +211,6 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         OTHERS       = 3.
 
     result = VALUE #( FOR incl IN includes ( name = incl ) ).
-  ENDMETHOD.
-
-
-  METHOD is_reserved_include.
-    DATA: is_reserved_name TYPE abap_bool,
-          is_hidden_name   TYPE abap_bool.
-
-    CALL FUNCTION 'RS_PROGNAME_SPLIT'
-      EXPORTING
-        progname_with_namespace = include_name
-      IMPORTING
-        fugr_is_reserved_name   = is_reserved_name
-        fugr_is_hidden_name     = is_hidden_name
-      EXCEPTIONS
-        delimiter_error         = 1
-        OTHERS                  = 2.
-
-    result = xsdbool( sy-subrc <> 0 OR is_reserved_name = abap_true OR is_hidden_name = abap_true ).
   ENDMETHOD.
 
 
