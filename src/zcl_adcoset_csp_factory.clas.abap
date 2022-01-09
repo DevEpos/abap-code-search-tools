@@ -30,7 +30,7 @@ CLASS zcl_adcoset_csp_factory DEFINITION
       END OF ty_providers.
 
     CLASS-DATA:
-      providers TYPE HASHED TABLE OF ty_providers WITH UNIQUE KEY type.
+      providers TYPE STANDARD TABLE OF ty_providers WITH KEY type.
 
     CLASS-METHODS:
       map_type
@@ -91,7 +91,7 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
           search_settings = search_settings
           matchers        = matchers )
 
-      when c_def_string_src_provider then
+      WHEN c_def_string_src_provider THEN
         NEW zcl_adcoset_csp_strsrc_default(
           search_settings = search_settings
           matchers        = matchers )

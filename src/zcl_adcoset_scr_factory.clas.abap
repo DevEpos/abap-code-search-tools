@@ -28,7 +28,7 @@ CLASS zcl_adcoset_scr_factory DEFINITION
       END OF ty_readers.
 
     CLASS-DATA:
-      readers TYPE HASHED TABLE OF ty_readers WITH UNIQUE KEY type.
+      readers TYPE STANDARD TABLE OF ty_readers WITH KEY type.
 
     CLASS-METHODS:
       map_type
