@@ -14,6 +14,9 @@ CLASS zcl_adcoset_csp_repsrc_default DEFINITION
           matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
   PROTECTED SECTION.
   PRIVATE SECTION.
+    CONSTANTS:
+      c_type_group_incl_prefix TYPE string VALUE '%_C'.
+
     DATA:
       search_settings TYPE zif_adcoset_ty_global=>ty_search_settings,
       matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
@@ -80,17 +83,10 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
         include_suffix = 'XT'.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-type_group.
-        " TODO: Move into custom code search provider?
-        SELECT SINGLE program_name
-          FROM ris_v_prog_tadir
-          WHERE object_name = @object-name
-            AND object_type = @object-type
-          INTO @result.
-        RETURN.
+        result = |{ c_type_group_incl_prefix }{ object-name }|.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-program.
         result = object-name.
-        RETURN.
 
     ENDCASE.
 
