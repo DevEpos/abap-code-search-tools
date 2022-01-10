@@ -33,8 +33,11 @@ SELECTION-SCREEN BEGIN OF BLOCK pattern WITH FRAME TITLE TEXT-b01.
   SELECT-OPTIONS: s_patt FOR pattern_var NO INTERVALS.
   PARAMETERS:
     p_ignc  TYPE abap_bool AS CHECKBOX DEFAULT 'X',
-    p_regex TYPE abap_bool AS CHECKBOX,
-    p_pcre  TYPE abap_bool AS CHECKBOX.
+    p_regex TYPE abap_bool AS CHECKBOX USER-COMMAND regex.
+  SELECTION-SCREEN BEGIN OF LINE.
+    PARAMETERS p_pcre  TYPE abap_bool AS CHECKBOX USER-COMMAND pcre.
+    SELECTION-SCREEN COMMENT 3(60) TEXT-001 FOR FIELD p_pcre.
+  SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN END OF BLOCK pattern.
 
 SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
@@ -182,11 +185,10 @@ CLASS lcl_report IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD pbo.
-    DATA(type_checks_enabled) = COND #( WHEN p_typal = abap_true THEN '0' ELSE '1' ).
 
     LOOP AT SCREEN.
       IF screen-group1 = 'TCH'.
-        screen-input = type_checks_enabled.
+        screen-input = COND #( WHEN p_typal = abap_true THEN '0' ELSE '1' ).
         MODIFY SCREEN.
       ELSEIF screen-group1 = 'SPM'.
         screen-input = COND #( WHEN p_singpm = abap_true THEN '0' ELSE '1' ).
@@ -195,7 +197,21 @@ CLASS lcl_report IMPLEMENTATION.
         screen-required = '2'.
         MODIFY SCREEN.
       ELSEIF screen-name = 'P_PCRE'.
-        screen-input = COND #( WHEN pcre_available = abap_true THEN '1' ELSE '0' ).
+        screen-input = COND #(
+          WHEN p_singpm = abap_false AND
+               pcre_available = abap_true THEN '1' ELSE '0' ).
+        MODIFY SCREEN.
+      ELSEIF screen-name = 'P_REGEX'.
+        screen-input = COND #( WHEN p_singpm = abap_false THEN '1' ELSE '0' ).
+        MODIFY SCREEN.
+      ELSEIF screen-name = 'P_SINGPM'.
+        screen-input = COND #( WHEN p_regex = abap_false THEN '1' ELSE '0' ).
+        MODIFY SCREEN.
+      ELSEIF screen-name = 'P_MULTIL'.
+        screen-input = COND #( WHEN p_singpm = abap_true THEN '0' ELSE '1' ).
+        MODIFY SCREEN.
+      ELSEIF screen-name = 'P_MATCHA'.
+        screen-input = COND #( WHEN p_singpm = abap_true THEN '0' ELSE '1' ).
         MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
@@ -211,6 +227,18 @@ CLASS lcl_report IMPLEMENTATION.
 
       WHEN 'NO_TYPES'.
         set_type_check_state( abap_false ).
+
+      WHEN 'REGEX'.
+        IF p_regex = abap_true.
+          p_singpm = abap_false.
+        ELSE.
+          p_pcre = abap_false.
+        ENDIF.
+
+      WHEN 'PCRE'.
+        IF p_pcre = abap_true.
+          p_regex = abap_true.
+        ENDIF.
 
       WHEN 'SINGLE_PATTERN_MODE'.
         IF p_singpm = abap_true.
