@@ -34,15 +34,17 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
 
     CALL METHOD cl_abap_regex=>('CREATE_PCRE')
       EXPORTING
+        pattern     = pattern
         ignore_case = ignore_case
 *       enable_jit  = abap_true
         " useful to search long string line by line e.g. "^[\d+]\s{1,3}$"
+        " but probably not needed as the code search has the option to search line by line anyway
 *       enable_multiline = abap_false
 *       no_submatches    = abap_false
 *       newline_mode     = cl_abap_regex=>('C_NEWLINE_MODE-CRLFANY')
-*       unicode_handling = cl_abap_regex=>('C_UNICODE_HANDLING-STRICT')
+*       unicode_handling = cl_abap_regex=>('C_UNICODE_HANDLING-STRICT') " not available in 7.55
 *       extended    = abap_true
-*       dot_all     = abap_false
+*       dot_all     = abap_false " not available in 7.55
       RECEIVING
         regex       = regex.
   ENDMETHOD.
