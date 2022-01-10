@@ -31,8 +31,8 @@ CLASS zcl_adcoset_csp_clas DEFINITION
 
     TYPES:
       BEGIN OF ty_class_incl,
-        name        TYPE ris_v_prog_tadir-program_name,
-        method_name TYPE ris_v_prog_tadir-method_name,
+        name        TYPE progname,
+        method_name TYPE seocpdname,
       END OF ty_class_incl,
       ty_class_includes TYPE STANDARD TABLE OF ty_class_incl WITH KEY name.
 
