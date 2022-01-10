@@ -1,11 +1,13 @@
 <?sap.transform simple?>
 <tt:transform xmlns:tt="http://www.sap.com/transformation-templates"
-              xmlns:codesearch="http://www.devepos.com/adt/codesearch"
+              xmlns:cst="http://www.devepos.com/adt/codesearchtools"
+              xmlns:adtcore="http://www.sap.com/adt/core"
               xmlns:cl="http://www.sap.com/abapxml/types/class-pool/ZIF_ADCOSET_TY_ADT_TYPES">
 
   <tt:root name="root" type="cl:ty_code_search_result"/>
 
-  <tt:include name="zadcoset_adt_obj_ref" template="adtObjRef"/>
+  <tt:include name="sadt_object_reference" template="objectReferenceAttributes" />
+  <tt:include name="sadt_main_object" template="main_object"/>
 
   <tt:template>
     <tt:apply name="codeSearchResult">
@@ -19,16 +21,16 @@
       <tt:root name="code_search_result"/>
     </tt:context>
 
-    <codesearch:result tt:extensible="deep">
-      <tt:attribute name="codesearch:numberOfResults" value-ref="code_search_result.number_of_results"/>
-      <tt:attribute name="codesearch:numberOfSearchedObjects" value-ref="code_search_result.number_of_searched_objects"/>
-      <tt:attribute name="codesearch:queryTimeMillis" value-ref="code_search_result.query_time_millis"/>
+    <cst:result tt:extensible="deep">
+      <tt:attribute name="cst:numberOfResults" value-ref="code_search_result.number_of_results"/>
+      <tt:attribute name="cst:numberOfSearchedObjects" value-ref="code_search_result.number_of_searched_objects"/>
+      <tt:attribute name="cst:queryTimeInMs" value-ref="code_search_result.query_time_in_ms"/>
 
       <tt:apply name="codeSearchObjects">
         <tt:with-root name="code_search_objects" ref="code_search_result.code_search_objects"/>
       </tt:apply>
 
-    </codesearch:result>
+    </cst:result>
 
   </tt:template>
 
@@ -40,22 +42,22 @@
 
     <tt:loop ref="code_search_objects">
 
-      <codesearch:searchObject tt:extensible="deep">
+      <cst:searchObject tt:extensible="deep">
 
-        <tt:cond check="not-initial($ref.adt_main_obj_ref)">
-          <codesearch:adtMainObjRef>
-            <tt:apply name="adtObjRef">
-              <tt:with-root name="ADT_OBJ_REF" ref="$ref.adt_main_obj_ref"/>
-            </tt:apply>
-          </codesearch:adtMainObjRef>
+        <tt:cond check="not-initial($ref.uri)">
+          <tt:attribute name="cst:uri" value-ref="$ref.uri"/>
         </tt:cond>
 
-        <tt:cond check="not-initial($ref.adt_obj_ref)">
-          <codesearch:adtObjRef>
-            <tt:apply name="adtObjRef">
-              <tt:with-root name="adt_obj_ref" ref="$ref.adt_obj_ref"/>
+        <tt:cond check="not-initial($ref.parent_uri)">
+          <tt:attribute name="cst:parentUri" value-ref="$ref.parent_uri"/>
+        </tt:cond>
+
+        <tt:cond check="not-initial($ref.adt_main_object)">
+          <adtcore:adtMainObject>
+            <tt:apply name="main_object">
+              <tt:with-root name="main_object_root" ref="$ref.adt_main_object"/>
             </tt:apply>
-          </codesearch:adtObjRef>
+          </adtcore:adtMainObject>
         </tt:cond>
 
         <tt:cond check="not-initial($ref.matches)">
@@ -63,7 +65,7 @@
             <tt:with-root name="code_search_matches" ref="$ref.matches"/>
           </tt:apply>
         </tt:cond>
-      </codesearch:searchObject>
+      </cst:searchObject>
 
     </tt:loop>
   </tt:template>
@@ -74,15 +76,15 @@
     </tt:context>
 
     <tt:loop ref="code_search_matches">
-      <codesearch:match tt:extensible="deep">
+      <cst:match tt:extensible="deep">
 
         <tt:cond check="not-initial($ref.uri)">
-          <tt:attribute name="codesearch:uri" value-ref="$ref.uri"/>
+          <tt:attribute name="cst:uri" value-ref="$ref.uri"/>
         </tt:cond>
 
-        <codesearch:snippet tt:value-ref="$ref.snippet"/>
+        <cst:snippet tt:value-ref="$ref.snippet"/>
 
-      </codesearch:match>
+      </cst:match>
     </tt:loop>
 
   </tt:template>
