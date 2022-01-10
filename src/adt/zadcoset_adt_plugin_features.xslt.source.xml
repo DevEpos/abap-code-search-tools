@@ -1,0 +1,56 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates"
+              xmlns:adtbase="http://www.devepos.com/adt/base"
+              xmlns:cl="http://www.sap.com/abapxml/types/class-pool/ZIF_ADCOSET_TY_ADT_TYPES">
+
+  <tt:root name="PLUGIN_FEATURES" type="cl:ty_adt_plugin_features"/>
+
+  <tt:template>
+    <adtbase:pluginFeatures tt:extensible="deep">
+      <tt:loop ref="PLUGIN_FEATURES">
+        <tt:apply name="pluginFeature">
+          <tt:with-root name="PLUGIN_FEATURE" ref="$ref"/>
+        </tt:apply>
+      </tt:loop>
+    </adtbase:pluginFeatures>
+  </tt:template>
+
+  <!-- PUBLIC TEMPLATES (can be called from other transformations) -->
+  <!-- Template for plugin feature -->
+  <tt:template name="pluginFeature">
+    <tt:context>
+      <tt:root name="PLUGIN_FEATURE" type="cl:ty_adt_plugin_feature"/>
+    </tt:context>
+
+    <adtbase:pluginFeature tt:extensible="deep">
+      <tt:apply name="pluginFeatureAttribute">
+        <tt:with-root name="PLUGIN_FEATURE" ref="PLUGIN_FEATURE"/>
+      </tt:apply>
+    </adtbase:pluginFeature>
+  </tt:template>
+
+  <!-- Template for attributes of plugin feature -->
+  <tt:template name="pluginFeatureAttribute">
+    <tt:context>
+      <tt:root name="PLUGIN_FEATURE"/>
+    </tt:context>
+
+    <tt:attribute name="adtbase:name" value-ref="plugin_feature.name"/>
+
+    <tt:attribute name="adtbase:endpoint" value-ref="plugin_feature.endpoint"/>
+
+    <tt:attribute name="adtbase:type" value-ref="plugin_feature.type"/>
+
+    <tt:cond check="not-initial(plugin_feature.category)">
+      <tt:attribute name="adtbase:category" value-ref="plugin_feature.category"/>
+    </tt:cond>
+
+    <tt:cond check="not-initial(plugin_feature.enabled)">
+      <tt:attribute name="adtbase:enabled" value-ref="plugin_feature.enabled" option="format(boolean)" />
+    </tt:cond>
+
+    <tt:cond check="not-initial(plugin_feature.description)">
+      <tt:attribute name="adtbase:description" value-ref="plugin_feature.description"/>
+    </tt:cond>
+  </tt:template>
+</tt:transform>

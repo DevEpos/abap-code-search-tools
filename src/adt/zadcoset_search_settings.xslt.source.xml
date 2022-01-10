@@ -1,0 +1,22 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates"
+              xmlns:cst="http://www.devepos.com/adt/codesearchtools"
+              xmlns:cl="http://www.sap.com/abapxml/types/class-pool/ZIF_ADCOSET_TY_ADT_TYPES">
+
+  <tt:root name="SETTINGS" type="cl:ty_code_search_settings"/>
+
+  <tt:template>
+    <cst:settings tt:extensible="deep">
+      <tt:cond check="not-initial(settings.pcre_enabled)">
+        <tt:attribute name="cst:pcreEnabled" option="format(boolean)" value-ref="settings.pcre_enabled"/>
+      </tt:cond>
+
+      <tt:cond check="not-initial(settings.parallel_enabled)">
+        <tt:attribute name="cst:parallelEnabled" option="format(boolean)" value-ref="settings.parallel_enabled"/>
+      </tt:cond>
+
+      <tt:attribute name="cst:parallelServerGroup" value-ref="settings.parallel_server_group"/>
+    </cst:settings>
+  </tt:template>
+
+</tt:transform>

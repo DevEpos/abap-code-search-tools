@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_ADCOSET_ADT_CH_FACTORY</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>ADT content handler factory</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_ADT_CH_FACTORY</CLSNAME>
+     <CMPNAME>CREATE_CS_SETTINGS_CH</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Creates content handler for code search settings</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_ADT_CH_FACTORY</CLSNAME>
+     <CMPNAME>CREATE_FEATURE_LIST_CH</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Creates content handler for feature list</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_ADT_CH_FACTORY</CLSNAME>
+     <CMPNAME>CREATE_SEARCH_RESULT_CH</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Creates content handler for code search result</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
