@@ -1,5 +1,5 @@
 ![](https://img.shields.io/badge/version-ALPHA-orange)
-![](https://img.shields.io/badge/ABAP-v7.40sp09+-orange)
+![](https://img.shields.io/badge/ABAP-v7.40sp09+-green)
 # abap-code-search
 ABAP Advanced Code Search Tools
 > **ATTENTION**: The API is basically useable but not all features are implemented or tested yet
@@ -17,17 +17,13 @@ Searches Code in ABAP sources like
 - [X] Behavior Definitions (BDEV)
 - [X] Simple Transformations (XSLT)
 
-
-The search will be done entirely via ABAP (as opposed to the ADT Source Search). There is an option to run the search in parallel for better performance
-
-There will also be an option to Search-n-Replace coding
-> **Note**: This feature will probably not be in the initial release
+The search is done entirely via ABAP (as opposed to the ADT Source Search). There is an option to run the search in parallel for better performance
 
 ### Search features
 Search can be done via normal String search or with Regular Expressions. If supported by the system it is also possible to activate PCRE (Perl Compatible Regular Expressions)
 
 ### UI
-The main focus will be ADT (ABAP Development Tools), but the repository may include also a simple selection report for executing the code search
+You can execute the search via report `ZADCOSET_SEARCH`, where most of the options are available as well, but the main focus of the UI will be ADT (see [abap-code-search-ui](http://github.com/stockbal/abap-code-search-ui)). 
 
 ### Package overview
 
