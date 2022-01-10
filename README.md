@@ -34,6 +34,7 @@ You can execute the search via report `ZADCOSET_SEARCH`, where most of the optio
   Object Name               | Purpose
   --------------------------|------------------------------------
   ZCL_ADCOSET_SEARCH_ENGINE | Access point to code search
+  ZADCOSET_SEARCH           | ABAP Report for executing the code search
   
 - **/src/adt**  
   Implementation of the ADT backend which is needed for future ADT plugin
