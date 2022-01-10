@@ -28,7 +28,13 @@ CLASS zcl_adcoset_search_query_fac IMPLEMENTATION.
   METHOD create_query.
     DATA: task_runner TYPE REF TO zif_adcoset_parl_task_runner.
 
-    IF parallel_processing-enabled = abap_true.
+    DATA(run_parallel) = parallel_processing-enabled.
+
+    IF scope->count( ) < zif_adcoset_c_global=>c_parl_proc_min_objects.
+      run_parallel = abap_false.
+    ENDIF.
+
+    IF run_parallel = abap_true.
       TRY.
           task_runner = zcl_adcoset_parl_task_runner=>new(
             server_group   = parallel_processing-server_group

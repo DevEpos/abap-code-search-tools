@@ -3,6 +3,9 @@ INTERFACE zif_adcoset_c_global
   PUBLIC.
 
   CONSTANTS:
+    "! Minium Objects in scope that are needed so parallel
+    "! processing will be used.
+    c_parl_proc_min_objects   TYPE i VALUE 50,
     "! <p class="shorttext synchronized" lang="en">Regex pattern to detect comment lines in CDS sources</p>
     "! Can be used for the following source types:
     "! <ul>
@@ -10,7 +13,7 @@ INTERFACE zif_adcoset_c_global
     "!   <li>DCLS</li>
     "!   <li>DDLX</li>
     "! </ul>
-    c_cds_comment_regex TYPE string VALUE '^\s*(//|/\*|--)',
+    c_cds_comment_regex       TYPE string VALUE '^\s*(//|/\*|--)',
     "! <p class="shorttext synchronized" lang="en">Matcher types</p>
     BEGIN OF c_matcher_type,
       substring   TYPE zif_adcoset_ty_global=>ty_matcher_type VALUE '1',

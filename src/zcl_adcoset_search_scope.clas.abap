@@ -59,7 +59,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     SELECT object_type AS type,
            object_name AS name,
            owner,
-           devclass as package_name
+           devclass AS package_name
       FROM zadcoset_repoobj
       WHERE object_type IN @search_scope-object_type_range
         AND object_name IN @search_scope-object_name_range
@@ -102,12 +102,15 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
 
   METHOD set_package_size.
+    " ??? >
+    " Should the package size be set depending on the available task.
+    " ??? <
     IF parallel_mode = abap_true.
-      IF object_count < 10.
-        package_size = 2.
-      ELSEIF object_count < 50.
-        package_size = 10.
-      ELSEIF object_count < 500.
+      IF object_count >= 50 AND object_count < 200.
+        package_size = 25.
+      ELSEIF object_count >= 200 AND object_count < 800.
+        package_size = 50.
+      ELSEIF object_count >= 800 AND object_count < 2000.
         package_size = 100.
       ELSE.
         package_size = 150.
