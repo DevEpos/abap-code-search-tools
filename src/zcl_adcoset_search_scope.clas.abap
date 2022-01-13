@@ -82,7 +82,10 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
 
   METHOD determine_count.
-    DATA(selection_limit) = search_scope-max_objects + 1.
+    DATA(selection_limit) = COND i(
+      WHEN search_scope-max_objects > 0 THEN search_scope-max_objects + 1
+                                        ELSE 0 ).
+
     SELECT COUNT(*)
       FROM zadcoset_repoobj
       WHERE object_type IN @search_scope-object_type_range
