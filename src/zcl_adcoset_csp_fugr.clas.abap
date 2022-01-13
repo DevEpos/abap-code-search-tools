@@ -16,7 +16,10 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
-      c_is_function_include_pattern TYPE string VALUE `^(/\w{1,10}/)?L.*U\d{2}$`.
+      BEGIN OF c_include_types,
+        function TYPE string VALUE 'FUGR/FF',
+        include  TYPE string VALUE 'FUGR/I',
+      END OF c_include_types.
 
     DATA:
       search_settings TYPE zif_adcoset_ty_global=>ty_search_settings,
@@ -27,15 +30,22 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
         name                TYPE progname,
         is_function_include TYPE abap_bool,
         func_name           TYPE rs38l_fnam,
+        adt_type            TYPE string,
       END OF ty_fugr_incl,
       ty_fugr_includes TYPE SORTED TABLE OF ty_fugr_incl WITH UNIQUE KEY name.
 
     METHODS:
       get_fugr_includes
         IMPORTING
-          fugr_program_name TYPE progname
+          include_prefix TYPE progname
         RETURNING
-          VALUE(result)     TYPE ty_fugr_includes,
+          VALUE(result)  TYPE ty_fugr_includes,
+      get_fugr_include_info
+        IMPORTING
+          fugr_name                  TYPE rs38l_area
+        EXPORTING
+          VALUE(fugr_main_prog)      TYPE progname
+          VALUE(fugr_include_prefix) TYPE progname,
       assign_objects_to_matches
         IMPORTING
           unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
@@ -44,16 +54,6 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
         CHANGING
           all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches,
       get_function_includes
-        IMPORTING
-          fugr_program_name TYPE progname
-        RETURNING
-          VALUE(result)     TYPE zcl_adcoset_csp_fugr=>ty_fugr_includes,
-      get_fugr_include_name
-        IMPORTING
-          fugr_name     TYPE rs38l_area
-        RETURNING
-          VALUE(result) TYPE progname,
-      get_all_includes
         IMPORTING
           fugr_program_name TYPE progname
         RETURNING
@@ -80,12 +80,17 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     DATA: function_names_loaded TYPE abap_bool.
 
     DATA(fugr_name) = CONV rs38l_area( object-name ).
-    DATA(fugr_program_name) = get_fugr_include_name( fugr_name ).
-    IF fugr_program_name IS INITIAL.
+    get_fugr_include_info(
+      EXPORTING
+        fugr_name           = fugr_name
+      IMPORTING
+        fugr_main_prog      = DATA(fugr_include)
+        fugr_include_prefix = DATA(fugr_include_prefix) ).
+    IF fugr_include IS INITIAL.
       RETURN.
     ENDIF.
 
-    DATA(includes) = get_fugr_includes( fugr_program_name ).
+    DATA(includes) = get_fugr_includes( fugr_include_prefix ).
     IF includes IS INITIAL.
       RETURN.
     ENDIF.
@@ -103,7 +108,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
           IF <include>-is_function_include = abap_true AND function_names_loaded = abap_false.
             mixin_function_names(
               EXPORTING
-                fugr_program_name = fugr_program_name
+                fugr_program_name = fugr_include
               CHANGING
                 includes          = includes ).
             function_names_loaded = abap_true.
@@ -124,14 +129,76 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
 
   METHOD get_fugr_includes.
+    DATA: is_reserved_name   TYPE abap_bool,
+          is_no_func_include TYPE abap_bool,
+          is_no_func_module  TYPE abap_bool,
+          include_suffix     TYPE c LENGTH 3.
 
-    LOOP AT get_all_includes( fugr_program_name ) ASSIGNING FIELD-SYMBOL(<include>).
-      IF matches( val = <include>-name regex = c_is_function_include_pattern ).
-        <include>-is_function_include = abap_true.
+    DATA(include_pattern) = CONV progname( |{ include_prefix }___| ).
+
+    SELECT name
+      FROM trdir
+      WHERE name LIKE @include_pattern
+      INTO TABLE @DATA(includes).
+
+    IF includes IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    LOOP AT includes ASSIGNING FIELD-SYMBOL(<include_key>).
+      DATA(include_name) = <include_key>-name.
+      CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
+        IMPORTING
+          no_function_include = is_no_func_include
+          no_function_module  = is_no_func_module
+          reserved_name       = is_reserved_name
+          suffix              = include_suffix
+        CHANGING
+          include             = include_name
+        EXCEPTIONS
+          OTHERS              = 1.
+      IF sy-subrc <> 0.
+        CONTINUE.
+      ELSEIF is_reserved_name = abap_true AND ( is_no_func_module = abap_true ).
+        CONTINUE.
       ENDIF.
-      result = VALUE #( BASE result ( <include> ) ).
+
+      INSERT VALUE #( name = <include_key>-name ) INTO TABLE result
+        ASSIGNING FIELD-SYMBOL(<new_include>).
+
+      IF include_suffix(1) = 'U'.
+        <new_include>-is_function_include = abap_true.
+        <new_include>-adt_type = c_include_types-function.
+      ELSE.
+        <new_include>-adt_type = c_include_types-include.
+      ENDIF.
+
     ENDLOOP.
 
+  ENDMETHOD.
+
+
+  METHOD get_fugr_include_info.
+    DATA: group_wo_namespace TYPE rs38l_area,
+          namespace          TYPE namespace.
+
+    CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
+      EXPORTING
+        complete_area = fugr_name
+      IMPORTING
+        namespace     = namespace
+        group         = group_wo_namespace
+      CHANGING
+        include       = fugr_main_prog
+      EXCEPTIONS
+        OTHERS        = 1.
+
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    fugr_main_prog = |{ namespace }SAPL{ group_wo_namespace }|.
+    fugr_include_prefix = |{ namespace }L{ group_wo_namespace }|.
   ENDMETHOD.
 
 
@@ -141,6 +208,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
       APPEND <match_without_source> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
       <match>-include = include-name.
+      <match>-adt_include_type = include-adt_type.
 
       " set the display name
       IF include-func_name IS NOT INITIAL.
@@ -157,7 +225,6 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     DATA: namespace TYPE namespace,
           fugr_name TYPE rs38l_area.
 
-    "get_function_includes
     SELECT funcname AS func_name,
            include
       FROM tfdir
@@ -171,46 +238,17 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         IMPORTING
           namespace = namespace
           group     = fugr_name
-        EXCEPTIONS ##FM_SUBRC_OK
-          OTHERS    = 6.
+        EXCEPTIONS
+          OTHERS    = 1.
 
       IF sy-subrc = 0.
         result = VALUE #( BASE result
           ( name      = |{ namespace }L{ fugr_name }U{ <function_include>-include }|
-            func_name = <function_include>-func_name ) ).
+            func_name = <function_include>-func_name
+            adt_type  = c_include_types-function ) ).
       ENDIF.
     ENDLOOP.
 
-  ENDMETHOD.
-
-
-  METHOD get_fugr_include_name.
-    DATA(group_name) = fugr_name.
-
-    CALL FUNCTION 'FUNCTION_INCLUDE_INFO'
-      IMPORTING
-        pname  = result
-      CHANGING
-        group  = group_name
-      EXCEPTIONS
-        OTHERS = 1.
-  ENDMETHOD.
-
-
-  METHOD get_all_includes.
-    DATA includes TYPE TABLE OF sobj_name.
-
-    CALL FUNCTION 'RS_GET_ALL_INCLUDES'
-      EXPORTING
-        program      = fugr_program_name
-      TABLES
-        includetab   = includes
-      EXCEPTIONS
-        not_existent = 1
-        no_program   = 2
-        OTHERS       = 3.
-
-    result = VALUE #( FOR incl IN includes ( name = incl ) ).
   ENDMETHOD.
 
 
@@ -222,7 +260,11 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include>).
       IF <include>-is_function_include = abap_true.
-        <include>-func_name = VALUE #( function_includes[ name = <include>-name ]-func_name OPTIONAL ).
+        DATA(function_include) = REF #( function_includes[ name = <include>-name ] OPTIONAL ).
+        IF function_include IS NOT INITIAL.
+          <include>-func_name = function_include->func_name.
+          <include>-adt_type = function_include->adt_type.
+        ENDIF.
       ENDIF.
     ENDLOOP.
 
