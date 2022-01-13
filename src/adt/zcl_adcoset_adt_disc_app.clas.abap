@@ -99,6 +99,7 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
 
     DATA(template) = |{ c_search_uri }\{?{ zif_adcoset_c_global=>c_search_params-search_pattern }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-max_objects }*\}| &&
+                     |\{&{ zif_adcoset_c_global=>c_search_params-read_package_hierarchy }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-match_all_patterns }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-max_results }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-all_results }*\}| &&
@@ -110,8 +111,9 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
                      |\{&{ zif_adcoset_c_global=>c_search_params-created_date }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-use_regex }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-class_search_scope }*\}| &&
-                     |\{&{ zif_adcoset_c_global=>c_search_params-ignore_comment_lines }*\}|
-                     .
+                     |\{&{ zif_adcoset_c_global=>c_search_params-ignore_comment_lines }*\}| &&
+                     |\{&{ zif_adcoset_c_global=>c_search_params-ignore_case }*\}| &&
+                     |\{&{ zif_adcoset_c_global=>c_search_params-multi_line }*\}|.
 
     search_collection->register_disc_res_w_template(
       relation      = c_root_rel_scheme && c_search_uri
