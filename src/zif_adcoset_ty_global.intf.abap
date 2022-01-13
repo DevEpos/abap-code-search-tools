@@ -11,7 +11,9 @@ INTERFACE zif_adcoset_ty_global
     ty_obj_names                 TYPE STANDARD TABLE OF sobj_name WITH EMPTY KEY,
     ty_cls_main_incl_search_mode TYPE string,
     ty_matcher_type              TYPE c LENGTH 1,
-    ty_duration                  TYPE p LENGTH 15 DECIMALS 2,
+    ty_duration_in_s             TYPE p LENGTH 15 DECIMALS 2,
+    ty_duration_in_ms            TYPE i,
+    ty_duration_in_micros        TYPE p LENGTH 12 DECIMALS 2,
     "! Type for DDLX Source name (not available on 7.40)
     ty_ddlxname                  TYPE progname,
 
@@ -93,8 +95,8 @@ INTERFACE zif_adcoset_ty_global
 
     "! Code search result
     BEGIN OF ty_search_result,
-      results       TYPE ty_search_result_objects,
-      duration_in_s TYPE string,
+      results        TYPE ty_search_result_objects,
+      duration_in_ms TYPE ty_duration_in_ms,
     END OF ty_search_result,
 
     "! <p class="shorttext synchronized" lang="en">Settings for code based class search</p>

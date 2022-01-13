@@ -88,8 +88,8 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
     timer->stop( ).
 
     result = VALUE #(
-      results       = query->get_results( )
-      duration_in_s = timer->get_duration_string( ) ).
+      results        = query->get_results( )
+      duration_in_ms = timer->get_duration_in_ms( ) ).
   ENDMETHOD.
 
 

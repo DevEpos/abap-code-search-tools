@@ -10,10 +10,12 @@ CLASS zcl_adcoset_timer DEFINITION
 
     CONSTANTS:
       BEGIN OF c_metric,
+        "! microseconds
+        micros TYPE ty_metric VALUE '0',
         "! milliseconds
-        ms TYPE ty_metric VALUE '0',
+        ms     TYPE ty_metric VALUE '1',
         "! seconds
-        s  TYPE ty_metric VALUE '1',
+        s      TYPE ty_metric VALUE '2',
       END OF c_metric.
 
     METHODS:
@@ -25,12 +27,18 @@ CLASS zcl_adcoset_timer DEFINITION
       stop
         RETURNING
           VALUE(result) TYPE REF TO zcl_adcoset_timer,
-      "! <p class="shorttext synchronized" lang="en">Retrieves duration in the given metric</p>
-      get_duration
-        IMPORTING
-          metric        TYPE ty_metric DEFAULT zcl_adcoset_timer=>c_metric-s
+      "! <p class="shorttext synchronized" lang="en">Retrieves duration in seconds</p>
+      get_duration_in_s
         RETURNING
-          VALUE(result) TYPE zif_adcoset_ty_global=>ty_duration,
+          VALUE(result) TYPE zif_adcoset_ty_global=>ty_duration_in_s,
+      "! <p class="shorttext synchronized" lang="en">Retrieves duration in milliseconds</p>
+      get_duration_in_ms
+        RETURNING
+          VALUE(result) TYPE zif_adcoset_ty_global=>ty_duration_in_ms,
+      "! <p class="shorttext synchronized" lang="en">Retrieves duration in microseconds</p>
+      get_duration_in_micros
+        RETURNING
+          VALUE(result) TYPE zif_adcoset_ty_global=>ty_duration_in_micros,
       "! <p class="shorttext synchronized" lang="en">Retrieves duration as string</p>
       get_duration_string
         IMPORTING
@@ -41,37 +49,54 @@ CLASS zcl_adcoset_timer DEFINITION
   PRIVATE SECTION.
     DATA:
       start_time    TYPE timestampl,
-      duration_in_s TYPE zif_adcoset_ty_global=>ty_duration.
+      duration_in_s TYPE timestampl.
 ENDCLASS.
 
 
 
 CLASS zcl_adcoset_timer IMPLEMENTATION.
 
-  METHOD get_duration.
+  METHOD get_duration_in_s.
+    result = duration_in_s.
+  ENDMETHOD.
+
+
+  METHOD get_duration_in_ms.
     IF duration_in_s = -1.
       result = -1.
-    ELSEIF metric = c_metric-s.
-      result = duration_in_s.
-    ELSEIF metric = c_metric-ms.
+    ELSE.
       result = duration_in_s * 1000.
     ENDIF.
   ENDMETHOD.
+
+
+  method get_duration_in_micros.
+    IF duration_in_s = -1.
+      result = -1.
+    ELSE.
+      result = duration_in_s * 1000000.
+    ENDIF.
+  ENDMETHOD.
+
 
   METHOD get_duration_string.
     IF duration_in_s = -1.
       result = 'Error during duration determination'.
     ELSEIF metric = c_metric-s.
-      result = |{ duration_in_s NUMBER = USER } s|.
+      result = |{ duration_in_s NUMBER = USER DECIMALS = 2 } s|.
     ELSEIF metric = c_metric-ms.
       result = |{ duration_in_s * 1000 NUMBER = USER DECIMALS = 0 } ms|.
+    ELSEIF metric = c_metric-micros.
+      result = |{ duration_in_s * 1000000 NUMBER = USER DECIMALS = 0 } µs|.
     ENDIF.
   ENDMETHOD.
+
 
   METHOD start.
     GET TIME STAMP FIELD start_time.
     result = me.
   ENDMETHOD.
+
 
   METHOD stop.
     DATA: end_time TYPE timestampl.

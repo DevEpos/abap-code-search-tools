@@ -370,7 +370,8 @@ CLASS lcl_report IMPLEMENTATION.
 
     ENDLOOP.
 
-    duration = search_result-duration_in_s.
+    duration = |{ CONV zif_adcoset_ty_global=>ty_duration_in_s(
+      search_result-duration_in_ms / 1000 ) NUMBER = USER DECIMALS = 2 } s|.
 
   ENDMETHOD.
 
