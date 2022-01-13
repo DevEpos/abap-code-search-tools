@@ -9,13 +9,13 @@ CLASS zcl_adcoset_adt_request_util DEFINITION
       "! <p class="shorttext synchronized" lang="en">Retrieve values of request parameter</p>
       get_request_param_values
         IMPORTING
-          param_name     TYPE string
-          default_values TYPE string_table OPTIONAL
-          mandatory      TYPE abap_bool OPTIONAL
-          upper_case     TYPE abap_bool OPTIONAL
-          request        TYPE REF TO if_adt_rest_request
+          param_name      TYPE string
+          value_separator TYPE string OPTIONAL
+          mandatory       TYPE abap_bool OPTIONAL
+          upper_case      TYPE abap_bool OPTIONAL
+          request         TYPE REF TO if_adt_rest_request
         RETURNING
-          VALUE(results) TYPE string_table
+          VALUE(results)  TYPE string_table
         RAISING
           cx_adt_rest,
       "! <p class="shorttext synchronized" lang="en">Retrieve value of request parameter</p>
@@ -28,6 +28,17 @@ CLASS zcl_adcoset_adt_request_util DEFINITION
           request       TYPE REF TO if_adt_rest_request
         RETURNING
           VALUE(result) TYPE string
+        RAISING
+          cx_adt_rest,
+      "! <p class="shorttext synchronized" lang="en">Retrieve value of integer request parameter</p>
+      get_integer_param_value
+        IMPORTING
+          param_name    TYPE string
+          default_value TYPE i OPTIONAL
+          mandatory     TYPE abap_bool OPTIONAL
+          request       TYPE REF TO if_adt_rest_request
+        RETURNING
+          VALUE(result) TYPE i
         RAISING
           cx_adt_rest,
       "! <p class="shorttext synchronized" lang="en">Retrieve boolean parameter value from request</p>
@@ -70,30 +81,57 @@ CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_integer_param_value.
+    DATA(param_value) = get_request_param_value(
+      param_name = param_name
+      mandatory  = mandatory
+      request    = request ).
+
+    IF param_value IS INITIAL.
+      result = default_value.
+    ELSEIF param_value CN '0123456789'.
+      RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
+        EXPORTING
+          text = |Non Integer value '{ param_value }' was passed to Parameter '{ param_name }'|.
+    ELSE.
+      result = param_value.
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD get_request_param_values.
+    DATA: param_values LIKE results,
+          tokens       TYPE string_table.
+
     IF mandatory = abap_true.
       request->get_uri_query_parameter_values(
         EXPORTING
           name      = param_name
           mandatory = abap_true
         IMPORTING
-          values    = results ).
+          values    = param_values ).
     ELSE.
       request->get_uri_query_parameter_values(
         EXPORTING
-          name      = param_name
-          default   = default_values
+          name   = param_name
         IMPORTING
-          values    = results ).
+          values = param_values ).
     ENDIF.
 
-    IF upper_case = abap_true.
-
-      LOOP AT results ASSIGNING FIELD-SYMBOL(<value>).
+    LOOP AT param_values ASSIGNING FIELD-SYMBOL(<value>).
+      IF upper_case = abap_true.
         TRANSLATE <value> TO UPPER CASE.
-      ENDLOOP.
+      ENDIF.
 
-    ENDIF.
+      IF value_separator IS NOT INITIAL AND <value> CS value_separator.
+        SPLIT <value> AT value_separator INTO TABLE tokens.
+        results = VALUE #( BASE results ( LINES OF VALUE #( FOR token IN tokens ( token ) ) ) ).
+      ELSE.
+        results = VALUE #( BASE results ( <value> ) ).
+      ENDIF.
+    ENDLOOP.
+
   ENDMETHOD.
 
 
