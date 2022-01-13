@@ -54,6 +54,12 @@
      <LENGTH>29</LENGTH>
     </item>
     <item>
+     <ID>I</ID>
+     <KEY>B07</KEY>
+     <ENTRY>Limitations</ENTRY>
+     <LENGTH>30</LENGTH>
+    </item>
+    <item>
      <ID>R</ID>
      <ENTRY>ABAP Code search</ENTRY>
      <LENGTH>16</LENGTH>
@@ -129,6 +135,12 @@
      <KEY>P_MAXO</KEY>
      <ENTRY>Max. Object Selection</ENTRY>
      <LENGTH>29</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_MAXR</KEY>
+     <ENTRY>Max. Number of Results</ENTRY>
+     <LENGTH>30</LENGTH>
     </item>
     <item>
      <ID>S</ID>

@@ -66,8 +66,14 @@ SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
       p_ddlx  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_bdef  TYPE abap_bool AS CHECKBOX MODIF ID tch.
   SELECTION-SCREEN END OF BLOCK types.
-  PARAMETERS: p_maxo TYPE n LENGTH 5 DEFAULT 500 OBLIGATORY.
+
 SELECTION-SCREEN END OF BLOCK scope.
+
+SELECTION-SCREEN BEGIN OF BLOCK limitations WITH FRAME TITLE TEXT-b07.
+  PARAMETERS:
+    p_maxo TYPE n LENGTH 5 DEFAULT 500,
+    p_maxr TYPE n LENGTH 6 DEFAULT 1000.
+SELECTION-SCREEN END OF BLOCK limitations.
 
 SELECTION-SCREEN BEGIN OF BLOCK settings WITH FRAME TITLE TEXT-b03.
   PARAMETERS:
@@ -340,13 +346,22 @@ CLASS lcl_report IMPLEMENTATION.
       ignore_case          = p_ignc
       pattern_range        = get_patterns( )
       parallel_processing  = VALUE #( enabled = p_parlp server_group = p_servg )
+      max_results          = p_maxr
+      all_results          = COND #( WHEN p_maxr IS INITIAL THEN abap_true )
+      custom_settings      = VALUE #(
+        class = VALUE #(
+          search_local_def_incl  = abap_true
+          search_main_incl       = abap_true
+          search_local_impl_incl = abap_true
+          search_test_incl       = abap_true
+          search_macro_incl      = abap_true )  )
       search_scope         = VALUE #(
         object_name_range = s_objn[]
         object_type_range = get_object_types(  )
         created_on_range  = s_crtd[]
         owner_range       = s_auth[]
         package_range     = s_pack[]
-        max_objects       = COND #( WHEN p_maxo > 10000 THEN 10000 ELSE p_maxo ) ) ).
+        max_objects       = p_maxo ) ).
 
     IF p_pcre = abap_true.
       IF zcl_adcoset_matcher_factory=>is_pcre_supported( ).
