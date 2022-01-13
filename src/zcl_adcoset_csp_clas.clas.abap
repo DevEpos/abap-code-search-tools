@@ -101,27 +101,48 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
   METHOD get_class_includes.
 
     DATA(class_name) = CONV classname( name ).
-    cl_oo_classname_service=>get_all_method_includes(
-      EXPORTING
-        clsname            = class_name
-      RECEIVING
-        result             = DATA(method_includes)
-      EXCEPTIONS
-        class_not_existing = 1 ).
 
-    SORT method_includes BY cpdkey-cpdname.
+    IF custom_settings-search_main_incl = abap_true.
+      cl_oo_classname_service=>get_all_method_includes(
+        EXPORTING
+          clsname            = class_name
+        RECEIVING
+          result             = DATA(method_includes)
+        EXCEPTIONS
+          class_not_existing = 1 ).
 
-    result = VALUE #(
-      ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) )
-      ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) )
-      ( name = cl_oo_classname_service=>get_ccau_name( class_name ) )
-      ( name = cl_oo_classname_service=>get_ccimp_name( class_name ) )
-      ( name = cl_oo_classname_service=>get_pubsec_name( class_name ) )
-      ( name = cl_oo_classname_service=>get_prosec_name( class_name ) )
-      ( name = cl_oo_classname_service=>get_prisec_name( class_name ) )
-      ( LINES OF VALUE #( FOR method IN method_includes
-        ( name        = method-incname
-          method_name = method-cpdkey-cpdname ) ) ) ).
+      SORT method_includes BY cpdkey-cpdname.
+
+      result = VALUE #( BASE result
+        ( name = cl_oo_classname_service=>get_pubsec_name( class_name ) )
+        ( name = cl_oo_classname_service=>get_prosec_name( class_name ) )
+        ( name = cl_oo_classname_service=>get_prisec_name( class_name ) )
+        ( LINES OF VALUE #( FOR method IN method_includes
+          ( name        = method-incname
+            method_name = method-cpdkey-cpdname
+            adt_type    = c_include_types-method ) ) ) ).
+    ENDIF.
+
+    IF custom_settings-search_local_def_incl = abap_true.
+      result = VALUE #( BASE result
+        ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) ) ).
+    ENDIF.
+
+    IF custom_settings-search_local_impl_incl = abap_true.
+      result = VALUE #( BASE result
+        ( name = cl_oo_classname_service=>get_ccimp_name( class_name ) ) ).
+    ENDIF.
+
+    IF custom_settings-search_test_incl = abap_true.
+      result = VALUE #( BASE result
+        ( name = cl_oo_classname_service=>get_ccau_name( class_name ) ) ).
+    ENDIF.
+
+    IF custom_settings-search_macro_incl = abap_true.
+      result = VALUE #( BASE result
+        ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) ) ).
+    ENDIF.
+
   ENDMETHOD.
 
 
