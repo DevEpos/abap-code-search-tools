@@ -65,11 +65,16 @@ INTERFACE zif_adcoset_ty_global
 
     "! <p class="shorttext synchronized" lang="en">Uniquely identifies a match</p>
     BEGIN OF ty_match_identifier,
-*      object_name  TYPE sobj_name,
-*      object_type  TYPE trobjtype, "wbobjtype,
-      display_name TYPE string,
-      main_include TYPE program,
-      include      TYPE program,
+      display_name     TYPE string,
+      main_include     TYPE program,
+      include          TYPE program,
+      "! ADT type for the include - if the include is filled<br>
+      "! <br>
+      "! Reason:<br>
+      "! the uri mapper does not create the most suitable type which will be used
+      "! to fetch the right image in ADT, so we write the correct one in this
+      "! component
+      adt_include_type TYPE string,
     END OF ty_match_identifier.
 
   TYPES BEGIN OF ty_search_match.
