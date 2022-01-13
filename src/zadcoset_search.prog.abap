@@ -140,7 +140,9 @@ CLASS lcl_report DEFINITION.
           row,
       navigate_to_adt
         IMPORTING
-          match TYPE ty_search_match.
+          match TYPE ty_search_match,
+      validate_params
+        RAISING zcx_adcoset_static_error.
 ENDCLASS.
 
 INITIALIZATION.
@@ -251,7 +253,9 @@ CLASS lcl_report IMPLEMENTATION.
 
 
   METHOD execute.
+
     TRY.
+        validate_params( ).
         run_search( ).
 
         IF results IS INITIAL.
@@ -453,13 +457,6 @@ CLASS lcl_report IMPLEMENTATION.
       result = VALUE #( FOR pattern IN s_patt[] ( sign = pattern-sign option = 'EQ' low = pattern-low ) ).
     ENDIF.
 
-    IF result IS INITIAL.
-      MESSAGE e001(00) WITH 'You have to provide at least 1 pattern' INTO DATA(msg).
-      SET CURSOR FIELD s_patt-low.
-      RAISE EXCEPTION TYPE zcx_adcoset_static_error
-        EXPORTING
-          text = msg.
-    ENDIF.
   ENDMETHOD.
 
   METHOD set_icon.
@@ -592,5 +589,16 @@ CLASS lcl_report IMPLEMENTATION.
         MESSAGE 'ADT Navigation error' TYPE 'S' DISPLAY LIKE 'E'.
     ENDTRY.
   ENDMETHOD.
+
+
+  METHOD validate_params.
+    IF s_patt-low IS INITIAL.
+      SET CURSOR FIELD s_patt-low.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error
+        EXPORTING
+          text = 'You have to provide at least 1 pattern'.
+    ENDIF.
+  ENDMETHOD.
+
 
 ENDCLASS.
