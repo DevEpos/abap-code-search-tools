@@ -17,6 +17,10 @@ CLASS zcl_adcoset_csp_clas DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
+      BEGIN OF c_include_types,
+        method TYPE string VALUE 'CLAS/OM',
+      END OF c_include_types,
+
       BEGIN OF c_section_texts,
         main_source       TYPE string VALUE `Main Source`,
         locals_def        TYPE string VALUE `Local Type Definitions`,
@@ -33,6 +37,7 @@ CLASS zcl_adcoset_csp_clas DEFINITION
       BEGIN OF ty_class_incl,
         name        TYPE progname,
         method_name TYPE seocpdname,
+        adt_type    TYPE string,
       END OF ty_class_incl,
       ty_class_includes TYPE STANDARD TABLE OF ty_class_incl WITH KEY name.
 
@@ -152,6 +157,7 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       APPEND <unassigned_match> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
       <match>-include = include-name.
+      <match>-adt_include_type = include-adt_type.
 
       " set the display name
       IF include-method_name IS NOT INITIAL.
