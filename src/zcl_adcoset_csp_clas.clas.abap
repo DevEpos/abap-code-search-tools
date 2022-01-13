@@ -19,10 +19,10 @@ CLASS zcl_adcoset_csp_clas DEFINITION
     CONSTANTS:
       BEGIN OF c_section_texts,
         main_source       TYPE string VALUE `Main Source`,
-        locals_def        TYPE string VALUE `Local Class Definitions`,
-        local_impl        TYPE string VALUE `Local Types`,
+        locals_def        TYPE string VALUE `Local Type Definitions`,
+        local_impl        TYPE string VALUE `Local Class Implementation`,
         macros            TYPE string VALUE `Macros`,
-        test_cls          TYPE string VALUE `Test Class Definitions`,
+        test_cls          TYPE string VALUE `Local Test Classes`,
         public_section    TYPE string VALUE 'Public Section',
         protected_section TYPE string VALUE 'Protected Section',
         private_section   TYPE string VALUE 'Private Section',
