@@ -15,8 +15,9 @@ CLASS zcl_adcoset_adt_obj_factory DEFINITION
     CLASS-DATA instance TYPE REF TO zcl_adcoset_adt_obj_factory.
 
     DATA:
-      uri_mapper      TYPE REF TO if_adt_uri_mapper,
-      mapping_options TYPE REF TO if_adt_mapping_options.
+      uri_mapper                     TYPE REF TO if_adt_uri_mapper,
+      standard_mapping_options       TYPE REF TO if_adt_mapping_options,
+      class_sections_mapping_options TYPE REF TO if_adt_mapping_options.
 
     METHODS:
       constructor,
@@ -42,10 +43,18 @@ CLASS zcl_adcoset_adt_obj_factory IMPLEMENTATION.
 
 
   METHOD constructor.
-    uri_mapper = cl_adt_tools_core_factory=>get_instance( )->get_uri_mapper( ).
-    mapping_options = cl_adt_tools_core_factory=>get_instance( )->create_mapping_options( ).
-    mapping_options->get_frag_types_accept_header(
+    DATA(adt_core_factory) = cl_adt_tools_core_factory=>get_instance( ).
+    uri_mapper = adt_core_factory->get_uri_mapper( ).
+
+    standard_mapping_options       = adt_core_factory->create_mapping_options( ).
+    class_sections_mapping_options = adt_core_factory->create_mapping_options( ).
+
+    standard_mapping_options->get_frag_types_accept_header(
       )->add( accepted_fragment_type = if_adt_frag_types_accept_hdr=>co_fragment_type_plaintext ).
+
+    class_sections_mapping_options->get_frag_types_accept_header(
+      )->add( accepted_fragment_type = if_adt_frag_types_accept_hdr=>co_fragment_type_plaintext
+      )->add( accepted_fragment_type = if_adt_frag_types_accept_hdr=>co_fragment_type_workbench ).
   ENDMETHOD.
 
 
@@ -113,6 +122,21 @@ CLASS zcl_adcoset_adt_obj_factory IMPLEMENTATION.
 
 
   METHOD zif_adcoset_adt_obj_factory~get_object_ref_for_include.
+    DATA: mapping_options TYPE REF TO if_adt_mapping_options.
+
+    IF start_line <= 0.
+      IF include+30(2) = 'CU' OR
+          include+30(2) = 'CO' OR
+          include+30(2) = 'CI' or
+          include+30(2) = 'CM'.
+        mapping_options = class_sections_mapping_options.
+      ELSE.
+        mapping_options = standard_mapping_options.
+      ENDIF.
+    ELSE.
+      mapping_options = standard_mapping_options.
+    ENDIF.
+
     TRY.
         DATA(adt_obj_ref) = uri_mapper->map_include_to_objref(
           program         = main_program
