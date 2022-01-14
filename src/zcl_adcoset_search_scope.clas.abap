@@ -7,7 +7,8 @@ CLASS zcl_adcoset_search_scope DEFINITION
   PUBLIC SECTION.
 
     INTERFACES:
-      zif_adcoset_search_scope.
+      zif_adcoset_search_scope,
+      zif_adcoset_conf_pack_proc.
 
     METHODS:
       constructor
@@ -16,17 +17,21 @@ CLASS zcl_adcoset_search_scope DEFINITION
           parallel_mode TYPE abap_bool OPTIONAL.
   PROTECTED SECTION.
   PRIVATE SECTION.
+    CONSTANTS:
+      c_min_parl_package_size TYPE i VALUE 500,
+      c_max_parl_package_size TYPE i VALUE 500,
+      c_serial_package_size   TYPE i VALUE 10000.
+
     DATA:
       search_scope              TYPE zif_adcoset_ty_global=>ty_search_scope,
       object_count              TYPE i,
       current_offset            TYPE i,
-      package_size              TYPE i,
+      package_size              TYPE i VALUE c_serial_package_size,
       is_more_objects_available TYPE abap_bool,
       parallel_mode             TYPE abap_bool.
 
     METHODS:
       determine_count,
-      set_package_size,
       resolve_packages.
 ENDCLASS.
 
@@ -41,7 +46,6 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     resolve_packages( ).
     determine_count( ).
-    set_package_size( ).
   ENDMETHOD.
 
 
@@ -56,6 +60,13 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
 
   METHOD zif_adcoset_search_scope~next_package.
+
+    DATA(max_rows) = package_size.
+    IF current_offset IS INITIAL AND
+        ( object_count  < package_size OR package_size = 0 ).
+      max_rows = object_count.
+    ENDIF.
+
     SELECT object_type AS type,
            object_name AS name,
            owner,
@@ -69,10 +80,10 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         AND created_date IN @search_scope-created_on_range
       ORDER BY object_name
       INTO CORRESPONDING FIELDS OF TABLE @result
-      UP TO @package_size ROWS
+      UP TO @max_rows ROWS
       OFFSET @current_offset.
 
-    current_offset = current_offset + package_size.
+    current_offset = current_offset + lines( result ).
   ENDMETHOD.
 
 
@@ -100,27 +111,6 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     IF object_count = selection_limit.
       object_count = search_scope-max_objects.
       is_more_objects_available = abap_true.
-    ENDIF.
-  ENDMETHOD.
-
-
-  METHOD set_package_size.
-    " ??? >
-    " Should the package size be set depending on the available task.
-    " ??? <
-    IF parallel_mode = abap_true.
-      IF object_count >= 50 AND object_count < 200.
-        package_size = 25.
-      ELSEIF object_count >= 200 AND object_count < 800.
-        package_size = 50.
-      ELSEIF object_count >= 800 AND object_count < 2000.
-        package_size = 100.
-      ELSE.
-        package_size = 150.
-      ENDIF.
-    ELSE.
-      " fixed size during sequential mode regardless of full scope
-      package_size = 100.
     ENDIF.
   ENDMETHOD.
 
@@ -159,6 +149,22 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     SORT search_scope-package_range BY sign option low high.
     DELETE ADJACENT DUPLICATES FROM search_scope-package_range COMPARING sign option low high.
+  ENDMETHOD.
+
+
+  METHOD zif_adcoset_conf_pack_proc~configure_package_size.
+    CHECK max_task_count > 0.
+
+    DATA(determined_pack_size) = object_count / max_task_count.
+
+    IF determined_pack_size < c_min_parl_package_size.
+      package_size = c_min_parl_package_size.
+    ELSEIF determined_pack_size > c_max_parl_package_size.
+      package_size = c_max_parl_package_size.
+    ELSE.
+      package_size = determined_pack_size.
+    ENDIF.
+
   ENDMETHOD.
 
 ENDCLASS.

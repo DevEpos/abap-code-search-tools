@@ -43,7 +43,11 @@ CLASS zcl_adcoset_search_query_fac IMPLEMENTATION.
             " TODO: move handler_class/handler_method to parallel settings???
             handler_class  = 'ZCL_ADCOSET_SEARCH_ENGINE'
             handler_method = 'SEARCH_CODE_IN_PACKAGE' ).
-        CATCH zcx_adcoset_static_error ##needed.
+
+          " update the package size
+          CAST zif_adcoset_conf_pack_proc( scope )->configure_package_size( task_runner->get_max_tasks( ) ).
+        CATCH zcx_adcoset_static_error
+              cx_sy_move_cast_error ##needed.
       ENDTRY.
     ENDIF.
 

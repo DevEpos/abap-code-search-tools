@@ -13,6 +13,11 @@ INTERFACE zif_adcoset_parl_task_runner
     "! <p class="shorttext synchronized" lang="en">Sets a new result receiver in the task runner</p>
     set_result_receiver
       IMPORTING
-        receiver TYPE REF TO zif_adcoset_parl_result_recv.
+        receiver TYPE REF TO zif_adcoset_parl_result_recv,
+
+    "! <p class="shorttext synchronized" lang="en">Returns the number of the maximum available tasks</p>
+    get_max_tasks
+      RETURNING
+        VALUE(result) TYPE i.
 
 ENDINTERFACE.

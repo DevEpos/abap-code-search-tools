@@ -74,6 +74,11 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD zif_adcoset_parl_task_runner~get_max_tasks.
+    result = max_tasks.
+  ENDMETHOD.
+
+
   METHOD zif_adcoset_parl_task_runner~set_result_receiver.
     me->result_receiver = receiver.
   ENDMETHOD.
@@ -194,6 +199,5 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
   METHOD wait_until_free_task.
     WAIT UNTIL free_tasks > 0 UP TO c_max_wait SECONDS.
   ENDMETHOD.
-
 
 ENDCLASS.
