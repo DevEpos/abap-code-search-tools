@@ -19,7 +19,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
   PRIVATE SECTION.
     CONSTANTS:
       c_min_parl_package_size TYPE i VALUE 500,
-      c_max_parl_package_size TYPE i VALUE 500,
+      c_max_parl_package_size TYPE i VALUE 2500,
       c_serial_package_size   TYPE i VALUE 10000.
 
     DATA:
