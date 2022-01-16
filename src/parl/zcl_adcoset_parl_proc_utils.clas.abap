@@ -75,13 +75,12 @@ CLASS zcl_adcoset_parl_proc_utils IMPLEMENTATION.
       ENDIF.
 
       IF group_info-max_tasks > 1.
-        group_info-max_tasks = group_info-max_tasks - 1.
+        group_info-max_tasks = group_info-max_tasks - 1 .
       ENDIF.
 
-      ASSERT group_info-max_tasks >= 1.
-
-      " https://en.wikipedia.org/wiki/Amdahl%27s_law
-      IF group_info-max_tasks > c_max_allowed_tasks.
+      IF group_info-max_tasks <= 1.
+        group_info-max_tasks = 1.
+      ELSEIF group_info-max_tasks > c_max_allowed_tasks.
         group_info-max_tasks = c_max_allowed_tasks.
       ENDIF.
 

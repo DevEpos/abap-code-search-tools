@@ -147,8 +147,10 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
       me->max_tasks = 1.
     ENDIF.
 
-    IF me->max_tasks = 1.
-      RAISE EXCEPTION TYPE zcx_adcoset_static_error.
+    IF me->max_tasks <= 1.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error
+        EXPORTING
+          text = |Not enough tasks available for parallel processing|.
     ENDIF.
 
     me->task_prefix = COND #(
