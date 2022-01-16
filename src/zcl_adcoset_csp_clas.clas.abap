@@ -18,7 +18,8 @@ CLASS zcl_adcoset_csp_clas DEFINITION
   PRIVATE SECTION.
     CONSTANTS:
       BEGIN OF c_include_types,
-        method TYPE string VALUE 'CLAS/OM',
+        method  TYPE string VALUE 'CLAS/OM',
+        include TYPE string VALUE 'CLAS/I',
       END OF c_include_types,
 
       BEGIN OF c_section_texts,
@@ -157,7 +158,8 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       APPEND <unassigned_match> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
       <match>-include = include-name.
-      <match>-adt_include_type = include-adt_type.
+      <match>-adt_include_type = COND #(
+        WHEN include-adt_type IS INITIAL THEN c_include_types-include ELSE include-adt_type ).
 
       " set the display name
       IF include-method_name IS NOT INITIAL.
