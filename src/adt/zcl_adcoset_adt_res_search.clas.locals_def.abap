@@ -103,15 +103,15 @@ CLASS lcl_search_result DEFINITION
       read_package_hierarchy TYPE abap_bool,
       adt_obj_factory        TYPE REF TO zif_adcoset_adt_obj_factory,
       adt_result             TYPE zif_adcoset_ty_adt_types=>ty_code_search_result.
-    METHODS: set_durations,
+
+    METHODS:
+      set_durations,
       create_adt_links,
       add_main_object_ref
         IMPORTING
           search_result_object TYPE REF TO zif_adcoset_ty_adt_types=>ty_code_search_object
           object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object
-          raw_match            TYPE zif_adcoset_ty_global=>ty_search_match
-        RAISING
-          zcx_adcoset_static_error,
+          raw_match            TYPE zif_adcoset_ty_global=>ty_search_match,
       create_match_objects
         IMPORTING
           search_result_object TYPE REF TO zif_adcoset_ty_adt_types=>ty_code_search_object
@@ -133,8 +133,8 @@ CLASS lcl_search_result DEFINITION
           parent_search_result_object TYPE zif_adcoset_ty_adt_types=>ty_code_search_object
           object_info                 TYPE zif_adcoset_ty_global=>ty_tadir_object
           raw_matches                 TYPE zif_adcoset_ty_global=>ty_search_matches
-        RAISING
-          zcx_adcoset_static_error,
+        RETURNING
+          VALUE(result)               TYPE zif_adcoset_ty_adt_types=>ty_code_search_objects,
       create_std_match_objects
         IMPORTING
           search_result_object TYPE REF TO zif_adcoset_ty_adt_types=>ty_code_search_object

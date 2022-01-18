@@ -147,7 +147,7 @@ CLASS lcl_search_query IMPLEMENTATION.
       EXPORTING
         filter_name = zif_adcoset_c_global=>c_search_params-appl_comp
         input       = packages
-        flags       = VALUE #( negation = abap_true )
+        flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
       IMPORTING
         range_table = settings-search_scope-appl_comp_range ).
   ENDMETHOD.
@@ -411,20 +411,27 @@ CLASS lcl_search_result IMPLEMENTATION.
 
     IF object_info-type = zif_adcoset_c_global=>c_source_code_type-class OR
         object_info-type = zif_adcoset_c_global=>c_source_code_type-function_group.
-      adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
-       ( search_result_object->* ) ).
-      create_incl_match_objects(
+      DATA(incl_match_objects) = create_incl_match_objects(
         parent_search_result_object = search_result_object->*
         object_info                 = object_info
         raw_matches                 = raw_matches ).
+
+      IF incl_match_objects IS NOT INITIAL.
+        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
+         ( search_result_object->* )
+         ( LINES OF incl_match_objects ) ).
+      ENDIF.
     ELSE.
       create_std_match_objects(
         search_result_object = search_result_object
         object_info          = object_info
         raw_matches          = raw_matches ).
 
-      adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
-       ( search_result_object->* ) ).
+      IF search_result_object->matches IS NOT INITIAL.
+        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
+         ( search_result_object->* ) ).
+      ENDIF.
+
     ENDIF.
 
   ENDMETHOD.
@@ -440,9 +447,13 @@ CLASS lcl_search_result IMPLEMENTATION.
     LOOP AT raw_matches ASSIGNING FIELD-SYMBOL(<raw_match_group>)
       GROUP BY <raw_match_group>-include.
 
-      DATA(incl_object_ref) = adt_obj_factory->get_object_ref_for_include(
-        main_program = object_info-name
-        include      = <raw_match_group>-include ).
+      TRY.
+          DATA(incl_object_ref) = adt_obj_factory->get_object_ref_for_include(
+            main_program = object_info-name
+            include      = <raw_match_group>-include ).
+        CATCH zcx_adcoset_static_error.
+          CONTINUE.
+      ENDTRY.
 
       DATA(incl_search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
         uri             = incl_object_ref-uri
@@ -461,8 +472,10 @@ CLASS lcl_search_result IMPLEMENTATION.
           raw_match            = <raw_match> ).
       ENDLOOP.
 
-      adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
-        ( incl_search_result_object ) ).
+      IF incl_search_result_object-matches IS NOT INITIAL.
+        result = VALUE #( BASE result
+          ( incl_search_result_object ) ).
+      ENDIF.
 
     ENDLOOP.
 
@@ -483,9 +496,13 @@ CLASS lcl_search_result IMPLEMENTATION.
 
   METHOD add_main_object_ref.
 
-    DATA(match_object_ref) = create_match_object_ref(
-      object_info = object_info
-      match       = raw_match ).
+    TRY.
+        DATA(match_object_ref) = create_match_object_ref(
+          object_info = object_info
+          match       = raw_match ).
+      CATCH zcx_adcoset_static_error.
+        RETURN.
+    ENDTRY.
 
     search_result_object->matches = VALUE #( BASE search_result_object->matches
       ( uri     = match_object_ref-uri
