@@ -5,7 +5,7 @@ INTERFACE zif_adcoset_c_global
   CONSTANTS:
     "! Minium Objects in scope that are needed so parallel
     "! processing will be used.
-    c_parl_proc_min_objects   TYPE i VALUE 1000,
+    c_parl_proc_min_objects   TYPE i VALUE 100,
     "! Type for Server Group (see RZ12)
     c_group_type_server_group TYPE rzlli_grpt VALUE 'S',
     "! <p class="shorttext synchronized" lang="en">Regex pattern to detect comment lines in CDS sources</p>
@@ -26,6 +26,8 @@ INTERFACE zif_adcoset_c_global
 
     "! <p class="shorttext synchronized" lang="en">Names of code search parameters</p>
     BEGIN OF c_search_params,
+      scope_id               TYPE string VALUE 'scopeId',
+      scope_offset           TYPE string VALUE 'scopeOffset',
       package                TYPE string VALUE 'packageName',
       owner                  TYPE string VALUE 'owner',
       use_regex              TYPE string VALUE 'useRegex',

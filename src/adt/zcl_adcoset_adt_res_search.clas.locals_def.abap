@@ -45,37 +45,9 @@ CLASS lcl_search_query DEFINITION
           request TYPE REF TO if_adt_rest_request
         RAISING
           cx_adt_rest,
-      get_owners
-        RAISING
-          cx_adt_rest,
-      get_packages
-        RAISING
-          cx_adt_rest,
-      get_appl_comps
-        RAISING
-          cx_adt_rest,
-      get_object_types
-        RAISING
-          cx_adt_rest,
-      get_object_names
-        RAISING
-          cx_adt_rest,
-      get_created_dates
-        RAISING
-          cx_adt_rest,
       get_patterns
         RAISING
           cx_adt_rest,
-      split_into_range
-        IMPORTING
-          filter_name TYPE string
-          separator   TYPE string DEFAULT ','
-          input       TYPE string
-          flags       TYPE ty_param_flags OPTIONAL
-        EXPORTING
-          range_table TYPE STANDARD TABLE
-        RAISING
-          zcx_adcoset_adt_rest,
       get_persisted_settings,
       get_class_scope
         RAISING

@@ -1,0 +1,23 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates"
+              xmlns:cst="http://www.devepos.com/adt/codesearchtools"
+              xmlns:cl="http://www.sap.com/abapxml/types/class-pool/ZIF_ADCOSET_TY_ADT_TYPES">
+
+  <tt:root name="SCOPE" type="cl:ty_search_scope"/>
+
+  <tt:template>
+    <cst:searchScope tt:extensible="deep">
+
+      <tt:cond check="not-initial(scope.id)">
+        <tt:attribute name="cst:id" option="format(guid)" value-ref="scope.id"/>
+      </tt:cond>
+
+      <tt:cond check="not-initial(scope.object_count)">
+        <tt:attribute name="cst:objectCount" value-ref="scope.object_count"/>
+      </tt:cond>
+
+    </cst:searchScope>
+
+  </tt:template>
+
+</tt:transform>

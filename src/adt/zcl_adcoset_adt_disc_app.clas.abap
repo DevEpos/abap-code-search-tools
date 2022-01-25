@@ -22,16 +22,18 @@ CLASS zcl_adcoset_adt_disc_app DEFINITION
       register_resources REDEFINITION.
   PRIVATE SECTION.
     CONSTANTS:
-      c_search_uri            TYPE string VALUE '/codesearch',
-      c_settings_relative_uri TYPE string VALUE '/settings',
-      c_static_uri            TYPE string VALUE '/devepos/adt/codesearchtools',
-      c_root_scheme           TYPE string VALUE 'http://www.devepos.com/adt/codesearchtools',
-      c_root_rel_scheme       TYPE string VALUE 'http://www.devepos.com/adt/relations/codesearchtools',
+      c_search_uri                TYPE string VALUE '/codesearch',
+      c_settings_relative_uri     TYPE string VALUE '/settings',
+      c_search_scope_relative_uri TYPE string VALUE '/scope',
+      c_static_uri                TYPE string VALUE '/devepos/adt/codesearchtools',
+      c_root_scheme               TYPE string VALUE 'http://www.devepos.com/adt/codesearchtools',
+      c_root_rel_scheme           TYPE string VALUE 'http://www.devepos.com/adt/relations/codesearchtools',
 
       "! REST handler constants
       BEGIN OF c_handlers,
         search          TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_SEARCH',
         search_settings TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_CONFIG',
+        search_scope    TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_SCOPE',
         appl_comp_vh    TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_APPLC_VH',
         server_group_vh TYPE string VALUE 'ZCL_ADCOSET_RES_SERVER_GRP_VH',
         plugin_features TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_FEATURES',
@@ -98,17 +100,13 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
       category_term   = 'codesearch' ).
 
     DATA(template) = |{ c_search_uri }\{?{ zif_adcoset_c_global=>c_search_params-search_pattern }*\}| &&
+                     |\{&{ zif_adcoset_c_global=>c_search_params-scope_id }*\}| &&
+                     |\{&{ zif_adcoset_c_global=>c_search_params-scope_offset }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-max_objects }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-read_package_hierarchy }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-match_all_patterns }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-max_results }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-all_results }*\}| &&
-                     |\{&{ zif_adcoset_c_global=>c_search_params-object_name }*\}| &&
-                     |\{&{ zif_adcoset_c_global=>c_search_params-object_type }*\}| &&
-                     |\{&{ zif_adcoset_c_global=>c_search_params-owner }*\}| &&
-                     |\{&{ zif_adcoset_c_global=>c_search_params-package }*\}| &&
-                     |\{&{ zif_adcoset_c_global=>c_search_params-appl_comp }*\}| &&
-                     |\{&{ zif_adcoset_c_global=>c_search_params-created_date }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-use_regex }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-class_search_scope }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-ignore_comment_lines }*\}| &&
@@ -127,6 +125,13 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
       description     = 'Settings for ABAP Code Search'
       category_scheme = c_root_scheme
       category_term   = 'codesearchSettings' ).
+
+    registry->register_discoverable_resource(
+      url             = |{ c_search_uri }{ c_search_scope_relative_uri }|
+      handler_class   = c_handlers-search_scope
+      description     = 'Search scope for ABAP Code Search'
+      category_scheme = c_root_scheme
+      category_term   = 'codesearchScope' ).
   ENDMETHOD.
 
 

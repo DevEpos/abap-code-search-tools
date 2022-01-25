@@ -79,8 +79,7 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
     DATA(query) = zcl_adcoset_search_query_fac=>create_query(
       parallel_processing = search_config-parallel_processing
       scope               = zcl_adcoset_search_scope_fac=>create_scope(
-        search_scope  = search_config-search_scope
-        parallel_mode = search_config-parallel_processing-enabled )
+        search_scope  = search_config-search_scope )
       settings            = search_config-internal_settings ).
 
     DATA(timer) = NEW zcl_adcoset_timer( )->start( ).

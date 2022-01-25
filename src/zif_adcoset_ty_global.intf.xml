@@ -63,7 +63,13 @@
      <CLSNAME>ZIF_ADCOSET_TY_GLOBAL</CLSNAME>
      <CMPNAME>TY_SEARCH_SCOPE</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Ranges for search scope</DESCRIPT>
+     <DESCRIPT>Ranges / data to define an object scope</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_TY_GLOBAL</CLSNAME>
+     <CMPNAME>TY_SEARCH_SCOPE_RANGES</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Ranges for determining the search scope</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZIF_ADCOSET_TY_GLOBAL</CLSNAME>

@@ -25,14 +25,10 @@ INTERFACE zif_adcoset_ty_adt_types
     ty_code_search_matches TYPE STANDARD TABLE OF ty_code_search_match WITH EMPTY KEY,
 
     BEGIN OF ty_code_search_object,
-*      adt_main_obj_ref TYPE ty_adt_obj_ref,
-*      adt_obj_ref      TYPE ty_adt_obj_ref,
-*      adt_main_obj_ref TYPE if_adt_tools_core_types=>ty_object_reference,
-*      adt_obj_ref      TYPE if_adt_tools_core_types=>ty_object_reference,
-      uri              TYPE string,
-      parent_uri       TYPE string,
+      uri             TYPE string,
+      parent_uri      TYPE string,
       adt_main_object TYPE if_adt_tools_core_types=>ty_main_object,
-      matches          TYPE ty_code_search_matches,
+      matches         TYPE ty_code_search_matches,
     END OF ty_code_search_object,
 
     ty_code_search_objects TYPE STANDARD TABLE OF ty_code_search_object WITH EMPTY KEY,
@@ -63,11 +59,27 @@ INTERFACE zif_adcoset_ty_adt_types
     END OF ty_adt_plugin_feature,
 
     "! List of ADT plugin features
-    ty_adt_plugin_features TYPE STANDARD TABLE OF ty_adt_plugin_feature WITH EMPTY KEY.
+    ty_adt_plugin_features TYPE STANDARD TABLE OF ty_adt_plugin_feature WITH EMPTY KEY,
+
+    "! Code Search scope Parameter
+    BEGIN OF ty_search_scope_param,
+      name  TYPE string,
+      value TYPE string,
+    END OF ty_search_scope_param,
+
+    "! List of Code Search Scope Parameters
+    ty_search_scope_params TYPE STANDARD TABLE OF ty_search_scope_param WITH EMPTY KEY,
+
+    "! Scope for code search
+    BEGIN OF ty_search_scope,
+      id           TYPE sysuuid_x16,
+      object_count TYPE i,
+    END OF ty_search_scope.
 
   "! Settings for Code Search
   TYPES BEGIN OF ty_code_search_settings.
   INCLUDE TYPE zadcoset_csset.
+  types: test type c length 2.
   TYPES END OF ty_code_search_settings.
 
 ENDINTERFACE.

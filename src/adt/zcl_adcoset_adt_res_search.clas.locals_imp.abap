@@ -31,7 +31,7 @@ CLASS lcl_search_query IMPLEMENTATION.
   METHOD get_matcher_type.
 
     IF matcher_config-enable_pcre = abap_true.
-      " TODO: some notify use that PCRE is not supported in the system??
+      " TODO: some notification that PCRE is not supported in the system??
       IF zcl_adcoset_matcher_factory=>is_pcre_supported( ).
         result = zif_adcoset_c_global=>c_matcher_type-pcre.
       ELSE.
@@ -48,51 +48,54 @@ CLASS lcl_search_query IMPLEMENTATION.
 
   METHOD parse_parameters.
     " hard code the line feed to
-    settings-all_results = zcl_adcoset_adt_request_util=>get_boolean_req_param(
+    settings-all_results = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-all_results
       request    = request ).
 
-    settings-ignore_case = zcl_adcoset_adt_request_util=>get_boolean_req_param(
+    settings-ignore_case = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-ignore_case
       request    = request ).
 
-    settings-ignore_comment_lines = zcl_adcoset_adt_request_util=>get_boolean_req_param(
+    settings-ignore_comment_lines = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-ignore_comment_lines
       request    = request ).
 
-    settings-multiline_search = zcl_adcoset_adt_request_util=>get_boolean_req_param(
+    settings-multiline_search = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-multi_line
       request    = request ).
 
-    settings-match_all_patterns = zcl_adcoset_adt_request_util=>get_boolean_req_param(
+    settings-match_all_patterns = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-match_all_patterns
       request    = request ).
 
-    read_packages = zcl_adcoset_adt_request_util=>get_boolean_req_param(
+    read_packages = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-read_package_hierarchy
       request    = request ).
 
-    matcher_config-use_regex = zcl_adcoset_adt_request_util=>get_boolean_req_param(
+    matcher_config-use_regex = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-use_regex
       request    = request ).
 
     IF settings-all_results = abap_false.
-      settings-max_results = zcl_adcoset_adt_request_util=>get_integer_param_value(
+      settings-max_results = zcl_adcoset_adt_request_util=>get_integer_query_parameter(
         param_name    = zif_adcoset_c_global=>c_search_params-max_results
         default_value = 100
         request       = request ).
     ENDIF.
 
-    settings-search_scope-max_objects = zcl_adcoset_adt_request_util=>get_integer_param_value(
-      param_name = zif_adcoset_c_global=>c_search_params-max_objects
-      request    = request ).
+    settings-search_scope = value #(
+      max_objects    = zcl_adcoset_adt_request_util=>get_integer_query_parameter(
+        param_name = zif_adcoset_c_global=>c_search_params-max_objects
+        request    = request )
+      scope_id       = zcl_adcoset_adt_request_util=>get_uuid_uri_query_parameter(
+        param_name = zif_adcoset_c_global=>c_search_params-scope_id
+        mandatory  = abap_true
+        request    = request )
+      current_offset = zcl_adcoset_adt_request_util=>get_integer_query_parameter(
+        param_name = zif_adcoset_c_global=>c_search_params-scope_offset
+        mandatory  = abap_true
+        request    = request ) ).
 
-    get_owners( ).
-    get_packages( ).
-    get_appl_comps( ).
-    get_object_types( ).
-    get_object_names( ).
-    get_created_dates( ).
     get_patterns( ).
     get_class_scope( ).
   ENDMETHOD.
@@ -105,109 +108,9 @@ CLASS lcl_search_query IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_owners.
-    DATA(owners) = zcl_adcoset_adt_request_util=>get_request_param_value(
-      param_name = zif_adcoset_c_global=>c_search_params-owner
-      upper_case = abap_true
-      request    = request ).
-
-    split_into_range(
-      EXPORTING
-        filter_name = zif_adcoset_c_global=>c_search_params-owner
-        input       = owners
-        flags       = VALUE #( negation = abap_true patterns = abap_true )
-      IMPORTING
-        range_table = settings-search_scope-owner_range ).
-  ENDMETHOD.
-
-
-  METHOD get_packages.
-    DATA(packages) = zcl_adcoset_adt_request_util=>get_request_param_value(
-      param_name = zif_adcoset_c_global=>c_search_params-package
-      upper_case = abap_true
-      request    = request ).
-
-    split_into_range(
-      EXPORTING
-        filter_name = zif_adcoset_c_global=>c_search_params-package
-        input       = packages
-        flags       = VALUE #( negation = abap_true patterns = abap_true )
-      IMPORTING
-        range_table = settings-search_scope-package_range ).
-  ENDMETHOD.
-
-
-  METHOD get_appl_comps.
-    DATA(packages) = zcl_adcoset_adt_request_util=>get_request_param_value(
-      param_name = zif_adcoset_c_global=>c_search_params-appl_comp
-      upper_case = abap_true
-      request    = request ).
-
-    split_into_range(
-      EXPORTING
-        filter_name = zif_adcoset_c_global=>c_search_params-appl_comp
-        input       = packages
-        flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
-      IMPORTING
-        range_table = settings-search_scope-appl_comp_range ).
-  ENDMETHOD.
-
-
-  METHOD get_object_types.
-    DATA(types) = zcl_adcoset_adt_request_util=>get_request_param_value(
-      param_name = zif_adcoset_c_global=>c_search_params-object_type
-      upper_case = abap_true
-      request    = request ).
-
-    split_into_range(
-      EXPORTING
-        filter_name = zif_adcoset_c_global=>c_search_params-object_type
-        input       = types
-        flags       = VALUE #( negation = abap_true )
-      IMPORTING
-        range_table = settings-search_scope-object_type_range ).
-  ENDMETHOD.
-
-
-  METHOD get_object_names.
-    DATA(object_names) = zcl_adcoset_adt_request_util=>get_request_param_value(
-      param_name = zif_adcoset_c_global=>c_search_params-object_name
-      upper_case = abap_true
-      request    = request ).
-
-    split_into_range(
-      EXPORTING
-        filter_name = zif_adcoset_c_global=>c_search_params-object_name
-        input       = object_names
-        separator   = ` `
-        flags       = VALUE #( negation = abap_true patterns = abap_true auto_prefix_matching = abap_true )
-      IMPORTING
-        range_table = settings-search_scope-object_name_range ).
-  ENDMETHOD.
-
-
-  METHOD get_created_dates.
-    DATA: dates TYPE string_table.
-
-    DATA(dates_list) = zcl_adcoset_adt_request_util=>get_request_param_value(
-      param_name = zif_adcoset_c_global=>c_search_params-created_date
-      upper_case = abap_true
-      request    = request ).
-
-    SPLIT dates_list AT ',' INTO TABLE dates.
-
-    LOOP AT dates ASSIGNING FIELD-SYMBOL(<date>).
-      APPEND INITIAL LINE TO settings-search_scope-created_on_range ASSIGNING FIELD-SYMBOL(<created_range>).
-
-      <created_range> = <date>.
-    ENDLOOP.
-  ENDMETHOD.
-
-
-
   METHOD get_patterns.
     settings-pattern_range = VALUE #(
-      FOR pattern IN  zcl_adcoset_adt_request_util=>get_request_param_values(
+      FOR pattern IN  zcl_adcoset_adt_request_util=>get_query_parameter_values(
         param_name = zif_adcoset_c_global=>c_search_params-search_pattern
         mandatory  = abap_true
         request    = request )
@@ -229,7 +132,7 @@ CLASS lcl_search_query IMPLEMENTATION.
   METHOD get_class_scope.
     DATA: scopes TYPE string_table.
 
-    DATA(scope_list) = zcl_adcoset_adt_request_util=>get_request_param_value(
+    DATA(scope_list) = zcl_adcoset_adt_request_util=>get_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-class_search_scope
       request    = request ).
 
@@ -267,88 +170,6 @@ CLASS lcl_search_query IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
-
-
-  METHOD split_into_range.
-    DATA: tokens    TYPE string_table,
-          new_range TYPE REF TO data.
-
-    CHECK input IS NOT INITIAL.
-
-    SPLIT input AT separator INTO TABLE tokens.
-
-    LOOP AT tokens INTO DATA(token).
-
-      CHECK token IS NOT INITIAL.
-
-      CREATE DATA new_range LIKE LINE OF range_table.
-      ASSIGN new_range->* TO FIELD-SYMBOL(<new_range>).
-
-      ASSIGN COMPONENT 'SIGN' OF STRUCTURE <new_range> TO FIELD-SYMBOL(<sign>).
-      ASSIGN COMPONENT 'OPTION' OF STRUCTURE <new_range> TO FIELD-SYMBOL(<option>).
-      ASSIGN COMPONENT 'LOW' OF STRUCTURE <new_range> TO FIELD-SYMBOL(<low>).
-
-      ASSERT: <sign> IS ASSIGNED,
-              <option> IS ASSIGNED,
-              <low> IS ASSIGNED.
-
-      IF token CA '*?'.
-        IF flags-patterns = abap_false.
-          RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              text = |Parameter '{ filter_name }' does not support patterns|.
-        ENDIF.
-        token = replace( val = token sub = '?' occ = 0  with = '+' ).
-        <option> = 'CP'.
-      ELSE.
-        <option> = 'EQ'.
-      ENDIF.
-
-      DATA(length) = strlen( token ).
-      DATA(last_char_offset) = length - 1.
-
-      IF token(1) = '!'.
-        IF flags-negation = abap_false.
-          RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              text = |Parameter '{ filter_name }' does not support negation!|.
-        ENDIF.
-        IF length = 1.
-          RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              text = |No value provided after negation character '!' for Parameter '{ filter_name }'!|.
-        ENDIF.
-        <sign> = 'E'.
-        token = token+1.
-        length = length - 1.
-        last_char_offset = last_char_offset - 1.
-      ELSE.
-        <sign> = 'I'.
-      ENDIF.
-
-      IF flags-auto_prefix_matching = abap_true.
-        <option> = 'CP'.
-        IF token+last_char_offset(1) = '<'.
-          token = token(last_char_offset).
-          IF token NA '+*'.
-            <option> = 'EQ'.
-          ENDIF.
-        ELSEIF token+last_char_offset(1) <> '*'.
-          token = |{ token }*|.
-        ENDIF.
-      ENDIF.
-
-      <low> = token.
-
-      " verify that token truly has a value
-      IF <low> IS NOT INITIAL.
-        APPEND <new_range> TO range_table.
-      ENDIF.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
 
 ENDCLASS.
 

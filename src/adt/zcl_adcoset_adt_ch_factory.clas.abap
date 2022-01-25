@@ -17,6 +17,14 @@ CLASS zcl_adcoset_adt_ch_factory DEFINITION
       "! <p class="shorttext synchronized" lang="en">Creates content handler for code search result</p>
       create_search_result_ch
         RETURNING
+          VALUE(result) TYPE REF TO if_adt_rest_content_handler,
+      "! <p class="shorttext synchronized" lang="en">Creates content handler for Code Search Scope</p>
+      create_search_scope_ch
+        RETURNING
+          VALUE(result) TYPE REF TO if_adt_rest_content_handler,
+      "! <p class="shorttext synchronized" lang="en">Creates content handler for Code Search Scope Parameters</p>
+      create_search_scope_params_ch
+        RETURNING
           VALUE(result) TYPE REF TO if_adt_rest_content_handler.
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -25,7 +33,6 @@ ENDCLASS.
 
 
 CLASS zcl_adcoset_adt_ch_factory IMPLEMENTATION.
-
 
   METHOD create_feature_list_ch.
     result = cl_adt_rest_st_handler=>create_instance(
@@ -45,6 +52,20 @@ CLASS zcl_adcoset_adt_ch_factory IMPLEMENTATION.
     result = cl_adt_rest_st_handler=>create_instance(
       st_name   = 'ZADCOSET_SEARCH_RESULT'
       root_name = 'ROOT' ).
+  ENDMETHOD.
+
+
+  METHOD create_search_scope_ch.
+    result = cl_adt_rest_st_handler=>create_instance(
+      st_name   = 'ZADCOSET_SEARCH_SCOPE'
+      root_name = 'SCOPE' ).
+  ENDMETHOD.
+
+
+  METHOD create_search_scope_params_ch.
+    result = cl_adt_rest_st_handler=>create_instance(
+      st_name   = 'ZADCOSET_SEARCH_SCOPE_PARAMS'
+      root_name = 'SCOPE_PARAMS' ).
   ENDMETHOD.
 
 ENDCLASS.

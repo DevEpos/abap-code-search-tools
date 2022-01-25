@@ -51,7 +51,7 @@ CLASS zcl_adcoset_adt_res_cs_config IMPLEMENTATION.
 
   METHOD validate_settings.
 
-    IF settings-parallel_enabled = abap_true and
+    IF settings-parallel_enabled = abap_true AND
         settings-parallel_server_group IS NOT INITIAL.
       SELECT SINGLE @abap_true
         FROM rzllitab

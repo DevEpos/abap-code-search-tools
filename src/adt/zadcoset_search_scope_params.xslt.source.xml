@@ -1,0 +1,27 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates"
+              xmlns:cst="http://www.devepos.com/adt/codesearchtools"
+              xmlns:cl="http://www.sap.com/abapxml/types/class-pool/ZIF_ADCOSET_TY_ADT_TYPES">
+
+  <tt:root name="SCOPE_PARAMS" type="cl:ty_search_scope_params" />
+
+  <tt:template>
+    <cst:searchScopeParameters tt:extensible="deep">
+
+      <tt:loop ref="scope_params">
+
+        <cst:scopeParameter tt:extensible="deep">
+
+          <tt:attribute name="cst:name" value-ref="$ref.name"/>
+
+          <tt:attribute name="cst:value" value-ref="$ref.value"/>
+
+        </cst:scopeParameter>
+
+      </tt:loop>
+
+    </cst:searchScopeParameters>
+
+  </tt:template>
+
+</tt:transform>

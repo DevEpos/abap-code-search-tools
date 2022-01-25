@@ -52,17 +52,27 @@ INTERFACE zif_adcoset_ty_global
 
     ty_objects TYPE STANDARD TABLE OF ty_object WITH EMPTY KEY,
 
-    "! <p class="shorttext synchronized" lang="en">Ranges for search scope</p>
-    BEGIN OF ty_search_scope,
+    "! <p class="shorttext synchronized" lang="en">Ranges for determining the search scope</p>
+    BEGIN OF ty_search_scope_ranges,
       package_range     TYPE ty_package_name_range,
       object_type_range TYPE RANGE OF trobjtype,
       object_name_range TYPE RANGE OF sobj_name,
       owner_range       TYPE RANGE OF uname,
       created_on_range  TYPE RANGE OF tadir-created_on,
       appl_comp_range   TYPE RANGE OF df14l-ps_posid,
-      max_objects       TYPE i,
-    END OF ty_search_scope,
+    END OF ty_search_scope_ranges.
 
+  "! <p class="shorttext synchronized" lang="en">Ranges / data to define an object scope</p>
+  TYPES BEGIN OF ty_search_scope.
+  TYPES:
+    scope_id       TYPE sysuuid_x16,
+    current_offset TYPE i.
+    INCLUDE        TYPE ty_search_scope_ranges AS ranges.
+  TYPES:
+      max_objects    TYPE i.
+  TYPES END OF ty_search_scope.
+
+  TYPES:
     "! <p class="shorttext synchronized" lang="en">Uniquely identifies a match</p>
     BEGIN OF ty_match_identifier,
       display_name     TYPE string,

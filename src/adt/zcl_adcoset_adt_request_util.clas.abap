@@ -7,7 +7,7 @@ CLASS zcl_adcoset_adt_request_util DEFINITION
   PUBLIC SECTION.
     CLASS-METHODS:
       "! <p class="shorttext synchronized" lang="en">Retrieve values of request parameter</p>
-      get_request_param_values
+      get_query_parameter_values
         IMPORTING
           param_name      TYPE string
           value_separator TYPE string OPTIONAL
@@ -19,7 +19,7 @@ CLASS zcl_adcoset_adt_request_util DEFINITION
         RAISING
           cx_adt_rest,
       "! <p class="shorttext synchronized" lang="en">Retrieve value of request parameter</p>
-      get_request_param_value
+      get_query_parameter
         IMPORTING
           param_name    TYPE string
           default_value TYPE any OPTIONAL
@@ -31,7 +31,7 @@ CLASS zcl_adcoset_adt_request_util DEFINITION
         RAISING
           cx_adt_rest,
       "! <p class="shorttext synchronized" lang="en">Retrieve value of integer request parameter</p>
-      get_integer_param_value
+      get_integer_query_parameter
         IMPORTING
           param_name    TYPE string
           default_value TYPE i OPTIONAL
@@ -42,13 +42,24 @@ CLASS zcl_adcoset_adt_request_util DEFINITION
         RAISING
           cx_adt_rest,
       "! <p class="shorttext synchronized" lang="en">Retrieve boolean parameter value from request</p>
-      get_boolean_req_param
+      get_boolean_query_parameter
         IMPORTING
           param_name    TYPE string
           default_value TYPE abap_bool OPTIONAL
           request       TYPE REF TO if_adt_rest_request
         RETURNING
-          VALUE(result) TYPE abap_bool.
+          VALUE(result) TYPE abap_bool,
+
+      "! <p class="shorttext synchronized" lang="en">Retrieves UUID request parameter</p>
+      get_uuid_uri_query_parameter
+        IMPORTING
+          param_name    TYPE string
+          mandatory     TYPE abap_bool OPTIONAL
+          request       TYPE REF TO if_adt_rest_request
+        RETURNING
+          VALUE(result) TYPE uuid
+        RAISING
+          cx_adt_rest.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -58,7 +69,7 @@ ENDCLASS.
 CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
 
 
-  METHOD get_request_param_value.
+  METHOD get_query_parameter.
     IF mandatory = abap_true.
       request->get_uri_query_parameter(
         EXPORTING
@@ -81,8 +92,8 @@ CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_integer_param_value.
-    DATA(param_value) = get_request_param_value(
+  METHOD get_integer_query_parameter.
+    DATA(param_value) = get_query_parameter(
       param_name = param_name
       mandatory  = mandatory
       request    = request ).
@@ -100,7 +111,7 @@ CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_request_param_values.
+  METHOD get_query_parameter_values.
     DATA: param_values LIKE results,
           tokens       TYPE string_table.
 
@@ -135,9 +146,9 @@ CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_boolean_req_param.
+  METHOD get_boolean_query_parameter.
     TRY.
-        DATA(value) = get_request_param_value(
+        DATA(value) = get_query_parameter(
           param_name = param_name
           request    = request ).
         IF value IS NOT INITIAL.
@@ -150,5 +161,29 @@ CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
     ENDTRY.
   ENDMETHOD.
 
+
+  METHOD get_uuid_uri_query_parameter.
+    DATA(uuid_c36_string) = get_query_parameter(
+      param_name = param_name
+      mandatory  = mandatory
+      request    = request ).
+
+    IF uuid_c36_string IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    TRY.
+        REPLACE ALL OCCURRENCES OF '-' IN uuid_c36_string WITH space.
+        cl_system_uuid=>convert_uuid_c32_static(
+          EXPORTING
+            uuid     = to_upper( uuid_c36_string )
+          IMPORTING
+            uuid_x16 = result ).
+      CATCH cx_uuid_error INTO DATA(conversion_error).
+        RAISE EXCEPTION TYPE zcx_abaptags_adt_error
+          EXPORTING
+            previous = conversion_error.
+    ENDTRY.
+  ENDMETHOD.
 
 ENDCLASS.
