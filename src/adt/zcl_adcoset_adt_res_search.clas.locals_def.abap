@@ -116,5 +116,8 @@ CLASS lcl_search_result DEFINITION
           object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object
           raw_matches          TYPE zif_adcoset_ty_global=>ty_search_matches
         RAISING
-          zcx_adcoset_static_error.
+          zcx_adcoset_static_error,
+      adjust_adt_obj
+        CHANGING
+          adt_obj_ref TYPE sadt_object_reference.
 ENDCLASS.
