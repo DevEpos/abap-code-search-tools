@@ -10,6 +10,9 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
       post REDEFINITION.
   PROTECTED SECTION.
   PRIVATE SECTION.
+    CONSTANTS:
+      c_value_separator TYPE string VALUE ',' ##NO_TEXT.
+
     TYPES:
       BEGIN OF ty_param_flags,
         negation             TYPE abap_bool,
@@ -62,7 +65,7 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
       split_into_range
         IMPORTING
           filter_name TYPE string
-          separator   TYPE string DEFAULT ','
+          separator   TYPE string DEFAULT c_value_separator
           input       TYPE string
           flags       TYPE ty_param_flags OPTIONAL
         EXPORTING
@@ -91,11 +94,16 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     parse_parameters( scope_params ).
     determine_scope( ).
-    persist_scope( ).
 
-    response->set_body_data(
-      content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_ch( )
-      data            = scope_ext ).
+    IF scope_ext-object_count > 0.
+      persist_scope( ).
+
+      response->set_body_data(
+        content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_ch( )
+        data            = scope_ext ).
+    ELSE.
+      response->set_status( cl_rest_status_code=>gc_success_no_content ).
+    ENDIF.
   ENDMETHOD.
 
 
@@ -247,7 +255,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     DATA(dates_list) = param_value.
 
-    SPLIT dates_list AT ',' INTO TABLE dates.
+    SPLIT dates_list AT c_value_separator INTO TABLE dates.
 
     LOOP AT dates ASSIGNING FIELD-SYMBOL(<date>).
       APPEND INITIAL LINE TO scope_ranges-created_on_range ASSIGNING FIELD-SYMBOL(<created_range>).
