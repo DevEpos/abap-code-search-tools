@@ -84,6 +84,7 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
       WHEN zif_adcoset_c_global=>c_source_code_type-function_group THEN
         NEW zcl_adcoset_csp_fugr(
           search_settings = search_settings
+          custom_settings = custom_settings-fugr
           matchers        = matchers )
 
       WHEN c_def_reposrc_provider THEN

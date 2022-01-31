@@ -49,6 +49,9 @@ CLASS lcl_search_query DEFINITION
         RAISING
           cx_adt_rest,
       get_persisted_settings,
+      get_fugr_scope
+        RAISING
+          cx_adt_rest,
       get_class_scope
         RAISING
           cx_adt_rest,

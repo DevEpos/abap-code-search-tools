@@ -114,16 +114,30 @@ INTERFACE zif_adcoset_ty_global
       duration_in_ms TYPE ty_duration_in_ms,
     END OF ty_search_result,
 
-    "! <p class="shorttext synchronized" lang="en">Settings for code based class search</p>
-    BEGIN OF ty_cls_search_settings,
-      search_main_incl       TYPE abap_bool,
-      search_methods_incl    TYPE abap_bool,
-      search_test_incl       TYPE abap_bool,
-      search_macro_incl      TYPE abap_bool,
-      search_local_def_incl  TYPE abap_bool,
-      search_local_impl_incl TYPE abap_bool,
-      main_incl_search_mode  TYPE ty_cls_main_incl_search_mode,
-    END OF ty_cls_search_settings,
+    "! Class settings for code search
+    BEGIN OF ty_clas_cs_settings,
+      "! Indicates which includes of a class shall be searched
+      BEGIN OF include_flags,
+        public_section    TYPE abap_bool,
+        protected_section TYPE abap_bool,
+        private_section   TYPE abap_bool,
+        methods           TYPE abap_bool,
+        main              TYPE abap_bool,
+        test              TYPE abap_bool,
+        macro             TYPE abap_bool,
+        local_def         TYPE abap_bool,
+        local_impl        TYPE abap_bool,
+      END OF include_flags,
+    END OF ty_clas_cs_settings,
+
+    "! Function group settings for code search
+    BEGIN OF ty_fugr_cs_settings,
+      "! Indicates which includes of a function group shall be searched
+      BEGIN OF include_flags,
+        function     TYPE abap_bool,
+        non_function TYPE abap_bool,
+      END OF include_flags,
+    END OF ty_fugr_cs_settings,
 
     "! <p class="shorttext synchronized" lang="en">Basic search settings</p>
     BEGIN OF ty_search_settings,
@@ -135,8 +149,10 @@ INTERFACE zif_adcoset_ty_global
       all_results          TYPE abap_bool,
     END OF ty_search_settings,
 
+    "! Custom code search settings for some object types
     BEGIN OF ty_custom_search_settings,
-      class TYPE ty_cls_search_settings,
+      class TYPE ty_clas_cs_settings,
+      fugr  TYPE ty_fugr_cs_settings,
     END OF ty_custom_search_settings,
 
     BEGIN OF ty_parl_processing,

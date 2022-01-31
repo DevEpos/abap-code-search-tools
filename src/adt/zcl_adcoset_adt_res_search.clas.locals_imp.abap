@@ -83,7 +83,7 @@ CLASS lcl_search_query IMPLEMENTATION.
         request       = request ).
     ENDIF.
 
-    settings-search_scope = value #(
+    settings-search_scope = VALUE #(
       max_objects    = zcl_adcoset_adt_request_util=>get_integer_query_parameter(
         param_name = zif_adcoset_c_global=>c_search_params-max_objects
         request    = request )
@@ -98,6 +98,7 @@ CLASS lcl_search_query IMPLEMENTATION.
 
     get_patterns( ).
     get_class_scope( ).
+    get_fugr_scope( ).
   ENDMETHOD.
 
 
@@ -133,37 +134,92 @@ CLASS lcl_search_query IMPLEMENTATION.
     DATA: scopes TYPE string_table.
 
     DATA(scope_list) = zcl_adcoset_adt_request_util=>get_query_parameter(
-      param_name = zif_adcoset_c_global=>c_search_params-class_search_scope
+      param_name = zif_adcoset_c_global=>c_search_params-class_includes
       request    = request ).
 
+    IF scope_list IS INITIAL.
+      RETURN.
+    ENDIF.
+
     SPLIT scope_list AT ',' INTO TABLE scopes.
+
+    ASSIGN settings-custom_settings-class-include_flags TO FIELD-SYMBOL(<class_incl_flags>).
 
     LOOP AT scopes INTO DATA(scope).
       CASE scope.
 
-        WHEN zif_adcoset_c_global=>c_cls_search_scope-all.
-          settings-custom_settings-class = VALUE #(
-            search_main_incl       = abap_true
-            search_local_def_incl  = abap_true
-            search_local_impl_incl = abap_true
-            search_macro_incl      = abap_true
-            search_test_incl       = abap_true ).
+        WHEN zif_adcoset_c_global=>c_class_include_id-all.
+          <class_incl_flags> = VALUE #(
+            public_section    = abap_true
+            protected_section = abap_true
+            private_section   = abap_true
+            methods           = abap_true
+            main              = abap_true
+            test              = abap_true
+            macro             = abap_true
+            local_def         = abap_true
+            local_impl        = abap_true ).
           EXIT.
 
-        WHEN zif_adcoset_c_global=>c_cls_search_scope-global.
-          settings-custom_settings-class-search_main_incl = abap_true.
+        WHEN zif_adcoset_c_global=>c_class_include_id-public_section.
+          <class_incl_flags>-public_section = abap_true.
 
-        WHEN zif_adcoset_c_global=>c_cls_search_scope-local_definitions.
-          settings-custom_settings-class-search_local_def_incl = abap_true.
+        WHEN zif_adcoset_c_global=>c_class_include_id-protected_section.
+          <class_incl_flags>-protected_section = abap_true.
 
-        WHEN zif_adcoset_c_global=>c_cls_search_scope-local_implementation.
-          settings-custom_settings-class-search_local_impl_incl = abap_true.
+        WHEN zif_adcoset_c_global=>c_class_include_id-private_section.
+          <class_incl_flags>-private_section = abap_true.
 
-        WHEN zif_adcoset_c_global=>c_cls_search_scope-macros.
-          settings-custom_settings-class-search_macro_incl = abap_true.
+        WHEN zif_adcoset_c_global=>c_class_include_id-methods.
+          <class_incl_flags>-methods = abap_true.
 
-        WHEN zif_adcoset_c_global=>c_cls_search_scope-tests.
-          settings-custom_settings-class-search_test_incl = abap_true.
+        WHEN zif_adcoset_c_global=>c_class_include_id-local_definitions.
+          <class_incl_flags>-local_def = abap_true.
+
+        WHEN zif_adcoset_c_global=>c_class_include_id-local_implementation.
+          <class_incl_flags>-local_impl = abap_true.
+
+        WHEN zif_adcoset_c_global=>c_class_include_id-macros.
+          <class_incl_flags>-macro = abap_true.
+
+        WHEN zif_adcoset_c_global=>c_class_include_id-tests.
+          <class_incl_flags>-test = abap_true.
+
+      ENDCASE.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD get_fugr_scope.
+    DATA: scopes TYPE string_table.
+
+    DATA(scope_list) = zcl_adcoset_adt_request_util=>get_query_parameter(
+      param_name = zif_adcoset_c_global=>c_search_params-fugr_includes
+      request    = request ).
+
+    IF scope_list IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    SPLIT scope_list AT ',' INTO TABLE scopes.
+
+    ASSIGN settings-custom_settings-fugr-include_flags TO FIELD-SYMBOL(<fugr_incl_flags>).
+
+    LOOP AT scopes INTO DATA(scope).
+      CASE scope.
+
+        WHEN zif_adcoset_c_global=>c_fugr_include_id-all.
+          <fugr_incl_flags> = VALUE #(
+            function     = abap_true
+            non_function = abap_true ).
+          EXIT.
+
+        WHEN zif_adcoset_c_global=>c_fugr_include_id-function.
+          <fugr_incl_flags>-function = abap_true.
+
+        WHEN zif_adcoset_c_global=>c_fugr_include_id-non_function.
+          <fugr_incl_flags>-non_function = abap_true.
 
       ENDCASE.
 

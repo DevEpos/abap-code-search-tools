@@ -12,6 +12,7 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
       constructor
         IMPORTING
           search_settings TYPE zif_adcoset_ty_global=>ty_search_settings
+          custom_settings TYPE zif_adcoset_ty_global=>ty_fugr_cs_settings
           matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -23,6 +24,7 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
 
     DATA:
       search_settings TYPE zif_adcoset_ty_global=>ty_search_settings,
+      custom_settings TYPE zif_adcoset_ty_global=>ty_fugr_cs_settings,
       matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
 
     TYPES:
@@ -72,6 +74,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
   METHOD constructor.
     me->search_settings = search_settings.
+    me->custom_settings = custom_settings.
     me->matchers = matchers.
   ENDMETHOD.
 
@@ -123,6 +126,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
               all_matches        = result ).
         CATCH zcx_adcoset_src_code_read ##NO_HANDLER.
       ENDTRY.
+
     ENDLOOP.
 
   ENDMETHOD.
@@ -163,16 +167,18 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
-      INSERT VALUE #( name = <include_key>-name ) INTO TABLE result
-        ASSIGNING FIELD-SYMBOL(<new_include>).
+      DATA(new_include) =  VALUE ty_fugr_incl( name = <include_key>-name ).
 
       IF include_suffix(1) = 'U'.
-        <new_include>-is_function_include = abap_true.
-        <new_include>-adt_type = c_include_types-function.
+        CHECK custom_settings-include_flags-function = abap_true.
+        new_include-is_function_include = abap_true.
+        new_include-adt_type = c_include_types-function.
       ELSE.
-        <new_include>-adt_type = c_include_types-include.
+        CHECK custom_settings-include_flags-non_function = abap_true.
+        new_include-adt_type = c_include_types-include.
       ENDIF.
 
+      result = VALUE #( BASE result ( new_include ) ).
     ENDLOOP.
 
   ENDMETHOD.
