@@ -419,6 +419,9 @@ CLASS lcl_search_result IMPLEMENTATION.
           name                   = object_info-name
           append_source_uri_path = abap_true ).
 
+
+        adjust_adt_obj( CHANGING adt_obj_ref = result ).
+
         adt_obj_factory->add_position_fragment(
           EXPORTING
             start_line   = match-start_line
@@ -430,4 +433,18 @@ CLASS lcl_search_result IMPLEMENTATION.
     ENDCASE.
 
   ENDMETHOD.
+
+
+  METHOD adjust_adt_obj.
+
+    " for some reason the URI for the programs of a Business Object Type are generated incorrectly,
+    "  so they have to be adjusted
+    IF adt_obj_ref-type = 'SOBJ/P'.
+      DATA(source_main_offset) = find( val = adt_obj_ref-uri sub = '/source/main' ).
+      IF source_main_offset > 0.
+        adt_obj_ref-uri = adt_obj_ref-uri(source_main_offset).
+      ENDIF.
+    ENDIF.
+  ENDMETHOD.
+
 ENDCLASS.
