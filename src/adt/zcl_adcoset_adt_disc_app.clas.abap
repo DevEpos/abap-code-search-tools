@@ -25,9 +25,9 @@ CLASS zcl_adcoset_adt_disc_app DEFINITION
       c_search_uri                TYPE string VALUE '/codesearch',
       c_settings_relative_uri     TYPE string VALUE '/settings',
       c_search_scope_relative_uri TYPE string VALUE '/scope',
-      c_static_uri                TYPE string VALUE '/devepos/adt/codesearchtools',
-      c_root_scheme               TYPE string VALUE 'http://www.devepos.com/adt/codesearchtools',
-      c_root_rel_scheme           TYPE string VALUE 'http://www.devepos.com/adt/relations/codesearchtools',
+      c_static_uri                TYPE string VALUE '/devepos/adt/cst',
+      c_root_scheme               TYPE string VALUE 'http://www.devepos.com/adt/cst',
+      c_root_rel_scheme           TYPE string VALUE 'http://www.devepos.com/adt/relations/cst',
 
       "! REST handler constants
       BEGIN OF c_handlers,
