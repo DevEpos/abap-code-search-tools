@@ -68,8 +68,8 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
     matcher->find_matches( source = VALUE #( ) ).
 
     DATA(cut) = NEW zcl_adcoset_source_code(
-      source = source
-      line_indexes = zcl_adcoset_string_util=>determine_line_indexes(
+      source         = source
+      line_indexes   = zcl_adcoset_string_util=>determine_line_indexes(
         source_text  = source[ 1 ]
         line_feed    = |\r\n| ) ).
 

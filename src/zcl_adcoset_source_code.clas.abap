@@ -17,10 +17,11 @@ CLASS zcl_adcoset_source_code DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
-      source        TYPE string_table,
-      comment_regex TYPE string,
-      line_count    TYPE i,
-      line_indexes  TYPE zif_adcoset_source_code=>ty_line_indexes.
+      source         TYPE string_table,
+      comment_regex  TYPE string,
+      line_count     TYPE i,
+      multiline_mode TYPE abap_bool,
+      line_indexes   TYPE zif_adcoset_source_code=>ty_line_indexes.
 
     METHODS:
       enhance_matches
@@ -78,6 +79,8 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
     me->line_indexes = line_indexes.
     me->comment_regex = comment_regex.
     line_count = lines( line_indexes ).
+    multiline_mode = xsdbool( line_count IS NOT INITIAL ).
+
   ENDMETHOD.
 
 
@@ -112,7 +115,7 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
 
     LOOP AT raw_matches ASSIGNING FIELD-SYMBOL(<raw_match>).
 
-      IF line_indexes IS INITIAL.
+      IF multiline_mode = abap_false.
         enhanced_match = get_single_line_match(
           raw_match            = <raw_match>
           ignore_comment_lines = ignore_comment_lines ).
