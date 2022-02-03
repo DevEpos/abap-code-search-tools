@@ -53,6 +53,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Technical identifier for source code types</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
+     <CMPNAME>C_TADIR_TYPE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Constants for needed TADIR types</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

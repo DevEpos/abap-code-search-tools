@@ -59,7 +59,7 @@ CLASS lcl_search_query DEFINITION
 ENDCLASS.
 
 
-CLASS lcl_search_result DEFINITION
+CLASS lcl_result_converter DEFINITION
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -68,20 +68,32 @@ CLASS lcl_search_result DEFINITION
         IMPORTING
           raw_result             TYPE zif_adcoset_ty_global=>ty_search_result
           read_package_hierarchy TYPE abap_bool OPTIONAL,
-      convert_to_adt_result
+      convert
         RETURNING
           VALUE(result) TYPE zif_adcoset_ty_adt_types=>ty_code_search_result.
   PROTECTED SECTION.
   PRIVATE SECTION.
+    CONSTANTS:
+      BEGIN OF c_adt_wb_object_type,
+        package TYPE string VALUE 'DEVC/K',
+      END OF c_adt_wb_object_type.
+
+    TYPES:
+      BEGIN OF ty_package,
+        package_name        TYPE devclass,
+        parent_package_name TYPE devclass,
+        uri                 TYPE string,
+      END OF ty_package.
+
     DATA:
-      raw_result             TYPE zif_adcoset_ty_global=>ty_search_result,
-      read_package_hierarchy TYPE abap_bool,
-      adt_obj_factory        TYPE REF TO zif_adcoset_adt_obj_factory,
-      adt_result             TYPE zif_adcoset_ty_adt_types=>ty_code_search_result.
+      raw_result      TYPE zif_adcoset_ty_global=>ty_search_result,
+      adt_obj_factory TYPE REF TO zif_adcoset_adt_obj_factory,
+      adt_result      TYPE zif_adcoset_ty_adt_types=>ty_code_search_result,
+      packages        TYPE SORTED TABLE OF ty_package WITH UNIQUE KEY package_name.
 
     METHODS:
       set_durations,
-      create_adt_links,
+      convert_matches_to_adt_result,
       add_main_object_ref
         IMPORTING
           search_result_object TYPE REF TO zif_adcoset_ty_adt_types=>ty_code_search_object
@@ -119,5 +131,11 @@ CLASS lcl_search_result DEFINITION
           zcx_adcoset_static_error,
       adjust_adt_obj
         CHANGING
-          adt_obj_ref TYPE sadt_object_reference.
+          adt_obj_ref TYPE sadt_object_reference,
+      get_package_uri
+        IMPORTING
+          package_name  TYPE devclass
+        RETURNING
+          VALUE(result) TYPE string,
+      add_packages_to_adt_result.
 ENDCLASS.

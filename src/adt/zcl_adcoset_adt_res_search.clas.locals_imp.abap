@@ -16,9 +16,9 @@ CLASS lcl_search_query IMPLEMENTATION.
 
     TRY.
         DATA(search_result) = zcl_adcoset_search_engine=>get_instance( )->search_code( search_config = settings ).
-        result = NEW lcl_search_result(
+        result = NEW lcl_result_converter(
           raw_result             = search_result
-          read_package_hierarchy = read_packages )->convert_to_adt_result( ).
+          read_package_hierarchy = read_packages )->convert( ).
       CATCH zcx_adcoset_static_error INTO DATA(search_error).
         RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
           EXPORTING
@@ -66,10 +66,6 @@ CLASS lcl_search_query IMPLEMENTATION.
 
     settings-match_all_patterns = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-match_all_patterns
-      request    = request ).
-
-    read_packages = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
-      param_name = zif_adcoset_c_global=>c_search_params-read_package_hierarchy
       request    = request ).
 
     matcher_config-use_regex = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
@@ -230,7 +226,7 @@ CLASS lcl_search_query IMPLEMENTATION.
 ENDCLASS.
 
 
-CLASS lcl_search_result IMPLEMENTATION.
+CLASS lcl_result_converter IMPLEMENTATION.
 
   METHOD constructor.
     me->raw_result = raw_result.
@@ -238,12 +234,13 @@ CLASS lcl_search_result IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD convert_to_adt_result.
+  METHOD convert.
     set_durations( ).
-    IF read_package_hierarchy = abap_true.
-      determine_package_hierarchy( ).
-    ENDIF.
-    create_adt_links( ).
+
+    determine_package_hierarchy( ).
+    add_packages_to_adt_result( ).
+
+    convert_matches_to_adt_result( ).
 
     result = adt_result.
   ENDMETHOD.
@@ -254,15 +251,16 @@ CLASS lcl_search_result IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD create_adt_links.
+  METHOD convert_matches_to_adt_result.
 
     LOOP AT raw_result-results ASSIGNING FIELD-SYMBOL(<raw_result>).
 
       TRY.
           DATA(search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
-              adt_main_object = VALUE #(
-                name        = <raw_result>-object-name
-                responsible = <raw_result>-object-owner ) ).
+            parent_uri      = get_package_uri( <raw_result>-object-package_name )
+            adt_main_object = VALUE #(
+              name        = <raw_result>-object-name
+              responsible = <raw_result>-object-owner ) ).
 
           DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj(
             type = <raw_result>-object-type
@@ -315,6 +313,62 @@ CLASS lcl_search_result IMPLEMENTATION.
 
 
   METHOD determine_package_hierarchy.
+    DATA: packages_to_read TYPE STANDARD TABLE OF ty_package,
+          read_packages    TYPE STANDARD TABLE OF ty_package.
+
+    packages_to_read = VALUE #(
+      FOR <res_obj> IN raw_result-results ( package_name = <res_obj>-object-package_name ) ).
+    SORT packages_to_read.
+    DELETE ADJACENT DUPLICATES FROM packages_to_read.
+
+    WHILE packages_to_read IS NOT INITIAL.
+      SELECT devclass AS package_name,
+             parentcl AS parent_package_name
+        FROM tdevc
+        FOR ALL ENTRIES IN @packages_to_read
+        WHERE devclass = @packages_to_read-package_name
+        INTO CORRESPONDING FIELDS OF TABLE @read_packages.
+
+
+      CLEAR packages_to_read.
+
+      LOOP AT read_packages ASSIGNING FIELD-SYMBOL(<read_package>).
+        CHECK NOT line_exists( packages[ package_name = <read_package>-package_name ] ).
+
+        IF <read_package>-parent_package_name IS NOT INITIAL.
+          packages_to_read = VALUE #( BASE packages_to_read ( package_name = <read_package>-parent_package_name ) ).
+        ENDIF.
+
+        TRY.
+            <read_package>-uri = adt_obj_factory->get_object_ref_for_trobj(
+              type = zif_adcoset_c_global=>c_tadir_type-package
+              name = CONV #( <read_package>-package_name ) )-uri.
+          CATCH zcx_adcoset_static_error.
+        ENDTRY.
+
+        packages = VALUE #( BASE packages ( <read_package> ) ).
+      ENDLOOP.
+
+    ENDWHILE.
+
+  ENDMETHOD.
+
+
+  METHOD add_packages_to_adt_result.
+
+    LOOP AT packages ASSIGNING FIELD-SYMBOL(<package>).
+
+      APPEND VALUE #(
+          uri             = <package>-uri
+          adt_main_object = VALUE #(
+            type = c_adt_wb_object_type-package
+            name = <package>-package_name )
+        ) TO adt_result-code_search_objects ASSIGNING FIELD-SYMBOL(<package_adt_result>).
+
+      IF <package>-parent_package_name IS NOT INITIAL.
+        <package_adt_result>-parent_uri = get_package_uri( <package>-parent_package_name ).
+      ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -445,6 +499,13 @@ CLASS lcl_search_result IMPLEMENTATION.
         adt_obj_ref-uri = adt_obj_ref-uri(source_main_offset).
       ENDIF.
     ENDIF.
+  ENDMETHOD.
+
+
+  METHOD get_package_uri.
+    CHECK packages IS NOT INITIAL.
+
+    result = VALUE #( packages[ package_name = package_name ]-uri OPTIONAL ).
   ENDMETHOD.
 
 ENDCLASS.

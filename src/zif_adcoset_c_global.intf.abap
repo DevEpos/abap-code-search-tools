@@ -35,7 +35,6 @@ INTERFACE zif_adcoset_c_global
       ignore_comment_lines   TYPE string VALUE 'ignoreCommentLines',
       ignore_case            TYPE string VALUE 'ignoreCase',
       multi_line             TYPE string VALUE 'multiLine',
-      read_package_hierarchy TYPE string VALUE 'readPackages',
       appl_comp              TYPE string VALUE 'applComp',
       object_name            TYPE string VALUE 'objectName',
       object_type            TYPE string VALUE 'objectType',
@@ -70,6 +69,11 @@ INTERFACE zif_adcoset_c_global
       function     TYPE string VALUE 'func',
       non_function TYPE string VALUE 'nonFunc',
     END OF c_fugr_include_id,
+
+    "! <p class="shorttext synchronized" lang="en">Constants for needed TADIR types</p>
+    BEGIN OF c_tadir_type,
+      package TYPE trobjtype VALUE 'DEVC',
+    END OF c_tadir_type,
 
     "! <p class="shorttext synchronized" lang="en">Technical identifier for source code types</p>
     BEGIN OF c_source_code_type,
