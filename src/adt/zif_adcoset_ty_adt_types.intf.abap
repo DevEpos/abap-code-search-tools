@@ -79,7 +79,6 @@ INTERFACE zif_adcoset_ty_adt_types
   "! Settings for Code Search
   TYPES BEGIN OF ty_code_search_settings.
   INCLUDE TYPE zadcoset_csset.
-  types: test type c length 2.
   TYPES END OF ty_code_search_settings.
 
 ENDINTERFACE.
