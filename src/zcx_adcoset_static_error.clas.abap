@@ -19,7 +19,8 @@ CLASS zcx_adcoset_static_error DEFINITION
       constructor
         IMPORTING
           previous LIKE previous OPTIONAL
-          text     TYPE string OPTIONAL.
+          text     TYPE string OPTIONAL
+          from_sy  TYPE abap_bool OPTIONAL.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -39,7 +40,7 @@ CLASS zcx_adcoset_static_error IMPLEMENTATION.
     IF text IS NOT INITIAL.
       fill_t100key = abap_true.
       zcl_adcoset_message_util=>split_string_to_symsg( text ).
-    ELSEIF sy-msgid IS NOT INITIAL.
+    ELSEIF from_sy = abap_true AND sy-msgid IS NOT INITIAL.
       fill_t100key = abap_true.
     ENDIF.
 
