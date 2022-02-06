@@ -1,6 +1,6 @@
 <?sap.transform simple?>
 <tt:transform xmlns:tt="http://www.sap.com/transformation-templates"
-              xmlns:cst="http://www.devepos.com/adt/codesearchtools"
+              xmlns:cst="http://www.devepos.com/adt/cst"
               xmlns:cl="http://www.sap.com/abapxml/types/class-pool/ZIF_ADCOSET_TY_ADT_TYPES">
 
   <tt:root name="SETTINGS" type="cl:ty_code_search_settings"/>
