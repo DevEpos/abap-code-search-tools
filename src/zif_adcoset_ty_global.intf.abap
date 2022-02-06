@@ -17,6 +17,14 @@ INTERFACE zif_adcoset_ty_global
     "! Type for DDLX Source name (not available on 7.40)
     ty_ddlxname                  TYPE progname,
 
+    BEGIN OF ty_message,
+      type        TYPE string,
+      content     TYPE string,
+      occurrences TYPE i,
+    END OF ty_message,
+
+    ty_messages TYPE STANDARD TABLE OF ty_message WITH EMPTY KEY,
+
     BEGIN OF ty_method_param_info,
       "! Name of a method parameter
       name        TYPE seocmpname,
@@ -111,6 +119,7 @@ INTERFACE zif_adcoset_ty_global
     "! Code search result
     BEGIN OF ty_search_result,
       results        TYPE ty_search_result_objects,
+      messages       TYPE ty_messages,
       duration_in_ms TYPE ty_duration_in_ms,
     END OF ty_search_result,
 
@@ -187,10 +196,17 @@ INTERFACE zif_adcoset_ty_global
   "! <p class="shorttext synchronized" lang="en">Defines search package for parallel search</p>
   TYPES BEGIN OF ty_search_package.
   INCLUDE TYPE ty_search_settings_int AS settings.
-  TYPES objects TYPE ty_tadir_objects.
+  TYPES:
+    objects      TYPE ty_tadir_objects,
+    result_count TYPE i.
   TYPES END OF ty_search_package.
 
   TYPES:
+    BEGIN OF ty_search_package_result,
+      result_objects TYPE ty_search_result_objects,
+      messages       TYPE ty_messages,
+    END OF ty_search_package_result,
+
     "! <p class="shorttext synchronized" lang="en">Value range for search option</p>
     BEGIN OF ty_search_option_range,
       sign    TYPE ddsign,

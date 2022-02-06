@@ -35,6 +35,7 @@ INTERFACE zif_adcoset_ty_adt_types
 
     BEGIN OF ty_code_search_result,
       code_search_objects        TYPE ty_code_search_objects,
+      messages                   TYPE zif_adcoset_ty_global=>ty_messages,
       number_of_results          TYPE i,
       number_of_searched_objects TYPE i,
       query_time_in_ms           TYPE i,

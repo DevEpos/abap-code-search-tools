@@ -46,7 +46,7 @@ CLASS zcl_adcoset_search_query_fac IMPLEMENTATION.
           " update the package size
           scope->configure_package_size( task_runner->get_max_tasks( ) ).
         CATCH zcx_adcoset_static_error INTO DATA(error) ##needed.
-          WRITE: / |Task handler error: { error->get_text( ) }|.
+          zcl_adcoset_log=>add_exception( error ).
       ENDTRY.
     ENDIF.
 

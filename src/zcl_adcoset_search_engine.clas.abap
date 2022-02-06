@@ -17,7 +17,7 @@ CLASS zcl_adcoset_search_engine DEFINITION
         IMPORTING
           input  TYPE zif_adcoset_ty_global=>ty_search_package
         EXPORTING
-          output TYPE zif_adcoset_ty_global=>ty_search_result_objects.
+          output TYPE zif_adcoset_ty_global=>ty_search_package_result.
     METHODS:
       "! <p class="shorttext synchronized" lang="en">Search source code</p>
       search_code
@@ -67,11 +67,15 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
 
     query->run( ).
 
-    output = query->get_results( ).
+    output = VALUE #(
+      result_objects = query->get_results( )
+      messages       = zcl_adcoset_log=>get_messages( ) ).
   ENDMETHOD.
 
 
   METHOD search_code.
+    zcl_adcoset_log=>clear( ).
+
     validate_matchers(
       matcher_type = search_config-matcher_type
       patterns     = search_config-pattern_range ).
@@ -88,6 +92,7 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
 
     result = VALUE #(
       results        = query->get_results( )
+      messages       = zcl_adcoset_log=>get_messages( )
       duration_in_ms = timer->get_duration_in_ms( ) ).
   ENDMETHOD.
 

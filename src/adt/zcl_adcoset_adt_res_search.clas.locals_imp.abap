@@ -19,6 +19,7 @@ CLASS lcl_search_query IMPLEMENTATION.
         result = NEW lcl_result_converter(
           raw_result             = search_result
           read_package_hierarchy = read_packages )->convert( ).
+        result-messages = search_result-messages.
       CATCH zcx_adcoset_static_error INTO DATA(search_error).
         RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
           EXPORTING
@@ -101,7 +102,7 @@ CLASS lcl_search_query IMPLEMENTATION.
   METHOD complete_settings.
     get_persisted_settings( ).
     settings-matcher_type = get_matcher_type( ).
-    settings-line_feed = |\r\n|.
+    settings-line_feed = |\n|.
   ENDMETHOD.
 
 
@@ -111,7 +112,7 @@ CLASS lcl_search_query IMPLEMENTATION.
         param_name = zif_adcoset_c_global=>c_search_params-search_pattern
         mandatory  = abap_true
         request    = request )
-      ( sign = 'I' option = 'CP' low = pattern ) ).
+      ( sign = 'I' option = 'CP' low = replace( val = pattern sub = |\r\n| with = |\n| occ = 0 ) ) ).
   ENDMETHOD.
 
 

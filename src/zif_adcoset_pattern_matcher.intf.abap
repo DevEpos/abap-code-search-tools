@@ -10,5 +10,7 @@ INTERFACE zif_adcoset_pattern_matcher
       IMPORTING
         source        TYPE string_table
       RETURNING
-        VALUE(result) TYPE match_result_tab.
+        VALUE(result) TYPE match_result_tab
+      RAISING
+        zcx_adcoset_pattern_sh_error.
 ENDINTERFACE.

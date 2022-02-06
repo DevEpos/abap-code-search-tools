@@ -1,12 +1,13 @@
 <?sap.transform simple?>
 <tt:transform xmlns:tt="http://www.sap.com/transformation-templates"
               xmlns:cst="http://www.devepos.com/adt/codesearchtools"
+              xmlns:adtbase="http://www.devepos.com/adt/base"
               xmlns:adtcore="http://www.sap.com/adt/core"
               xmlns:cl="http://www.sap.com/abapxml/types/class-pool/ZIF_ADCOSET_TY_ADT_TYPES">
 
   <tt:root name="root" type="cl:ty_code_search_result"/>
 
-  <tt:include name="sadt_object_reference" template="objectReferenceAttributes" />
+  <tt:include name="sadt_object_reference" template="objectReferenceAttributes"/>
   <tt:include name="sadt_main_object" template="main_object"/>
 
   <tt:template>
@@ -16,6 +17,7 @@
   </tt:template>
 
 
+  <!-- Template for the result -->
   <tt:template name="codeSearchResult">
     <tt:context>
       <tt:root name="code_search_result"/>
@@ -30,11 +32,15 @@
         <tt:with-root name="code_search_objects" ref="code_search_result.code_search_objects"/>
       </tt:apply>
 
+      <tt:apply name="responseMessages">
+        <tt:with-root name="messages" ref="code_search_result.messages"/>
+      </tt:apply>
+
     </cst:result>
 
   </tt:template>
 
-
+  <!-- Template for the result objects -->
   <tt:template name="codeSearchObjects">
     <tt:context>
       <tt:root name="code_search_objects" type="cl:ty_code_search_objects"/>
@@ -70,6 +76,7 @@
     </tt:loop>
   </tt:template>
 
+  <!-- Template for the matches in an ADT object -->
   <tt:template name="codeSearchMatches">
     <tt:context>
       <tt:root name="code_search_matches" type="cl:ty_code_search_matches"/>
@@ -87,6 +94,37 @@
       </cst:match>
     </tt:loop>
 
+  </tt:template>
+
+  <!-- Template for response messages -->
+  <tt:template name="responseMessages">
+    <tt:context>
+      <tt:root name="messages" />
+    </tt:context>
+
+    <adtbase:responseMessages>
+      <tt:loop ref="messages">
+
+        <tt:cond check="not-initial($ref.content)">
+          <adtbase:responseMessage tt:extensible="deep">
+
+            <tt:cond check="not-initial($ref.type)">
+              <tt:attribute name="adtbase:type" value-ref="$ref.type"/>
+            </tt:cond>
+
+            <tt:cond check="not-initial($ref.content)">
+              <tt:attribute name="adtbase:content" value-ref="$ref.content"/>
+            </tt:cond>
+
+            <tt:cond check="not-initial($ref.occurrences)">
+              <tt:attribute name="adtbase:occurrences" value-ref="$ref.occurrences"/>
+            </tt:cond>
+
+          </adtbase:responseMessage>
+        </tt:cond>
+
+      </tt:loop>
+    </adtbase:responseMessages>
   </tt:template>
 
 </tt:transform>

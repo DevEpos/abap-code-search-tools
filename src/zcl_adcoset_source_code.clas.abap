@@ -87,7 +87,15 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
   METHOD zif_adcoset_source_code~find_matches.
 
     LOOP AT matchers INTO DATA(matcher).
-      DATA(raw_matches) = matcher->find_matches( source ).
+      TRY.
+          DATA(raw_matches) = matcher->find_matches( source ).
+        CATCH zcx_adcoset_pattern_sh_error INTO DATA(error).
+          zcl_adcoset_log=>add_exception( error ).
+          IF match_all = abap_true.
+            CLEAR result.
+            RETURN.
+          ENDIF.
+      ENDTRY.
       IF raw_matches IS NOT INITIAL.
         DATA(enhanced_matches) = enhance_matches(
           raw_matches          = raw_matches

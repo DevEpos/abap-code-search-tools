@@ -44,10 +44,11 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
 
 
   METHOD zif_adcoset_parl_result_recv~send_results.
-    FIELD-SYMBOLS: <results> TYPE zif_adcoset_ty_global=>ty_search_result_objects.
-    ASSIGN results TO <results>.
+    FIELD-SYMBOLS: <package_result> TYPE zif_adcoset_ty_global=>ty_search_package_result.
+    ASSIGN results TO <package_result>.
     IF sy-subrc = 0.
-      INSERT LINES OF <results> INTO TABLE search_results.
+      INSERT LINES OF <package_result>-result_objects INTO TABLE search_results.
+      zcl_adcoset_log=>add_all_messages( <package_result>-messages ).
     ENDIF.
   ENDMETHOD.
 
