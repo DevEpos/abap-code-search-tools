@@ -10,10 +10,10 @@ CLASS zcl_adcoset_search_engine DEFINITION
       get_instance
         RETURNING
           VALUE(result) TYPE REF TO zcl_adcoset_search_engine,
-      "! <p class="shorttext synchronized" lang="en">Code search for a given package</p>
+      "! <p class="shorttext synchronized" lang="en">Runs code search (for ARFC call)</p>
       "! <strong>NOTE:</strong> <br>
-      "! This method should only be called from a parallel task
-      search_code_in_package
+      "! This method should only be called from a parallel task, see {@link zif_adcoset_parl_task_runner }
+      run_code_search_arfc
         IMPORTING
           input  TYPE zif_adcoset_ty_global=>ty_search_package
         EXPORTING
@@ -55,7 +55,7 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD search_code_in_package.
+  METHOD run_code_search_arfc.
     zcl_adcoset_parl_proc_utils=>assert_async_rfc_call( ).
 
     TRY.

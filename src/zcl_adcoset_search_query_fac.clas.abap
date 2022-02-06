@@ -42,7 +42,7 @@ CLASS zcl_adcoset_search_query_fac IMPLEMENTATION.
 *           max_tasks      = 10
             " TODO: move handler_class/handler_method to parallel settings???
             handler_class  = 'ZCL_ADCOSET_SEARCH_ENGINE'
-            handler_method = 'SEARCH_CODE_IN_PACKAGE' ).
+            handler_method = 'RUN_CODE_SEARCH_ARFC' ).
           " update the package size
           scope->configure_package_size( task_runner->get_max_tasks( ) ).
         CATCH zcx_adcoset_static_error INTO DATA(error) ##needed.
