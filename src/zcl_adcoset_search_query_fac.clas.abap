@@ -12,6 +12,7 @@ CLASS zcl_adcoset_search_query_fac DEFINITION
           parallel_processing TYPE zif_adcoset_ty_global=>ty_parl_processing OPTIONAL
           scope               TYPE REF TO zif_adcoset_search_scope
           settings            TYPE zif_adcoset_ty_global=>ty_search_settings_int
+          monitor             TYPE REF TO zif_adcoset_search_progmon
         RETURNING
           VALUE(result)       TYPE REF TO zif_adcoset_search_query
         RAISING
@@ -55,14 +56,15 @@ CLASS zcl_adcoset_search_query_fac IMPLEMENTATION.
         NEW zcl_adcoset_parl_search_query(
           task_runner = task_runner
           scope       = scope
-          settings    = settings )
+          settings    = settings
+          monitor     = monitor )
       ELSE
         NEW zcl_adcoset_search_query(
           scope           = scope
           settings        = settings-basic_settings
           custom_settings = settings-custom_settings
-          matchers        = zcl_adcoset_matcher_factory=>create_matchers(
-            settings-pattern_config ) ) ).
+          matchers        = zcl_adcoset_matcher_factory=>create_matchers( settings-pattern_config )
+          monitor         = monitor ) ).
   ENDMETHOD.
 
 

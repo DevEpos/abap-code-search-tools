@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_INTF" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOINTERF>
+    <CLSNAME>ZIF_ADCOSET_SEARCH_PROGMON</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Progress monitor for Code Search</DESCRIPT>
+    <EXPOSURE>2</EXPOSURE>
+    <STATE>1</STATE>
+    <UNICODE>X</UNICODE>
+   </VSEOINTERF>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_SEARCH_PROGMON</CLSNAME>
+     <CMPNAME>ADD_MATCH_COUNT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Adds the given match count to the overall count</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_SEARCH_PROGMON</CLSNAME>
+     <CMPNAME>CANCEL</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Sets the current search to cancelled</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_SEARCH_PROGMON</CLSNAME>
+     <CMPNAME>DONE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Notifies that the search is done</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_SEARCH_PROGMON</CLSNAME>
+     <CMPNAME>IS_CANCELLED</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Tests if the current search was cancelled</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_SEARCH_PROGMON</CLSNAME>
+     <CMPNAME>IS_DONE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Tests if the search is still ongoing</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

@@ -197,8 +197,9 @@ INTERFACE zif_adcoset_ty_global
   TYPES BEGIN OF ty_search_package.
   INCLUDE TYPE ty_search_settings_int AS settings.
   TYPES:
-    objects      TYPE ty_tadir_objects,
-    result_count TYPE i.
+    objects     TYPE ty_tadir_objects,
+    "! Current match count
+    match_count TYPE i.
   TYPES END OF ty_search_package.
 
   TYPES:

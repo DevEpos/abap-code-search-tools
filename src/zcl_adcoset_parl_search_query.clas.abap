@@ -14,11 +14,13 @@ CLASS zcl_adcoset_parl_search_query DEFINITION
         IMPORTING
           scope       TYPE REF TO zif_adcoset_search_scope
           task_runner TYPE REF TO zif_adcoset_parl_task_runner
-          settings    TYPE zif_adcoset_ty_global=>ty_search_settings_int.
+          settings    TYPE zif_adcoset_ty_global=>ty_search_settings_int
+          monitor     TYPE REF TO zif_adcoset_search_progmon.
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
       scope          TYPE REF TO zif_adcoset_search_scope,
+      monitor        TYPE REF TO zif_adcoset_search_progmon,
       task_runner    TYPE REF TO zif_adcoset_parl_task_runner,
       settings       TYPE zif_adcoset_ty_global=>ty_search_settings_int,
       search_results TYPE zif_adcoset_ty_global=>ty_search_result_objects.
@@ -37,6 +39,7 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
     me->scope = scope.
     me->task_runner = task_runner.
     me->settings = settings.
+    me->monitor = monitor.
 
     " registers this instance as result receiver
     me->task_runner->set_result_receiver( me ).
@@ -56,6 +59,10 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
   METHOD zif_adcoset_search_query~run.
 
     WHILE scope->has_next_package( ).
+      IF monitor->is_done( ).
+        RETURN.
+      ENDIF.
+
       DATA(package) = scope->next_package( ).
 
       " process new package asynchronously

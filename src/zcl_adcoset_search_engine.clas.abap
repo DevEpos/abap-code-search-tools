@@ -58,10 +58,16 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
   METHOD run_code_search_arfc.
     zcl_adcoset_parl_proc_utils=>assert_async_rfc_call( ).
 
+    DATA(monitor) = zcl_adcoset_search_progmon=>create(
+      max_results = input-max_results
+      all_results = input-all_results ).
+    monitor->add_match_count( input-match_count ).
+
     TRY.
         DATA(query) = zcl_adcoset_search_query_fac=>create_query(
           scope    = zcl_adcoset_search_scope_fac=>create_final_scope( objects = input-objects )
-          settings = input-settings ).
+          settings = input-settings
+          monitor  = monitor ).
       CATCH zcx_adcoset_static_error.
     ENDTRY.
 
@@ -84,7 +90,10 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
       parallel_processing = search_config-parallel_processing
       scope               = zcl_adcoset_search_scope_fac=>create_scope(
         search_scope  = search_config-search_scope )
-      settings            = search_config-internal_settings ).
+      settings            = search_config-internal_settings
+      monitor             = zcl_adcoset_search_progmon=>create(
+        max_results = search_config-max_results
+        all_results = search_config-all_results ) ).
 
     DATA(timer) = NEW zcl_adcoset_timer( )->start( ).
     query->run( ).
