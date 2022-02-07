@@ -48,11 +48,6 @@ CLASS lcl_search_query IMPLEMENTATION.
 
 
   METHOD parse_parameters.
-    " hard code the line feed to
-    settings-all_results = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
-      param_name = zif_adcoset_c_global=>c_search_params-all_results
-      request    = request ).
-
     settings-ignore_case = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-ignore_case
       request    = request ).
@@ -72,13 +67,6 @@ CLASS lcl_search_query IMPLEMENTATION.
     matcher_config-use_regex = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-use_regex
       request    = request ).
-
-    IF settings-all_results = abap_false.
-      settings-max_results = zcl_adcoset_adt_request_util=>get_integer_query_parameter(
-        param_name    = zif_adcoset_c_global=>c_search_params-max_results
-        default_value = 100
-        request       = request ).
-    ENDIF.
 
     settings-search_scope = VALUE #(
       max_objects    = zcl_adcoset_adt_request_util=>get_integer_query_parameter(

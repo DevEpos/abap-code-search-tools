@@ -50,12 +50,7 @@ INTERFACE zif_adcoset_c_global
       class_includes       TYPE string VALUE 'classIncludes',
       fugr_includes        TYPE string VALUE 'fugrIncludes',
       max_objects          TYPE string VALUE 'maxObjects',
-      max_results          TYPE string VALUE 'maxResults',
-      all_results          TYPE string VALUE 'allResults',
     END OF c_search_params,
-
-    "! <p class="shorttext synchronized" lang="en">Use to signal that all objects in scope should be searched</p>
-    c_max_objects_all TYPE string VALUE 'all',
 
     "! <p class="shorttext synchronized" lang="en">Include id's for class</p>
     BEGIN OF c_class_include_id,

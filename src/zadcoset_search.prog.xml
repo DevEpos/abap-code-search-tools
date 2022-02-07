@@ -138,12 +138,6 @@
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_MAXR</KEY>
-     <ENTRY>Max. Number of Results</ENTRY>
-     <LENGTH>30</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
      <KEY>P_MULTIL</KEY>
      <ENTRY>Multiline search</ENTRY>
      <LENGTH>24</LENGTH>

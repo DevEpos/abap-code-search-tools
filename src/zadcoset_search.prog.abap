@@ -71,8 +71,7 @@ SELECTION-SCREEN END OF BLOCK scope.
 
 SELECTION-SCREEN BEGIN OF BLOCK limitations WITH FRAME TITLE TEXT-b07.
   PARAMETERS:
-    p_maxo TYPE n LENGTH 6 DEFAULT 5000,
-    p_maxr TYPE n LENGTH 6 DEFAULT 1000.
+    p_maxo TYPE n LENGTH 6 DEFAULT 5000.
 SELECTION-SCREEN END OF BLOCK limitations.
 
 SELECTION-SCREEN BEGIN OF BLOCK settings WITH FRAME TITLE TEXT-b03.
@@ -362,8 +361,6 @@ CLASS lcl_report IMPLEMENTATION.
           include_flags = VALUE #(
             function     = abap_true
             non_function = abap_true ) ) )
-      max_results          = p_maxr
-      all_results          = COND #( WHEN p_maxr IS INITIAL THEN abap_true )
       search_scope         = VALUE #(
         object_name_range = s_objn[]
         object_type_range = get_object_types(  )

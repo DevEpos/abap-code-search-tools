@@ -37,12 +37,6 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
-     <CMPNAME>C_MAX_OBJECTS_ALL</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Use to signal that all objects in scope should be searched</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_C_GLOBAL</CLSNAME>
      <CMPNAME>C_SEARCH_PARAMS</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Names of code search parameters</DESCRIPT>

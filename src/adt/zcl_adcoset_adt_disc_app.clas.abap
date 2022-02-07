@@ -104,8 +104,6 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
                      |\{&{ zif_adcoset_c_global=>c_search_params-scope_offset }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-max_objects }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-match_all_patterns }*\}| &&
-                     |\{&{ zif_adcoset_c_global=>c_search_params-max_results }*\}| &&
-                     |\{&{ zif_adcoset_c_global=>c_search_params-all_results }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-use_regex }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-class_includes }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-fugr_includes }*\}| &&
