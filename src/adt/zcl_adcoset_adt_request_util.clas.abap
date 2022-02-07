@@ -180,7 +180,7 @@ CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
           IMPORTING
             uuid_x16 = result ).
       CATCH cx_uuid_error INTO DATA(conversion_error).
-        RAISE EXCEPTION TYPE zcx_abaptags_adt_error
+        RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
           EXPORTING
             previous = conversion_error.
     ENDTRY.
