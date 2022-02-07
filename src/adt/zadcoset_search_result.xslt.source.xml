@@ -102,29 +102,31 @@
       <tt:root name="messages" />
     </tt:context>
 
-    <adtbase:responseMessages>
-      <tt:loop ref="messages">
+    <tt:cond check="not-initial(messages)">
+      <adtbase:responseMessages>
+        <tt:loop ref="messages">
 
-        <tt:cond check="not-initial($ref.content)">
-          <adtbase:responseMessage tt:extensible="deep">
+          <tt:cond check="not-initial($ref.content)">
+            <adtbase:responseMessage tt:extensible="deep">
 
-            <tt:cond check="not-initial($ref.type)">
-              <tt:attribute name="adtbase:type" value-ref="$ref.type"/>
-            </tt:cond>
+              <tt:cond check="not-initial($ref.type)">
+                <tt:attribute name="adtbase:type" value-ref="$ref.type"/>
+              </tt:cond>
 
-            <tt:cond check="not-initial($ref.content)">
-              <tt:attribute name="adtbase:content" value-ref="$ref.content"/>
-            </tt:cond>
+              <tt:cond check="not-initial($ref.content)">
+                <tt:attribute name="adtbase:content" value-ref="$ref.content"/>
+              </tt:cond>
 
-            <tt:cond check="not-initial($ref.occurrences)">
-              <tt:attribute name="adtbase:occurrences" value-ref="$ref.occurrences"/>
-            </tt:cond>
+              <tt:cond check="not-initial($ref.occurrences)">
+                <tt:attribute name="adtbase:occurrences" value-ref="$ref.occurrences"/>
+              </tt:cond>
 
-          </adtbase:responseMessage>
-        </tt:cond>
+            </adtbase:responseMessage>
+          </tt:cond>
 
-      </tt:loop>
-    </adtbase:responseMessages>
+        </tt:loop>
+      </adtbase:responseMessages>
+    </tt:cond>
   </tt:template>
 
 </tt:transform>
