@@ -31,15 +31,17 @@ CLASS lcl_search_query IMPLEMENTATION.
 
   METHOD get_matcher_type.
 
-    IF matcher_config-enable_pcre = abap_true.
-      " TODO: some notification that PCRE is not supported in the system??
-      IF zcl_adcoset_matcher_factory=>is_pcre_supported( ).
-        result = zif_adcoset_c_global=>c_matcher_type-pcre.
+    IF matcher_config-use_regex = abap_true.
+      IF matcher_config-enable_pcre = abap_true.
+        IF zcl_adcoset_matcher_factory=>is_pcre_supported( ).
+          result = zif_adcoset_c_global=>c_matcher_type-pcre.
+        ELSE.
+          " should not happen but a fallback does not hurt anybody
+          result = zif_adcoset_c_global=>c_matcher_type-posix_regex.
+        ENDIF.
       ELSE.
         result = zif_adcoset_c_global=>c_matcher_type-posix_regex.
       ENDIF.
-    ELSEIF matcher_config-use_regex = abap_true.
-      result = zif_adcoset_c_global=>c_matcher_type-posix_regex.
     ELSE.
       result = zif_adcoset_c_global=>c_matcher_type-substring.
     ENDIF.
