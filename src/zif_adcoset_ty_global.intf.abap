@@ -167,12 +167,22 @@ INTERFACE zif_adcoset_ty_global
       server_group TYPE ty_server_group,
     END OF ty_parl_processing,
 
+    "! Settings for PCRE Regex
+    BEGIN OF ty_pcre_regex_settings,
+      "! Extended mode means all whitespaces have to be escaped to be
+      "! recognized as whitespaces
+      extended_mode_disabled   TYPE abap_bool,
+      "! Single line mode tells the RegEx engine that the '.' character should
+      "! match line break sequences as well (i.e. \r, \n, \r\n)
+      single_line_mode_enabled TYPE abap_bool,
+    END OF ty_pcre_regex_settings,
+
     BEGIN OF ty_pattern_config,
       ignore_case   TYPE abap_bool,
       matcher_type  TYPE ty_matcher_type,
       pattern_range TYPE RANGE OF string,
+      pcre_settings TYPE ty_pcre_regex_settings,
     END OF ty_pattern_config.
-
 
   "! <p class="shorttext synchronized" lang="en">Internal code search settings</p>
   TYPES BEGIN OF ty_search_settings_int.

@@ -13,12 +13,6 @@
    <TPOOL>
     <item>
      <ID>I</ID>
-     <KEY>001</KEY>
-     <ENTRY>Enable PCRE (Perl compatible regular expressions)</ENTRY>
-     <LENGTH>70</LENGTH>
-    </item>
-    <item>
-     <ID>I</ID>
      <KEY>B01</KEY>
      <ENTRY>Pattern</ENTRY>
      <LENGTH>17</LENGTH>
@@ -147,12 +141,6 @@
      <KEY>P_PARLP</KEY>
      <ENTRY>Enable parallel processing</ENTRY>
      <LENGTH>34</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
-     <KEY>P_PCRE</KEY>
-     <ENTRY>Enable PCRE</ENTRY>
-     <LENGTH>19</LENGTH>
     </item>
     <item>
      <ID>S</ID>

@@ -34,10 +34,6 @@ SELECTION-SCREEN BEGIN OF BLOCK pattern WITH FRAME TITLE TEXT-b01.
   PARAMETERS:
     p_ignc  TYPE abap_bool AS CHECKBOX DEFAULT 'X',
     p_regex TYPE abap_bool AS CHECKBOX USER-COMMAND regex.
-  SELECTION-SCREEN BEGIN OF LINE.
-    PARAMETERS p_pcre  TYPE abap_bool AS CHECKBOX USER-COMMAND pcre.
-    SELECTION-SCREEN COMMENT 3(60) TEXT-001 FOR FIELD p_pcre.
-  SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN END OF BLOCK pattern.
 
 SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
@@ -165,7 +161,7 @@ AT SELECTION-SCREEN.
 CLASS lcl_report IMPLEMENTATION.
 
   METHOD constructor.
-    pcre_available = zcl_adcoset_matcher_factory=>is_pcre_supported( ).
+    pcre_available = zcl_adcoset_pcre_util=>is_pcre_supported( ).
     set_icon(
       EXPORTING
         icon_name = 'ICON_SELECT_ALL'
@@ -238,13 +234,6 @@ CLASS lcl_report IMPLEMENTATION.
       WHEN 'REGEX'.
         IF p_regex = abap_true.
           p_singpm = abap_false.
-        ELSE.
-          p_pcre = abap_false.
-        ENDIF.
-
-      WHEN 'PCRE'.
-        IF p_pcre = abap_true.
-          p_regex = abap_true.
         ENDIF.
 
       WHEN 'SINGLE_PATTERN_MODE'.
@@ -369,14 +358,12 @@ CLASS lcl_report IMPLEMENTATION.
         package_range     = s_pack[]
         max_objects       = p_maxo ) ).
 
-    IF p_pcre = abap_true.
-      IF zcl_adcoset_matcher_factory=>is_pcre_supported( ).
+    IF p_regex = abap_true.
+      IF zcl_adcoset_pcre_util=>is_pcre_supported( ).
         search_config-matcher_type = zif_adcoset_c_global=>c_matcher_type-pcre.
       ELSE.
         search_config-matcher_type = zif_adcoset_c_global=>c_matcher_type-posix_regex.
       ENDIF.
-    ELSEIF p_regex = abap_true.
-      search_config-matcher_type = zif_adcoset_c_global=>c_matcher_type-posix_regex.
     ELSE.
       search_config-matcher_type = zif_adcoset_c_global=>c_matcher_type-substring.
     ENDIF.

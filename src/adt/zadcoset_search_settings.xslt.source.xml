@@ -7,8 +7,12 @@
 
   <tt:template>
     <cst:settings tt:extensible="deep">
-      <tt:cond check="not-initial(settings.pcre_enabled)">
-        <tt:attribute name="cst:pcreEnabled" option="format(boolean)" value-ref="settings.pcre_enabled"/>
+      <tt:cond check="not-initial(settings.pcre_ext_mode_disabled)">
+        <tt:attribute name="cst:pcreExtendedDisabled" option="format(boolean)" value-ref="settings.pcre_ext_mode_disabled"/>
+      </tt:cond>
+
+      <tt:cond check="not-initial(settings.pcre_single_line_enabled)">
+        <tt:attribute name="cst:pcreSingleLineEnabled" option="format(boolean)" value-ref="settings.pcre_single_line_enabled"/>
       </tt:cond>
 
       <tt:cond check="not-initial(settings.parallel_enabled)">

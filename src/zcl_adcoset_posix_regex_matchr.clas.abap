@@ -18,7 +18,6 @@ CLASS zcl_adcoset_posix_regex_matchr DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
-      regex       TYPE REF TO cl_abap_regex,
       pattern     TYPE string,
       ignore_case TYPE abap_bool.
 ENDCLASS.
@@ -31,7 +30,8 @@ CLASS zcl_adcoset_posix_regex_matchr IMPLEMENTATION.
   METHOD constructor.
     me->pattern = pattern.
     me->ignore_case = ignore_case.
-    regex = NEW #(
+    " will only be used to verify the regex pattern is valid
+    NEW cl_abap_regex(
       pattern     = pattern
       ignore_case = ignore_case ).
   ENDMETHOD.
@@ -42,9 +42,9 @@ CLASS zcl_adcoset_posix_regex_matchr IMPLEMENTATION.
     " exceptions inside the '_find' method that cannot be caught
     TRY.
         IF ignore_case = abap_true.
-          FIND ALL OCCURRENCES OF regex pattern IN TABLE source IGNORING CASE RESULTS result.
+          FIND ALL OCCURRENCES OF REGEX pattern IN TABLE source IGNORING CASE RESULTS result.
         ELSE.
-          FIND ALL OCCURRENCES OF regex pattern IN TABLE source RESPECTING CASE RESULTS result.
+          FIND ALL OCCURRENCES OF REGEX pattern IN TABLE source RESPECTING CASE RESULTS result.
         ENDIF.
       CATCH cx_sy_regex_too_complex INTO DATA(regex_error).
         RAISE EXCEPTION TYPE zcx_adcoset_pattern_sh_error

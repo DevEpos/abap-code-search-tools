@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ADCOSET_MATCHER_FACTORY</CLSNAME>
+    <CLSNAME>ZCL_ADCOSET_PCRE_UTIL</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Factory to create matchers</DESCRIPT>
+    <DESCRIPT>Utility to check PCRE support</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
@@ -13,16 +13,16 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_ADCOSET_MATCHER_FACTORY</CLSNAME>
-     <CMPNAME>CREATE_MATCHER</CMPNAME>
+     <CLSNAME>ZCL_ADCOSET_PCRE_UTIL</CLSNAME>
+     <CMPNAME>IS_DOT_ALL_PARAM_EXISTING</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Creates matcher for the given type and pattern</DESCRIPT>
+     <DESCRIPT>Returns &apos;X&apos; if the parameter &apos;DOT_ALL&apos; exists at CREATE_PCRE</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_ADCOSET_MATCHER_FACTORY</CLSNAME>
-     <CMPNAME>CREATE_MATCHERS</CMPNAME>
+     <CLSNAME>ZCL_ADCOSET_PCRE_UTIL</CLSNAME>
+     <CMPNAME>IS_PCRE_SUPPORTED</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Creates matchers from pattern range</DESCRIPT>
+     <DESCRIPT>Checks if PCRE is supported in the system</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

@@ -26,7 +26,7 @@ CLASS zcl_adcoset_adt_res_features IMPLEMENTATION.
         name        = c_pcre_available_feature
         type        = 'Boolean'
         category    = 'RequestAttribute'
-        enabled     = zcl_adcoset_matcher_factory=>is_pcre_supported( )
+        enabled     = zcl_adcoset_pcre_util=>is_pcre_supported( )
         description = 'Indicates if Perl-Compatible-Regular-Expressions are available' ) ).
 
     response->set_body_data(

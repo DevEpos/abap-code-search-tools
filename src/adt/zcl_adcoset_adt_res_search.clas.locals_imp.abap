@@ -32,13 +32,8 @@ CLASS lcl_search_query IMPLEMENTATION.
   METHOD get_matcher_type.
 
     IF matcher_config-use_regex = abap_true.
-      IF matcher_config-enable_pcre = abap_true.
-        IF zcl_adcoset_matcher_factory=>is_pcre_supported( ).
-          result = zif_adcoset_c_global=>c_matcher_type-pcre.
-        ELSE.
-          " should not happen but a fallback does not hurt anybody
-          result = zif_adcoset_c_global=>c_matcher_type-posix_regex.
-        ENDIF.
+      IF zcl_adcoset_pcre_util=>is_pcre_supported( ).
+        result = zif_adcoset_c_global=>c_matcher_type-pcre.
       ELSE.
         result = zif_adcoset_c_global=>c_matcher_type-posix_regex.
       ENDIF.
@@ -107,13 +102,13 @@ CLASS lcl_search_query IMPLEMENTATION.
 
 
   METHOD get_persisted_settings.
-
     DATA(server_settings) = zcl_adcoset_search_settings=>get_settings( ).
+    settings-pcre_settings = VALUE #(
+      extended_mode_disabled   = server_settings-pcre_ext_mode_disabled
+      single_line_mode_enabled = server_settings-pcre_single_line_enabled ).
     settings-parallel_processing = VALUE #(
       enabled      = server_settings-parallel_enabled
       server_group = server_settings-parallel_server_group ).
-
-    matcher_config-enable_pcre = server_settings-pcre_enabled.
   ENDMETHOD.
 
 
