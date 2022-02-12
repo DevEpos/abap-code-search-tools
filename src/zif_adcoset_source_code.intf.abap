@@ -17,6 +17,7 @@ INTERFACE zif_adcoset_source_code
       IMPORTING
         matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
         match_all            TYPE abap_bool OPTIONAL
+        sequential_matching  TYPE abap_bool OPTIONAL
         ignore_comment_lines TYPE abap_bool OPTIONAL
       RETURNING
         VALUE(result)        TYPE zif_adcoset_ty_global=>ty_search_matches.

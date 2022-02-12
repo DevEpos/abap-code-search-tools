@@ -22,12 +22,28 @@ CLASS zcl_adcoset_pcre_matcher DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
-      c_single_mode_option TYPE string VALUE '(?s)'.
+      BEGIN OF c_pcre_options,
+        single_line_on TYPE string VALUE '(?s)',
+        extended_off   TYPE string VALUE '(?-x)',
+      END OF c_pcre_options.
+
+    CLASS-DATA:
+      matcher_classname TYPE string.
 
     DATA:
-      regex       TYPE REF TO cl_abap_regex,
-      pattern     TYPE string,
-      ignore_case TYPE abap_bool.
+      regex                    TYPE REF TO cl_abap_regex,
+      pattern                  TYPE string,
+      pattern_for_seq_matching TYPE string,
+      ignore_case              TYPE abap_bool.
+
+    METHODS:
+      "! Generates a subroutine pool for finding matches in a table of strings. <br/><br/>
+      "!
+      "! The program is needed as the PCRE option is not available on all NW stacks and <br/>
+      "! offset's cannot be passed to the SAP API for RegEx processing
+      generate_matcher_program
+        RETURNING
+          VALUE(result) TYPE progname.
 ENDCLASS.
 
 
@@ -58,8 +74,8 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
       " prefixed to the pattern it will not be removed and single line mode will
       " still be active
       IF settings-single_line_mode_enabled = abap_true.
-        IF find( val = l_pattern sub = c_single_mode_option ) <= 0.
-          l_pattern = c_single_mode_option && l_pattern.
+        IF find( val = l_pattern sub = c_pcre_options-single_line_on ) <= 0.
+          l_pattern = c_pcre_options-single_line_on && l_pattern.
         ENDIF.
       ENDIF.
 
@@ -71,6 +87,16 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
         RECEIVING
           regex       = regex.
     ENDIF.
+
+    " create pattern for sequential matching
+    pattern_for_seq_matching = pattern.
+    IF settings-extended_mode_disabled = abap_true.
+      pattern_for_seq_matching = c_pcre_options-extended_off && pattern_for_seq_matching.
+    ENDIF.
+
+    IF settings-single_line_mode_enabled = abap_true.
+      pattern_for_seq_matching = c_pcre_options-single_line_on && pattern_for_seq_matching.
+    ENDIF.
   ENDMETHOD.
 
 
@@ -78,11 +104,64 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
     TRY.
         result = regex->create_matcher( table = source )->find_all( ).
       CATCH cx_sy_matcher ##NO_HANDLER.
-        " TODO: check system where PCRE is available if the same problems as in
-        "       zcl_adcoset_posix_regex_matchr can occur
-        " should not happen. The regex exceptions will be handled in the constructor
     ENDTRY.
   ENDMETHOD.
 
+
+  METHOD zif_adcoset_pattern_matcher~find_next_match.
+    IF matcher_classname IS INITIAL.
+      matcher_classname = |\\PROGRAM={ generate_matcher_program( ) }\\CLASS=LCL_PCRE_MATCHER|.
+    ENDIF.
+
+    CALL METHOD (matcher_classname)=>('FIND_NEXT_MATCH')
+      EXPORTING
+        source      = source
+        pattern     = pattern_for_seq_matching
+        ignore_case = ignore_case
+        start_line  = start_line
+        offset      = offset.
+  ENDMETHOD.
+
+
+  METHOD generate_matcher_program.
+    DATA: source_lines TYPE TABLE OF string.
+
+    source_lines = VALUE #(
+      ( |REPORT zpcre_matcher.| )
+      ( |CLASS lcl_pcre_matcher DEFINITION CREATE PRIVATE.| )
+      ( |  PUBLIC SECTION.| )
+      ( |    CLASS-METHODS find_next_match| )
+      ( |      IMPORTING| )
+      ( |        source        TYPE string_table| )
+      ( |        pattern       TYPE string| )
+      ( |        ignore_case   TYPE abap_bool| )
+      ( |        start_line    TYPE i OPTIONAL| )
+      ( |        offset        TYPE i OPTIONAL| )
+      ( |      RETURNING| )
+      ( |        VALUE(result) TYPE match_result.| )
+      ( |ENDCLASS.| )
+      ( || )
+      ( |CLASS lcl_pcre_matcher IMPLEMENTATION.| )
+      ( |  METHOD find_next_match.| )
+      ( |    DATA(l_start_line) = COND #( WHEN start_line IS INITIAL THEN 1 ELSE start_line ).| )
+      ( || )
+      ( |    IF ignore_case = abap_true.| )
+      ( |      FIND FIRST OCCURRENCE OF PCRE pattern IN TABLE source| )
+      ( |        FROM l_start_line OFFSET offset| )
+      ( |        IGNORING CASE| )
+      ( |        RESULTS result.| )
+      ( |    ELSE.| )
+      ( |      FIND FIRST OCCURRENCE OF PCRE pattern IN TABLE source| )
+      ( |        FROM l_start_line OFFSET offset| )
+      ( |        RESPECTING CASE| )
+      ( |        RESULTS result.| )
+      ( |    ENDIF.| )
+      ( |  ENDMETHOD.| )
+      ( |ENDCLASS.| ) ).
+
+    GENERATE SUBROUTINE POOL source_lines
+      NAME result
+      MESSAGE DATA(message).
+  ENDMETHOD.
 
 ENDCLASS.

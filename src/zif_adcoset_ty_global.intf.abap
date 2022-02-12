@@ -153,6 +153,7 @@ INTERFACE zif_adcoset_ty_global
       line_feed            TYPE string,
       ignore_comment_lines TYPE abap_bool,
       match_all_patterns   TYPE abap_bool,
+      sequential_matching  TYPE abap_bool,
       multiline_search     TYPE abap_bool,
     END OF ty_search_settings,
 

@@ -39,6 +39,7 @@ INTERFACE zif_adcoset_c_global
       owner                TYPE string VALUE 'owner',
       use_regex            TYPE string VALUE 'useRegex',
       match_all_patterns   TYPE string VALUE 'matchAll',
+      sequential_matching  TYPE string VALUE 'seqMatching',
       ignore_comment_lines TYPE string VALUE 'ignoreCommentLines',
       ignore_case          TYPE string VALUE 'ignoreCase',
       multi_line           TYPE string VALUE 'multiLine',

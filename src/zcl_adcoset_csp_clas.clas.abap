@@ -86,6 +86,7 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
           DATA(matches) = source_code->find_matches(
             matchers             = matchers
             match_all            = search_settings-match_all_patterns
+            sequential_matching  = search_settings-sequential_matching
             ignore_comment_lines = search_settings-ignore_comment_lines ).
 
           IF matches IS NOT INITIAL.

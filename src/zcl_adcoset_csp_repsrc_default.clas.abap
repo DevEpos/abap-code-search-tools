@@ -52,6 +52,7 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
         LOOP AT source->find_matches(
             matchers             = matchers
             match_all            = search_settings-match_all_patterns
+            sequential_matching  = search_settings-sequential_matching
             ignore_comment_lines = search_settings-ignore_comment_lines ) ASSIGNING FIELD-SYMBOL(<match>).
 
           <match>-include = include_name.

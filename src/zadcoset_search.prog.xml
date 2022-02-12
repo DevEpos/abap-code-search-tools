@@ -156,6 +156,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_SEQMA</KEY>
+     <ENTRY>Sequential Matching</ENTRY>
+     <LENGTH>27</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_SERVG</KEY>
      <ENTRY>Server group</ENTRY>
      <LENGTH>20</LENGTH>

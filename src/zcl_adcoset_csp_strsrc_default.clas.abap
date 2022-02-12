@@ -36,6 +36,7 @@ CLASS zcl_adcoset_csp_strsrc_default IMPLEMENTATION.
         result = source->find_matches(
           matchers             = matchers
           match_all            = search_settings-match_all_patterns
+          sequential_matching  = search_settings-sequential_matching
           ignore_comment_lines = search_settings-ignore_comment_lines ).
 
       CATCH zcx_adcoset_src_code_read.

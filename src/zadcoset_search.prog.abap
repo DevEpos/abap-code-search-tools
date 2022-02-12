@@ -74,8 +74,9 @@ SELECTION-SCREEN BEGIN OF BLOCK settings WITH FRAME TITLE TEXT-b03.
   PARAMETERS:
     p_igncom TYPE abap_bool AS CHECKBOX,
     p_singpm TYPE abap_bool AS CHECKBOX USER-COMMAND single_pattern_mode,
-    p_multil TYPE abap_bool AS CHECKBOX MODIF ID spm,
-    p_matcha TYPE abap_bool AS CHECKBOX MODIF ID spm.
+    p_multil TYPE abap_bool AS CHECKBOX USER-COMMAND multiline,
+    p_seqma  TYPE abap_bool AS CHECKBOX USER-COMMAND sequential_matching,
+    p_matcha TYPE abap_bool AS CHECKBOX.
 SELECTION-SCREEN END OF BLOCK settings.
 
 SELECTION-SCREEN BEGIN OF BLOCK parallel_processing WITH FRAME TITLE TEXT-b04.
@@ -193,9 +194,6 @@ CLASS lcl_report IMPLEMENTATION.
       IF screen-group1 = 'TCH'.
         screen-input = COND #( WHEN p_typal = abap_true THEN '0' ELSE '1' ).
         MODIFY SCREEN.
-      ELSEIF screen-group1 = 'SPM'.
-        screen-input = COND #( WHEN p_singpm = abap_true THEN '0' ELSE '1' ).
-        MODIFY SCREEN.
       ELSEIF screen-name = 'S_PATT-LOW'.
         screen-required = '2'.
         MODIFY SCREEN.
@@ -208,13 +206,20 @@ CLASS lcl_report IMPLEMENTATION.
         screen-input = COND #( WHEN p_singpm = abap_false THEN '1' ELSE '0' ).
         MODIFY SCREEN.
       ELSEIF screen-name = 'P_SINGPM'.
-        screen-input = COND #( WHEN p_regex = abap_false THEN '1' ELSE '0' ).
+        screen-input = COND #( WHEN p_regex = abap_false AND
+                                    p_seqma = abap_false THEN '1' ELSE '0' ).
         MODIFY SCREEN.
       ELSEIF screen-name = 'P_MULTIL'.
-        screen-input = COND #( WHEN p_singpm = abap_true THEN '0' ELSE '1' ).
+        screen-input = COND #( WHEN p_singpm = abap_true OR
+                                    p_seqma  = abap_true THEN '0' ELSE '1' ).
         MODIFY SCREEN.
       ELSEIF screen-name = 'P_MATCHA'.
-        screen-input = COND #( WHEN p_singpm = abap_true THEN '0' ELSE '1' ).
+        screen-input = COND #( WHEN p_singpm = abap_true OR
+                                    p_seqma  = abap_true THEN '0' ELSE '1' ).
+        MODIFY SCREEN.
+      ELSEIF screen-name = 'P_SEQMA'.
+        screen-input = COND #( WHEN p_singpm = abap_true OR
+                                    p_multil = abap_true THEN '0' ELSE '1' ).
         MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
@@ -236,10 +241,18 @@ CLASS lcl_report IMPLEMENTATION.
           p_singpm = abap_false.
         ENDIF.
 
+      WHEN 'SEQUENTIAL_MATCHING'.
+        IF p_seqma = abap_true.
+          p_singpm = abap_false.
+          p_matcha = abap_true.
+          p_multil = abap_false.
+        ENDIF.
+
       WHEN 'SINGLE_PATTERN_MODE'.
         IF p_singpm = abap_true.
           p_multil = abap_true.
           p_matcha = abap_false.
+          p_seqma = abap_false.
         ENDIF.
     ENDCASE.
 
@@ -331,6 +344,7 @@ CLASS lcl_report IMPLEMENTATION.
       ignore_comment_lines = p_igncom
       match_all_patterns   = p_matcha
       multiline_search     = p_multil
+      sequential_matching  = p_seqma
       ignore_case          = p_ignc
       pattern_range        = get_patterns( )
       parallel_processing  = VALUE #( enabled = p_parlp server_group = p_servg )

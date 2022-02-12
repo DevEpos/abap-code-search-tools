@@ -54,5 +54,28 @@ CLASS zcl_adcoset_posix_regex_matchr IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD zif_adcoset_pattern_matcher~find_next_match.
+    DATA(l_start_line) = COND #( WHEN start_line IS INITIAL THEN 1 ELSE start_line ).
+
+    TRY.
+        IF ignore_case = abap_true.
+          FIND FIRST OCCURRENCE OF REGEX pattern IN TABLE source
+            FROM l_start_line OFFSET offset
+            IGNORING CASE
+            RESULTS result.
+        ELSE.
+          FIND FIRST OCCURRENCE OF REGEX pattern IN TABLE source
+            FROM l_start_line OFFSET offset
+            RESPECTING CASE
+            RESULTS result.
+        ENDIF.
+      CATCH cx_sy_regex_too_complex INTO DATA(regex_error).
+        RAISE EXCEPTION TYPE zcx_adcoset_pattern_sh_error
+          EXPORTING
+            previous = regex_error.
+    ENDTRY.
+
+  ENDMETHOD.
+
 ENDCLASS.
 

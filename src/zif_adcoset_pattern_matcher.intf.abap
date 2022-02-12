@@ -12,5 +12,16 @@ INTERFACE zif_adcoset_pattern_matcher
       RETURNING
         VALUE(result) TYPE match_result_tab
       RAISING
+        zcx_adcoset_pattern_sh_error,
+
+    "! <p class="shorttext synchronized" lang="en">Retrieves the next match in the given source and offset</p>
+    find_next_match DEFAULT IGNORE
+      IMPORTING
+        source        TYPE string_table
+        start_line    TYPE i OPTIONAL
+        offset        TYPE i OPTIONAL
+      RETURNING
+        VALUE(result) TYPE match_result
+      RAISING
         zcx_adcoset_pattern_sh_error.
 ENDINTERFACE.

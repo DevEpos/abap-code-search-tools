@@ -24,7 +24,6 @@ ENDCLASS.
 
 CLASS zcl_adcoset_substring_matcher IMPLEMENTATION.
 
-
   METHOD constructor.
     me->pattern = pattern.
     me->ignore_case = ignore_case.
@@ -39,5 +38,21 @@ CLASS zcl_adcoset_substring_matcher IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+
+  METHOD zif_adcoset_pattern_matcher~find_next_match.
+    DATA(l_start_line) = COND #( WHEN start_line IS INITIAL THEN 1 ELSE start_line ).
+
+    IF ignore_case = abap_true.
+      FIND FIRST OCCURRENCE OF pattern IN TABLE source
+        FROM l_start_line OFFSET offset
+        IGNORING CASE
+        RESULTS result.
+    ELSE.
+      FIND FIRST OCCURRENCE OF pattern IN TABLE source
+        FROM l_start_line OFFSET offset
+        RESPECTING CASE
+        RESULTS result.
+    ENDIF.
+  ENDMETHOD.
 
 ENDCLASS.

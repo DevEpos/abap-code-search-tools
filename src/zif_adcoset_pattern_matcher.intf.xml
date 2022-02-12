@@ -17,6 +17,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves the matches in the given source</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_PATTERN_MATCHER</CLSNAME>
+     <CMPNAME>FIND_NEXT_MATCH</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Retrieves the next match in the given source and offset</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

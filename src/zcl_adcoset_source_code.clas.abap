@@ -64,7 +64,20 @@ CLASS zcl_adcoset_source_code DEFINITION
           start_line    TYPE zif_adcoset_source_code=>ty_line_index
           end_line      TYPE zif_adcoset_source_code=>ty_line_index
         RETURNING
-          VALUE(result) TYPE abap_bool.
+          VALUE(result) TYPE abap_bool,
+      find_sequential_matches
+        IMPORTING
+          matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
+          ignore_comment_lines TYPE abap_bool OPTIONAL
+        RETURNING
+          VALUE(result)        TYPE zif_adcoset_ty_global=>ty_search_matches,
+      find_non_sequential_matches
+        IMPORTING
+          matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
+          match_all            TYPE abap_bool OPTIONAL
+          ignore_comment_lines TYPE abap_bool OPTIONAL
+        RETURNING
+          VALUE(result)        TYPE zif_adcoset_ty_global=>ty_search_matches.
 ENDCLASS.
 
 
@@ -85,6 +98,83 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
 
 
   METHOD zif_adcoset_source_code~find_matches.
+
+    IF sequential_matching = abap_true.
+      result = find_sequential_matches(
+        matchers             = matchers
+        ignore_comment_lines = ignore_comment_lines ).
+    ELSE.
+      result = find_non_sequential_matches(
+        matchers             = matchers
+        match_all            = match_all
+        ignore_comment_lines = ignore_comment_lines ).
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD find_sequential_matches.
+    DATA: line_offset   TYPE i,
+          col_offset    TYPE i,
+          current_match TYPE match_result,
+          match_start   TYPE match_result,
+          raw_matches   TYPE match_result_tab.
+
+    DATA(has_more_matches) = abap_true.
+
+    WHILE has_more_matches = abap_true.
+
+      CLEAR: current_match,
+             raw_matches.
+
+      LOOP AT matchers ASSIGNING FIELD-SYMBOL(<matcher>).
+        DATA(i) = sy-tabix.
+        TRY.
+            current_match = <matcher>->find_next_match(
+              source     = source
+              start_line = line_offset
+              offset     = col_offset ).
+          CATCH zcx_adcoset_pattern_sh_error.
+            has_more_matches = abap_false.
+            EXIT.
+        ENDTRY.
+
+        IF current_match IS INITIAL.
+          has_more_matches = abap_false.
+          EXIT.
+        ENDIF.
+
+        IF ignore_comment_lines = abap_true AND
+            comment_regex IS NOT INITIAL AND
+            is_comment_line( source[ current_match-line ] ).
+          has_more_matches = abap_false.
+          EXIT.
+        ENDIF.
+
+        IF i = 1.
+          match_start = current_match.
+        ENDIF.
+
+        line_offset = current_match-line.
+        col_offset = current_match-offset + current_match-length.
+      ENDLOOP.
+
+      raw_matches = VALUE #( BASE raw_matches ( current_match ) ).
+
+      IF current_match IS NOT INITIAL AND
+          match_start IS NOT INITIAL.
+        result = VALUE #( BASE result
+          ( start_line   = match_start-line
+            start_column = match_start-offset
+            end_line     = current_match-line
+            end_column   = current_match-offset + current_match-length
+            snippet      = source[ match_start-line ] ) ).
+      ENDIF.
+    ENDWHILE.
+
+  ENDMETHOD.
+
+
+  METHOD find_non_sequential_matches.
 
     LOOP AT matchers INTO DATA(matcher).
       TRY.
@@ -237,6 +327,5 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
         len = end_line-offset + end_line-length - start_line-offset
         regex = comment_regex  ) <> -1 ).
   ENDMETHOD.
-
 
 ENDCLASS.
