@@ -42,6 +42,8 @@ CLASS zcl_adcoset_csp_strsrc_default IMPLEMENTATION.
       CATCH zcx_adcoset_src_code_read.
         "handle exception
     ENDTRY.
+
+    zcl_adcoset_search_protocol=>increment_searched_srcs_count( ).
   ENDMETHOD.
 
 

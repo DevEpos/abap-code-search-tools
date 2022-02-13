@@ -92,7 +92,7 @@ CLASS lcl_result_converter DEFINITION
       packages        TYPE SORTED TABLE OF ty_package WITH UNIQUE KEY package_name.
 
     METHODS:
-      set_durations,
+      init_result,
       convert_matches_to_adt_result,
       add_main_object_ref
         IMPORTING

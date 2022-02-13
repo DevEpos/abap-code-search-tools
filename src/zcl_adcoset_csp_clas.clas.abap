@@ -102,6 +102,8 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       ENDTRY.
     ENDLOOP.
 
+    zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( class_includes ) ).
+
   ENDMETHOD.
 
 

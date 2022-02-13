@@ -69,6 +69,8 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
             ENDIF.
           CATCH zcx_adcoset_static_error.
         ENDTRY.
+
+        zcl_adcoset_search_protocol=>increment_searched_objs_count( ).
       ENDLOOP.
 
     ENDWHILE.

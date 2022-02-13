@@ -130,6 +130,8 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
     ENDLOOP.
 
+    zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( includes ) ).
+
   ENDMETHOD.
 
 

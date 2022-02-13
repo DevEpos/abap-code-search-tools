@@ -49,6 +49,8 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
     IF sy-subrc = 0.
       INSERT LINES OF <package_result>-result_objects INTO TABLE search_results.
       zcl_adcoset_log=>add_all_messages( <package_result>-messages ).
+      zcl_adcoset_search_protocol=>increase_searchd_objects_count( <package_result>-searched_objects_count ).
+      zcl_adcoset_search_protocol=>increase_searchd_sources_count( <package_result>-searched_sources_count ).
     ENDIF.
   ENDMETHOD.
 

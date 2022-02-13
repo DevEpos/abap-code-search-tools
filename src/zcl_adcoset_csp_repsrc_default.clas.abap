@@ -30,7 +30,6 @@ ENDCLASS.
 
 CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
 
-
   METHOD constructor.
     me->search_settings = search_settings.
     me->matchers = matchers.
@@ -62,8 +61,9 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
       CATCH zcx_adcoset_src_code_read.
         "handle exception
     ENDTRY.
-  ENDMETHOD.
 
+    zcl_adcoset_search_protocol=>increment_searched_srcs_count( ).
+  ENDMETHOD.
 
 
   METHOD get_include.

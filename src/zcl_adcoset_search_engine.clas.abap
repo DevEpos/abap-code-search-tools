@@ -68,13 +68,16 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
     query->run( ).
 
     output = VALUE #(
-      result_objects = query->get_results( )
-      messages       = zcl_adcoset_log=>get_messages( ) ).
+      result_objects         = query->get_results( )
+      searched_objects_count = zcl_adcoset_search_protocol=>get_searched_object_count( )
+      searched_sources_count = zcl_adcoset_search_protocol=>get_searched_sources_count( )
+      messages               = zcl_adcoset_log=>get_messages( ) ).
   ENDMETHOD.
 
 
   METHOD search_code.
     zcl_adcoset_log=>clear( ).
+    zcl_adcoset_search_protocol=>reset( ).
 
     validate_matchers(
       matcher_type = search_config-matcher_type
@@ -91,9 +94,11 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
     timer->stop( ).
 
     result = VALUE #(
-      results        = query->get_results( )
-      messages       = zcl_adcoset_log=>get_messages( )
-      duration_in_ms = timer->get_duration_in_ms( ) ).
+      results                = query->get_results( )
+      messages               = zcl_adcoset_log=>get_messages( )
+      duration_in_ms         = timer->get_duration_in_ms( )
+      searched_objects_count = zcl_adcoset_search_protocol=>get_searched_object_count( )
+      searched_sources_count = zcl_adcoset_search_protocol=>get_searched_sources_count( ) ).
   ENDMETHOD.
 
 

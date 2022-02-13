@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_ADCOSET_SEARCH_PROTOCOL</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Protocol that collects information during code search</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_PROTOCOL</CLSNAME>
+     <CMPNAME>GET_SEARCHED_OBJECT_COUNT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns count of searched objects</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_PROTOCOL</CLSNAME>
+     <CMPNAME>GET_SEARCHED_SOURCES_COUNT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns count of searched sources</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_PROTOCOL</CLSNAME>
+     <CMPNAME>INCREASE_SEARCHD_OBJECTS_COUNT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Increases count of searched objects with the given value</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_PROTOCOL</CLSNAME>
+     <CMPNAME>INCREASE_SEARCHD_SOURCES_COUNT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Increases count of searched sources with the given value</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_PROTOCOL</CLSNAME>
+     <CMPNAME>INCREMENT_SEARCHED_OBJS_COUNT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Increments the count of searched objects</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_PROTOCOL</CLSNAME>
+     <CMPNAME>INCREMENT_SEARCHED_SRCS_COUNT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Increments the count of searched sources</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_ADCOSET_SEARCH_PROTOCOL</CLSNAME>
+     <CMPNAME>RESET</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Resets the protocol values</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

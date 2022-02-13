@@ -225,7 +225,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
 
   METHOD convert.
-    set_durations( ).
+    init_result( ).
 
     determine_package_hierarchy( ).
     add_packages_to_adt_result( ).
@@ -236,8 +236,10 @@ CLASS lcl_result_converter IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD set_durations.
+  METHOD init_result.
     adt_result-query_time_in_ms = raw_result-duration_in_ms.
+    adt_result-number_of_searched_objects = raw_result-searched_objects_count.
+    adt_result-number_of_searched_sources = raw_result-searched_sources_count.
   ENDMETHOD.
 
 

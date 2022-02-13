@@ -26,6 +26,7 @@
     <cst:result tt:extensible="deep">
       <tt:attribute name="cst:numberOfResults" value-ref="code_search_result.number_of_results"/>
       <tt:attribute name="cst:numberOfSearchedObjects" value-ref="code_search_result.number_of_searched_objects"/>
+      <tt:attribute name="cst:numberOfSearchedSources" value-ref="code_search_result.number_of_searched_sources"/>
       <tt:attribute name="cst:queryTimeInMs" value-ref="code_search_result.query_time_in_ms"/>
 
       <tt:apply name="codeSearchObjects">

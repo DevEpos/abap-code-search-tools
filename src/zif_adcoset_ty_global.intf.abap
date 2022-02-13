@@ -118,9 +118,11 @@ INTERFACE zif_adcoset_ty_global
 
     "! Code search result
     BEGIN OF ty_search_result,
-      results        TYPE ty_search_result_objects,
-      messages       TYPE ty_messages,
-      duration_in_ms TYPE ty_duration_in_ms,
+      results                TYPE ty_search_result_objects,
+      searched_objects_count TYPE i,
+      searched_sources_count TYPE i,
+      messages               TYPE ty_messages,
+      duration_in_ms         TYPE ty_duration_in_ms,
     END OF ty_search_result,
 
     "! Class settings for code search
@@ -211,8 +213,10 @@ INTERFACE zif_adcoset_ty_global
 
   TYPES:
     BEGIN OF ty_search_package_result,
-      result_objects TYPE ty_search_result_objects,
-      messages       TYPE ty_messages,
+      result_objects         TYPE ty_search_result_objects,
+      searched_objects_count TYPE i,
+      searched_sources_count TYPE i,
+      messages               TYPE ty_messages,
     END OF ty_search_package_result,
 
     "! <p class="shorttext synchronized" lang="en">Value range for search option</p>
