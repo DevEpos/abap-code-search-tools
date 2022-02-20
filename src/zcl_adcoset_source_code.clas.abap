@@ -99,7 +99,7 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
 
   METHOD zif_adcoset_source_code~find_matches.
 
-    IF sequential_matching = abap_true.
+    IF sequential_matching = abap_true and lines( matchers ) > 1.
       result = find_sequential_matches(
         matchers             = matchers
         ignore_comment_lines = ignore_comment_lines ).
