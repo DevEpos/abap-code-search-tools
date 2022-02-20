@@ -22,10 +22,12 @@ CLASS zcl_adcoset_search_scope DEFINITION
 
     DATA:
       search_ranges                  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges,
+      "! Restricts the maximum number of objects to select for the search
       max_objects                    TYPE i,
       "! Holds the object count depending on whether the scope was loaded from the
       "! database or not
       obj_count_for_package_building TYPE i,
+      "! This holds the object count for the current scope
       object_count                   TYPE i,
       current_offset                 TYPE i,
       all_packages_read              TYPE abap_bool,
