@@ -53,6 +53,11 @@ INTERFACE zif_adcoset_c_global
       max_objects          TYPE string VALUE 'maxObjects',
     END OF c_search_params,
 
+    "! Parameters for Scope Endpoint
+    BEGIN OF c_scope_params,
+      expiration TYPE string VALUE 'expiration',
+    END OF c_scope_params,
+
     "! <p class="shorttext synchronized" lang="en">Include id's for class</p>
     BEGIN OF c_class_include_id,
       all                  TYPE string VALUE 'all',
