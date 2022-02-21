@@ -99,7 +99,7 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
 
   METHOD zif_adcoset_source_code~find_matches.
 
-    IF sequential_matching = abap_true and lines( matchers ) > 1.
+    IF sequential_matching = abap_true AND lines( matchers ) > 1.
       result = find_sequential_matches(
         matchers             = matchers
         ignore_comment_lines = ignore_comment_lines ).
@@ -116,15 +116,13 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
     DATA: line_offset   TYPE i,
           col_offset    TYPE i,
           current_match TYPE match_result,
-          match_start   TYPE match_result,
-          raw_matches   TYPE match_result_tab.
+          match_start   TYPE match_result.
 
     DATA(has_more_matches) = abap_true.
 
     WHILE has_more_matches = abap_true.
 
-      CLEAR: current_match,
-             raw_matches.
+      CLEAR current_match.
 
       LOOP AT matchers ASSIGNING FIELD-SYMBOL(<matcher>).
         DATA(i) = sy-tabix.
@@ -147,6 +145,7 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
             comment_regex IS NOT INITIAL AND
             is_comment_line( source[ current_match-line ] ).
           has_more_matches = abap_false.
+          CLEAR current_match.
           EXIT.
         ENDIF.
 
@@ -157,8 +156,6 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
         line_offset = current_match-line.
         col_offset = current_match-offset + current_match-length.
       ENDLOOP.
-
-      raw_matches = VALUE #( BASE raw_matches ( current_match ) ).
 
       IF current_match IS NOT INITIAL AND
           match_start IS NOT INITIAL.
