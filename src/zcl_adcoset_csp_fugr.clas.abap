@@ -240,22 +240,20 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
       WHERE pname = @fugr_program_name
       INTO TABLE @DATA(function_includes).
 
-    LOOP AT function_includes ASSIGNING FIELD-SYMBOL(<function_include>).
-      CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
-        EXPORTING
-          program   = fugr_program_name
-        IMPORTING
-          namespace = namespace
-          group     = fugr_name
-        EXCEPTIONS
-          OTHERS    = 1.
+    CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
+      EXPORTING
+        program   = fugr_program_name
+      IMPORTING
+        namespace = namespace
+        group     = fugr_name
+      EXCEPTIONS
+        OTHERS    = 1.
 
-      IF sy-subrc = 0.
-        result = VALUE #( BASE result
-          ( name      = |{ namespace }L{ fugr_name }U{ <function_include>-include }|
-            func_name = <function_include>-func_name
-            adt_type  = c_include_types-function ) ).
-      ENDIF.
+    LOOP AT function_includes ASSIGNING FIELD-SYMBOL(<function_include>).
+      INSERT VALUE #(
+        name      = |{ namespace }L{ fugr_name }U{ <function_include>-include }|
+        func_name = <function_include>-func_name
+        adt_type  = c_include_types-function ) INTO TABLE result.
     ENDLOOP.
 
   ENDMETHOD.
