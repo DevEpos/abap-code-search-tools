@@ -77,21 +77,43 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       max_rows = object_count.
     ENDIF.
 
-    SELECT object_type AS type,
-           object_name AS name,
-           owner,
-           devclass AS package_name
-      FROM zadcoset_repoobj
-      WHERE object_type IN @search_ranges-object_type_range
-        AND object_name IN @search_ranges-object_name_range
-        AND ps_posid IN @search_ranges-appl_comp_range
-        AND devclass IN @search_ranges-package_range
-        AND owner IN @search_ranges-owner_range
-        AND created_date IN @search_ranges-created_on_range
-      ORDER BY object_name
-      INTO CORRESPONDING FIELDS OF TABLE @result
-      UP TO @max_rows ROWS
-      OFFSET @current_offset.
+    IF search_ranges-appl_comp_range IS NOT INITIAL.
+      SELECT object_type AS type,
+             object_name AS name,
+             owner,
+             devclass AS package_name
+        FROM zadcoset_srccobj
+        WHERE object_type IN @search_ranges-object_type_range
+          AND object_name IN @search_ranges-object_name_range
+          AND devclass IN @search_ranges-package_range
+          AND devclass IN (
+            SELECT devclass
+              FROM tdevc
+                INNER JOIN df14l
+                  ON tdevc~component = df14l~fctr_id
+              WHERE ps_posid IN @search_ranges-appl_comp_range )
+          AND owner IN @search_ranges-owner_range
+          AND created_date IN @search_ranges-created_on_range
+        ORDER BY object_name
+        INTO CORRESPONDING FIELDS OF TABLE @result
+        UP TO @max_rows ROWS
+        OFFSET @current_offset.
+    ELSE.
+      SELECT object_type AS type,
+             object_name AS name,
+             owner,
+             devclass AS package_name
+        FROM zadcoset_srccobj
+        WHERE object_type IN @search_ranges-object_type_range
+          AND object_name IN @search_ranges-object_name_range
+          AND devclass IN @search_ranges-package_range
+          AND owner IN @search_ranges-owner_range
+          AND created_date IN @search_ranges-created_on_range
+        ORDER BY object_name
+        INTO CORRESPONDING FIELDS OF TABLE @result
+        UP TO @max_rows ROWS
+        OFFSET @current_offset.
+    ENDIF.
 
     DATA(package_result_count) = lines( result ).
     current_offset = current_offset + package_result_count.
@@ -133,16 +155,33 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       WHEN max_objects > 0 THEN max_objects + 1
                            ELSE 0 ).
 
-    SELECT COUNT(*)
-      FROM zadcoset_repoobj
-      WHERE object_type IN @search_ranges-object_type_range
-        AND object_name IN @search_ranges-object_name_range
-        AND ps_posid IN @search_ranges-appl_comp_range
-        AND devclass IN @search_ranges-package_range
-        AND owner IN @search_ranges-owner_range
-        AND created_date IN @search_ranges-created_on_range
-      INTO @object_count
-      UP TO @selection_limit ROWS.
+    IF search_ranges-appl_comp_range IS NOT INITIAL.
+      SELECT COUNT(*)
+        FROM zadcoset_srccobj
+        WHERE object_type IN @search_ranges-object_type_range
+          AND object_name IN @search_ranges-object_name_range
+          AND devclass IN @search_ranges-package_range
+          AND devclass IN (
+            SELECT devclass
+              FROM tdevc
+                INNER JOIN df14l
+                  ON tdevc~component = df14l~fctr_id
+              WHERE ps_posid IN @search_ranges-appl_comp_range )
+          AND owner IN @search_ranges-owner_range
+          AND created_date IN @search_ranges-created_on_range
+        INTO @object_count
+        UP TO @selection_limit ROWS.
+    ELSE.
+      SELECT COUNT(*)
+        FROM zadcoset_srccobj
+        WHERE object_type IN @search_ranges-object_type_range
+          AND object_name IN @search_ranges-object_name_range
+          AND devclass IN @search_ranges-package_range
+          AND owner IN @search_ranges-owner_range
+          AND created_date IN @search_ranges-created_on_range
+        INTO @object_count
+        UP TO @selection_limit ROWS.
+    ENDIF.
 
     IF object_count = selection_limit.
       object_count = max_objects.
