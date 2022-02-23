@@ -43,6 +43,12 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
+     <CMPNAME>NEXT_OFFSET</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns the next offset available in the scope</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
      <CMPNAME>NEXT_PACKAGE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves the next package of objects in scope</DESCRIPT>

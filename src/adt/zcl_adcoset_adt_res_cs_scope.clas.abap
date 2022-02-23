@@ -91,6 +91,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     delete_expired_scopes( ).
 
+    " determine the expiration timestamp for the scope
     expiration = zcl_adcoset_adt_request_util=>get_integer_query_parameter(
       param_name    = zif_adcoset_c_global=>c_scope_params-expiration
       default_value = 2

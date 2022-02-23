@@ -26,6 +26,11 @@ CLASS zcl_adcoset_search_settings IMPLEMENTATION.
       FROM zadcoset_csset
       WHERE uname = @sy-uname
       INTO CORRESPONDING FIELDS OF @result.
+
+    IF sy-subrc <> 0.
+      result = VALUE #(
+        parallel_proc_pack_size = zif_adcoset_c_global=>c_parl_proc_min_pack_size ).
+    ENDIF.
   ENDMETHOD.
 
 

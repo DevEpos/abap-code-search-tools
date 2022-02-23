@@ -57,6 +57,16 @@
      <ADMINFIELD>0</ADMINFIELD>
      <COMPTYPE>E</COMPTYPE>
     </DD03P>
+    <DD03P>
+     <FIELDNAME>PARALLEL_PROC_PACK_SIZE</FIELDNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>X</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>INT4</DATATYPE>
+     <LENG>000010</LENG>
+     <MASK>  INT4</MASK>
+     <DDTEXT>Number of objects to process in a single parallel API call</DDTEXT>
+    </DD03P>
    </DD03P_TABLE>
   </asx:values>
  </asx:abap>

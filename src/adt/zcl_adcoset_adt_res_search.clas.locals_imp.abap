@@ -92,6 +92,7 @@ CLASS lcl_search_query IMPLEMENTATION.
     get_persisted_settings( ).
     settings-matcher_type = get_matcher_type( ).
     settings-line_feed = |\n|.
+    settings-is_adt = abap_true.
   ENDMETHOD.
 
 

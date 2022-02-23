@@ -43,8 +43,15 @@ CLASS zcl_adcoset_search_query_fac IMPLEMENTATION.
             " TODO: move handler_class/handler_method to parallel settings???
             handler_class  = 'ZCL_ADCOSET_SEARCH_ENGINE'
             handler_method = 'RUN_CODE_SEARCH_ARFC' ).
+
+          IF settings-is_adt = abap_true.
+            DATA(max_objs_for_parl_proc) = zcl_adcoset_search_settings=>get_settings( )-parallel_proc_pack_size.
+          ENDIF.
+
           " update the package size
-          scope->configure_package_size( task_runner->get_max_tasks( ) ).
+          scope->configure_package_size(
+            max_task_count = task_runner->get_max_tasks( )
+            max_objects    = max_objs_for_parl_proc ).
         CATCH zcx_adcoset_static_error INTO DATA(error) ##needed.
           zcl_adcoset_log=>add_exception( error ).
       ENDTRY.

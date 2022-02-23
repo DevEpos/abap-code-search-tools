@@ -192,7 +192,8 @@ INTERFACE zif_adcoset_ty_global
   INCLUDE TYPE ty_search_settings AS basic_settings.
   INCLUDE TYPE ty_pattern_config AS pattern_config.
   TYPES:
-    custom_settings TYPE ty_custom_search_settings.
+    custom_settings TYPE ty_custom_search_settings,
+    is_adt          TYPE abap_bool.
   TYPES END OF ty_search_settings_int.
 
   "! <p class="shorttext synchronized" lang="en">External settings for code search API</p>

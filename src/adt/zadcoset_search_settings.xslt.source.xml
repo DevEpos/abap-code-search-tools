@@ -20,6 +20,7 @@
       </tt:cond>
 
       <tt:attribute name="cst:parallelServerGroup" value-ref="settings.parallel_server_group"/>
+      <tt:attribute name="cst:parallelPackageSize" value-ref="settings.parallel_proc_pack_size"/>
     </cst:settings>
   </tt:template>
 

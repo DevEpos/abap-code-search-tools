@@ -13,6 +13,11 @@ INTERFACE zif_adcoset_search_scope
       RETURNING
         VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects,
 
+    "! <p class="shorttext synchronized" lang="en">Returns the next offset available in the scope</p>
+    next_offset DEFAULT IGNORE
+      RETURNING
+        VALUE(result) TYPE i,
+
     "! <p class="shorttext synchronized" lang="en">Returns 'X' if another package exists</p>
     has_next_package
       RETURNING
@@ -27,6 +32,7 @@ INTERFACE zif_adcoset_search_scope
     "! The driving factor will be the available number of parallel tasks
     configure_package_size DEFAULT IGNORE
       IMPORTING
+        max_objects TYPE i optional
         max_task_count TYPE i,
 
     "! <p class="shorttext synchronized" lang="en">Retrieves the ranges of this scope</p>

@@ -137,6 +137,15 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   METHOD zif_adcoset_search_scope~configure_package_size.
     CHECK max_task_count > 0.
 
+    IF max_objects IS NOT INITIAL.
+      " update max objects number
+      me->max_objects =
+        package_size = max_objects.
+      " set fixed object count
+      object_count = max_objects + current_offset.
+      obj_count_for_package_building = max_objects.
+    ENDIF.
+
     DATA(determined_pack_size) = obj_count_for_package_building / max_task_count.
 
     IF determined_pack_size < c_min_parl_package_size.
