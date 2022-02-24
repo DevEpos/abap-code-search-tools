@@ -30,7 +30,10 @@ CLASS zcl_adcoset_search_settings IMPLEMENTATION.
     IF sy-subrc <> 0.
       result = VALUE #(
         parallel_proc_pack_size = zif_adcoset_c_global=>c_parl_proc_min_pack_size ).
+    ELSEIF result-parallel_proc_pack_size < zif_adcoset_c_global=>c_parl_proc_min_pack_size.
+      result-parallel_proc_pack_size = zif_adcoset_c_global=>c_parl_proc_min_pack_size.
     ENDIF.
+
   ENDMETHOD.
 
 
