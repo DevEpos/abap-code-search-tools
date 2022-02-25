@@ -1,8 +1,6 @@
-![](https://img.shields.io/badge/version-ALPHA-orange)
 ![](https://img.shields.io/badge/ABAP-v7.40sp09+-green)
 # abap-code-search
 ABAP Advanced Code Search Tools
-> **ATTENTION**: The API is basically useable but not all features are implemented or tested yet
 
 ## Description
 Searches Code in ABAP sources like
