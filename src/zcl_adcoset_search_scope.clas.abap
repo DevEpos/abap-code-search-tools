@@ -94,7 +94,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
               WHERE ps_posid IN @search_ranges-appl_comp_range )
           AND owner IN @search_ranges-owner_range
           AND created_date IN @search_ranges-created_on_range
-        ORDER BY object_name
+        ORDER BY pgmid
         INTO CORRESPONDING FIELDS OF TABLE @result
         UP TO @max_rows ROWS
         OFFSET @current_offset.
@@ -109,7 +109,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
           AND devclass IN @search_ranges-package_range
           AND owner IN @search_ranges-owner_range
           AND created_date IN @search_ranges-created_on_range
-        ORDER BY object_name
+        ORDER BY pgmid
         INTO CORRESPONDING FIELDS OF TABLE @result
         UP TO @max_rows ROWS
         OFFSET @current_offset.
