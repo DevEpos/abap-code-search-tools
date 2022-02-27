@@ -152,11 +152,12 @@ INTERFACE zif_adcoset_ty_global
 
     "! <p class="shorttext synchronized" lang="en">Basic search settings</p>
     BEGIN OF ty_search_settings,
-      line_feed            TYPE string,
-      ignore_comment_lines TYPE abap_bool,
-      match_all_patterns   TYPE abap_bool,
-      sequential_matching  TYPE abap_bool,
-      multiline_search     TYPE abap_bool,
+      line_feed                 TYPE string,
+      ignore_comment_lines      TYPE abap_bool,
+      match_all_patterns        TYPE abap_bool,
+      sequential_matching       TYPE abap_bool,
+      check_sequence_bounds TYPE abap_bool,
+      multiline_search          TYPE abap_bool,
     END OF ty_search_settings,
 
     "! Custom code search settings for some object types

@@ -73,10 +73,11 @@ SELECTION-SCREEN END OF BLOCK limitations.
 SELECTION-SCREEN BEGIN OF BLOCK settings WITH FRAME TITLE TEXT-b03.
   PARAMETERS:
     p_igncom TYPE abap_bool AS CHECKBOX,
+    p_matcha TYPE abap_bool AS CHECKBOX,
     p_singpm TYPE abap_bool AS CHECKBOX USER-COMMAND single_pattern_mode,
     p_multil TYPE abap_bool AS CHECKBOX USER-COMMAND multiline,
     p_seqma  TYPE abap_bool AS CHECKBOX USER-COMMAND sequential_matching,
-    p_matcha TYPE abap_bool AS CHECKBOX.
+    p_chseb  TYPE abap_bool AS CHECKBOX.
 SELECTION-SCREEN END OF BLOCK settings.
 
 SELECTION-SCREEN BEGIN OF BLOCK parallel_processing WITH FRAME TITLE TEXT-b04.
@@ -221,6 +222,9 @@ CLASS lcl_report IMPLEMENTATION.
         screen-input = COND #( WHEN p_singpm = abap_true OR
                                     p_multil = abap_true THEN '0' ELSE '1' ).
         MODIFY SCREEN.
+      ELSEIF screen-name = 'P_CHSEB'.
+        screen-input = COND #( WHEN p_seqma = abap_true THEN '1' ELSE '0' ).
+        MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
 
@@ -340,15 +344,16 @@ CLASS lcl_report IMPLEMENTATION.
 
   METHOD run_search.
     DATA(search_config) = VALUE zif_adcoset_ty_global=>ty_search_settings_external(
-      line_feed            = |\r\n|
-      ignore_comment_lines = p_igncom
-      match_all_patterns   = p_matcha
-      multiline_search     = p_multil
-      sequential_matching  = p_seqma
-      ignore_case          = p_ignc
-      pattern_range        = get_patterns( )
-      parallel_processing  = VALUE #( enabled = p_parlp server_group = p_servg )
-      custom_settings      = VALUE #(
+      line_feed             = |\r\n|
+      ignore_comment_lines  = p_igncom
+      match_all_patterns    = p_matcha
+      multiline_search      = p_multil
+      sequential_matching   = p_seqma
+      check_sequence_bounds = COND #( WHEN p_seqma = abap_true THEN p_chseb ELSE abap_false )
+      ignore_case           = p_ignc
+      pattern_range         = get_patterns( )
+      parallel_processing   = VALUE #( enabled = p_parlp server_group = p_servg )
+      custom_settings       = VALUE #(
         class = VALUE #(
           include_flags = VALUE #(
             public_section    = abap_true
@@ -364,7 +369,7 @@ CLASS lcl_report IMPLEMENTATION.
           include_flags = VALUE #(
             function     = abap_true
             non_function = abap_true ) ) )
-      search_scope         = VALUE #(
+      search_scope          = VALUE #(
         object_name_range = s_objn[]
         object_type_range = get_object_types(  )
         created_on_range  = s_crtd[]

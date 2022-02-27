@@ -65,6 +65,12 @@ CLASS lcl_search_query IMPLEMENTATION.
       param_name = zif_adcoset_c_global=>c_search_params-sequential_matching
       request    = request ).
 
+    IF settings-sequential_matching = abap_true.
+      settings-check_sequence_bounds = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
+        param_name = zif_adcoset_c_global=>c_search_params-check_sequence_bounds
+        request    = request ).
+    ENDIF.
+
     matcher_config-use_regex = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-use_regex
       request    = request ).

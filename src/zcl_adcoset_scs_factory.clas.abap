@@ -24,8 +24,9 @@ CLASS zcl_adcoset_scs_factory IMPLEMENTATION.
   METHOD create.
     IF settings-sequential_matching = abap_true AND lines( matchers ) > 1.
       result = NEW zcl_adcoset_scs_sequential(
-        ignore_comment_lines = settings-ignore_comment_lines
-        matchers             = matchers ).
+        ignore_comment_lines  = settings-ignore_comment_lines
+        check_sequence_bounds = settings-check_sequence_bounds
+        matchers              = matchers ).
     ELSE.
       result = NEW zcl_adcoset_scs_standard(
         match_all            = settings-match_all_patterns
