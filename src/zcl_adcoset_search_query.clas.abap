@@ -18,11 +18,11 @@ CLASS zcl_adcoset_search_query DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
-      scope           TYPE REF TO zif_adcoset_search_scope,
-      settings        TYPE zif_adcoset_ty_global=>ty_search_settings,
-      custom_settings TYPE zif_adcoset_ty_global=>ty_custom_search_settings,
-      matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab,
-      search_results  TYPE zif_adcoset_ty_global=>ty_search_result_objects.
+      scope             TYPE REF TO zif_adcoset_search_scope,
+      settings          TYPE zif_adcoset_ty_global=>ty_search_settings,
+      custom_settings   TYPE zif_adcoset_ty_global=>ty_custom_search_settings,
+      src_code_searcher TYPE REF TO zif_adcoset_src_code_searcher,
+      search_results    TYPE zif_adcoset_ty_global=>ty_search_result_objects.
 ENDCLASS.
 
 
@@ -37,7 +37,9 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
     me->scope = scope.
     me->settings = settings.
     me->custom_settings = custom_settings.
-    me->matchers = matchers.
+    src_code_searcher = zcl_adcoset_scs_factory=>create(
+      matchers = matchers
+      settings = settings ).
   ENDMETHOD.
 
   METHOD zif_adcoset_search_query~run.
@@ -48,9 +50,7 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
         TRY.
             DATA(source_code_provider) = zcl_adcoset_csp_factory=>get_search_provider(
               type            = <object>-type
-              search_settings = settings
-              custom_settings = custom_settings
-              matchers        = matchers ).
+              custom_settings = custom_settings ).
 
             DATA(source_code_reader) = zcl_adcoset_scr_factory=>get_reader(
               type         = <object>-type
@@ -58,8 +58,9 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
               line_feed    = settings-line_feed ).
 
             DATA(matches) = source_code_provider->search(
-              object          = <object>
-              src_code_reader = source_code_reader ).
+              object            = <object>
+              src_code_searcher = src_code_searcher
+              src_code_reader   = source_code_reader ).
 
             IF matches IS NOT INITIAL.
               INSERT VALUE #(

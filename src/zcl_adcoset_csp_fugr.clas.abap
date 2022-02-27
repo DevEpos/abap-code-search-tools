@@ -11,9 +11,7 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
       "! <p class="shorttext synchronized" lang="en">Creates new instance of a function group search provider</p>
       constructor
         IMPORTING
-          search_settings TYPE zif_adcoset_ty_global=>ty_search_settings
-          custom_settings TYPE zif_adcoset_ty_global=>ty_fugr_cs_settings
-          matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+          custom_settings TYPE zif_adcoset_ty_global=>ty_fugr_cs_settings.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
@@ -23,7 +21,6 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
       END OF c_include_types.
 
     DATA:
-      search_settings TYPE zif_adcoset_ty_global=>ty_search_settings,
       custom_settings TYPE zif_adcoset_ty_global=>ty_fugr_cs_settings,
       matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
 
@@ -73,9 +70,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
 
   METHOD constructor.
-    me->search_settings = search_settings.
     me->custom_settings = custom_settings.
-    me->matchers = matchers.
   ENDMETHOD.
 
 
@@ -101,12 +96,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include>).
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
-          DATA(matches) = source_code->find_matches(
-            matchers             = matchers
-            match_all            = search_settings-match_all_patterns
-            sequential_matching  = search_settings-sequential_matching
-            ignore_comment_lines = search_settings-ignore_comment_lines ).
-
+          DATA(matches) = src_code_searcher->search( source_code ).
           CHECK matches IS NOT INITIAL.
 
           IF <include>-is_function_include = abap_true AND function_names_loaded = abap_false.

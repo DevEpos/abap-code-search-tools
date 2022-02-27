@@ -11,15 +11,11 @@ INTERFACE zif_adcoset_source_code
     ty_line_indexes TYPE TABLE OF ty_line_index WITH KEY number
                                                 WITH UNIQUE HASHED KEY offset COMPONENTS offset.
 
-  METHODS:
-    "! <p class="shorttext synchronized" lang="en">Find matches with the given table of matchers</p>
-    find_matches
-      IMPORTING
-        matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
-        match_all            TYPE abap_bool OPTIONAL
-        sequential_matching  TYPE abap_bool OPTIONAL
-        ignore_comment_lines TYPE abap_bool OPTIONAL
-      RETURNING
-        VALUE(result)        TYPE zif_adcoset_ty_global=>ty_search_matches.
+  DATA:
+    content                TYPE string_table READ-ONLY,
+    line_indexes           TYPE ty_line_indexes READ-ONLY,
+    is_single_line_content TYPE abap_bool READ-ONLY,
+    line_count             TYPE i READ-ONLY,
+    comment_regex          TYPE string READ-ONLY.
 
 ENDINTERFACE.

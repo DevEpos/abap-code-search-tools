@@ -8,16 +8,9 @@ CLASS zcl_adcoset_csp_repsrc_default DEFINITION
     INTERFACES zif_adcoset_code_search_prov.
     METHODS:
       "! <p class="shorttext synchronized" lang="en">Creates new instance of a default search provider</p>
-      constructor
-        IMPORTING
-          search_settings TYPE zif_adcoset_ty_global=>ty_search_settings
-          matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+      constructor.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    DATA:
-      search_settings TYPE zif_adcoset_ty_global=>ty_search_settings,
-      matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
-
     METHODS:
       get_include
         IMPORTING
@@ -31,8 +24,6 @@ ENDCLASS.
 CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
 
   METHOD constructor.
-    me->search_settings = search_settings.
-    me->matchers = matchers.
   ENDMETHOD.
 
 
@@ -48,12 +39,7 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
           name = include_name
           type = object-type ).
 
-        LOOP AT source->find_matches(
-            matchers             = matchers
-            match_all            = search_settings-match_all_patterns
-            sequential_matching  = search_settings-sequential_matching
-            ignore_comment_lines = search_settings-ignore_comment_lines ) ASSIGNING FIELD-SYMBOL(<match>).
-
+        LOOP AT src_code_searcher->search( source ) ASSIGNING FIELD-SYMBOL(<match>).
           <match>-include = include_name.
           result = VALUE #( BASE result ( <match> ) ).
         ENDLOOP.

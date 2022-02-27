@@ -10,9 +10,7 @@ CLASS zcl_adcoset_csp_factory DEFINITION
       get_search_provider
         IMPORTING
           type            TYPE trobjtype
-          search_settings TYPE zif_adcoset_ty_global=>ty_search_settings
           custom_settings TYPE zif_adcoset_ty_global=>ty_custom_search_settings
-          matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
         RETURNING
           VALUE(result)   TYPE REF TO zif_adcoset_code_search_prov
         RAISING
@@ -41,9 +39,7 @@ CLASS zcl_adcoset_csp_factory DEFINITION
       create_provider
         IMPORTING
           type            TYPE trobjtype
-          search_settings TYPE zif_adcoset_ty_global=>ty_search_settings
           custom_settings TYPE zif_adcoset_ty_global=>ty_custom_search_settings
-          matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab
         RETURNING
           VALUE(result)   TYPE REF TO zif_adcoset_code_search_prov
         RAISING
@@ -64,9 +60,7 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
           type = mapped_type
           ref  = create_provider(
             type            = mapped_type
-            search_settings = search_settings
-            custom_settings = custom_settings
-            matchers        = matchers ) ) INTO TABLE providers ASSIGNING FIELD-SYMBOL(<provider>).
+            custom_settings = custom_settings ) ) INTO TABLE providers ASSIGNING FIELD-SYMBOL(<provider>).
         result = <provider>-ref.
     ENDTRY.
   ENDMETHOD.
@@ -76,26 +70,16 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
     result = SWITCH #( type
 
       WHEN zif_adcoset_c_global=>c_source_code_type-class THEN
-        NEW zcl_adcoset_csp_clas(
-          search_settings = search_settings
-          custom_settings = custom_settings-class
-          matchers        = matchers )
+        NEW zcl_adcoset_csp_clas( custom_settings = custom_settings-class )
 
       WHEN zif_adcoset_c_global=>c_source_code_type-function_group THEN
-        NEW zcl_adcoset_csp_fugr(
-          search_settings = search_settings
-          custom_settings = custom_settings-fugr
-          matchers        = matchers )
+        NEW zcl_adcoset_csp_fugr( custom_settings = custom_settings-fugr )
 
       WHEN c_def_reposrc_provider THEN
-        NEW zcl_adcoset_csp_repsrc_default(
-          search_settings = search_settings
-          matchers        = matchers )
+        NEW zcl_adcoset_csp_repsrc_default( )
 
       WHEN c_def_string_src_provider THEN
-        NEW zcl_adcoset_csp_strsrc_default(
-          search_settings = search_settings
-          matchers        = matchers )
+        NEW zcl_adcoset_csp_strsrc_default( )
 
       ELSE
         THROW zcx_adcoset_no_provider( ) ).

@@ -11,9 +11,7 @@ CLASS zcl_adcoset_csp_clas DEFINITION
       "! <p class="shorttext synchronized" lang="en">Creates new instance of a class search provider</p>
       constructor
         IMPORTING
-          search_settings TYPE zif_adcoset_ty_global=>ty_search_settings
-          custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings
-          matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+          custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings.
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
@@ -43,9 +41,8 @@ CLASS zcl_adcoset_csp_clas DEFINITION
       ty_class_includes TYPE STANDARD TABLE OF ty_class_incl WITH KEY name.
 
     DATA:
-      custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings,
-      search_settings TYPE zif_adcoset_ty_global=>ty_search_settings,
-      matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+      custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings.
+
     METHODS:
       get_class_includes
         IMPORTING
@@ -67,9 +64,7 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
 
 
   METHOD constructor.
-    me->search_settings = search_settings.
     me->custom_settings = custom_settings.
-    me->matchers = matchers.
   ENDMETHOD.
 
 
@@ -83,11 +78,7 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     LOOP AT class_includes ASSIGNING FIELD-SYMBOL(<include>).
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
-          DATA(matches) = source_code->find_matches(
-            matchers             = matchers
-            match_all            = search_settings-match_all_patterns
-            sequential_matching  = search_settings-sequential_matching
-            ignore_comment_lines = search_settings-ignore_comment_lines ).
+          DATA(matches) = src_code_searcher->search( source_code = source_code ).
 
           IF matches IS NOT INITIAL.
             assign_objects_to_matches(
