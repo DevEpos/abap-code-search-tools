@@ -65,12 +65,6 @@ CLASS lcl_search_query IMPLEMENTATION.
       param_name = zif_adcoset_c_global=>c_search_params-sequential_matching
       request    = request ).
 
-    IF settings-sequential_matching = abap_true.
-      settings-check_sequence_bounds = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
-        param_name = zif_adcoset_c_global=>c_search_params-check_sequence_bounds
-        request    = request ).
-    ENDIF.
-
     matcher_config-use_regex = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
       param_name = zif_adcoset_c_global=>c_search_params-use_regex
       request    = request ).
@@ -103,12 +97,24 @@ CLASS lcl_search_query IMPLEMENTATION.
 
 
   METHOD get_patterns.
-    settings-pattern_range = VALUE #(
+    settings-patterns = VALUE #(
       FOR pattern IN  zcl_adcoset_adt_request_util=>get_query_parameter_values(
         param_name = zif_adcoset_c_global=>c_search_params-search_pattern
         mandatory  = abap_true
         request    = request )
-      ( sign = 'I' option = 'CP' low = replace( val = pattern sub = |\r\n| with = |\n| occ = 0 ) ) ).
+      ( content = replace( val = pattern sub = |\r\n| with = |\n| occ = 0 ) ) ).
+
+    IF settings-sequential_matching = abap_true.
+      TRY.
+          settings-patterns = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns = settings-patterns ).
+        CATCH zcx_adcoset_static_error INTO DATA(parse_error).
+          " TODO: create ADT endpoint to run validation for patterns before hand
+          "    -> better UX as user still has the chance to fix the patterns
+          RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
+            EXPORTING
+              previous = parse_error.
+      ENDTRY.
+    ENDIF.
   ENDMETHOD.
 
 

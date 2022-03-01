@@ -10,8 +10,8 @@ CLASS zcl_adcoset_matcher_factory DEFINITION
       create_matcher
         IMPORTING
           type          TYPE zif_adcoset_ty_global=>ty_matcher_type
-          pcre_settings  TYPE zif_adcoset_ty_global=>ty_pcre_regex_settings OPTIONAL
-          pattern       TYPE string
+          pcre_settings TYPE zif_adcoset_ty_global=>ty_pcre_regex_settings OPTIONAL
+          pattern       TYPE zif_adcoset_ty_global=>ty_pattern
           ignore_case   TYPE abap_bool OPTIONAL
         RETURNING
           VALUE(result) TYPE REF TO zif_adcoset_pattern_matcher
@@ -38,6 +38,7 @@ ENDCLASS.
 CLASS zcl_adcoset_matcher_factory IMPLEMENTATION.
 
   METHOD create_matcher.
+
     result = SWITCH #( type
 
       WHEN zif_adcoset_c_global=>c_matcher_type-posix_regex THEN
@@ -63,12 +64,12 @@ CLASS zcl_adcoset_matcher_factory IMPLEMENTATION.
 
   METHOD create_matchers.
 
-    LOOP AT pattern_config-pattern_range ASSIGNING FIELD-SYMBOL(<pattern_range>).
+    LOOP AT pattern_config-patterns ASSIGNING FIELD-SYMBOL(<pattern>).
       TRY.
           result = VALUE #( BASE result
             ( create_matcher(
                 type          = pattern_config-matcher_type
-                pattern       = <pattern_range>-low
+                pattern       = <pattern>
                 pcre_settings = pattern_config-pcre_settings
                 ignore_case   = pattern_config-ignore_case ) ) ).
         CATCH zcx_adcoset_no_matcher

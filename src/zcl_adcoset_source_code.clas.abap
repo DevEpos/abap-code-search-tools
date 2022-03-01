@@ -35,7 +35,6 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
     me->comment_regex = comment_regex.
     line_count = lines( line_indexes ).
     is_single_line_content = xsdbool( line_count IS NOT INITIAL ).
-
   ENDMETHOD.
 
 ENDCLASS.

@@ -69,7 +69,7 @@ CLASS zcl_adcoset_search_query_fac IMPLEMENTATION.
           settings        = settings-basic_settings
           custom_settings = settings-custom_settings
           matchers        = zcl_adcoset_matcher_factory=>create_matchers(
-            settings-pattern_config ) ) ).
+            pattern_config = settings-pattern_config  ) ) ).
   ENDMETHOD.
 
 

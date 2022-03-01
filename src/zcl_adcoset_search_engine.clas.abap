@@ -36,7 +36,7 @@ CLASS zcl_adcoset_search_engine DEFINITION
       validate_matchers
         IMPORTING
           matcher_type TYPE zif_adcoset_ty_global=>ty_matcher_type
-          patterns     TYPE zif_adcoset_ty_global=>ty_search_settings_external-pattern_range
+          patterns     TYPE zif_adcoset_ty_global=>ty_patterns
         RAISING
           zcx_adcoset_static_error.
 ENDCLASS.
@@ -81,7 +81,7 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
 
     validate_matchers(
       matcher_type = search_config-matcher_type
-      patterns     = search_config-pattern_range ).
+      patterns     = search_config-patterns ).
 
     DATA(query) = zcl_adcoset_search_query_fac=>create_query(
       parallel_processing = search_config-parallel_processing
@@ -106,10 +106,10 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
     CHECK matcher_type <> zif_adcoset_c_global=>c_matcher_type-substring.
 
     TRY.
-        LOOP AT patterns ASSIGNING FIELD-SYMBOL(<pattern_range>).
+        LOOP AT patterns ASSIGNING FIELD-SYMBOL(<pattern>).
           zcl_adcoset_matcher_factory=>create_matcher(
             type    = matcher_type
-            pattern = <pattern_range>-low ).
+            pattern = <pattern> ).
         ENDLOOP.
       CATCH cx_sy_regex INTO DATA(error).
         RAISE EXCEPTION TYPE zcx_adcoset_static_error

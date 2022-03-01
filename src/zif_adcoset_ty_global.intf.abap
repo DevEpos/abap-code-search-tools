@@ -11,6 +11,8 @@ INTERFACE zif_adcoset_ty_global
     ty_obj_names                 TYPE STANDARD TABLE OF sobj_name WITH EMPTY KEY,
     ty_cls_main_incl_search_mode TYPE string,
     ty_matcher_type              TYPE c LENGTH 1,
+    "! type for control flags of a matcher
+    ty_control_flags             TYPE x LENGTH 4,
     ty_duration_in_s             TYPE p LENGTH 15 DECIMALS 2,
     ty_duration_in_ms            TYPE i,
     ty_duration_in_micros        TYPE p LENGTH 12 DECIMALS 2,
@@ -152,12 +154,12 @@ INTERFACE zif_adcoset_ty_global
 
     "! <p class="shorttext synchronized" lang="en">Basic search settings</p>
     BEGIN OF ty_search_settings,
-      line_feed                 TYPE string,
-      ignore_comment_lines      TYPE abap_bool,
-      match_all_patterns        TYPE abap_bool,
-      sequential_matching       TYPE abap_bool,
+      line_feed             TYPE string,
+      ignore_comment_lines  TYPE abap_bool,
+      match_all_patterns    TYPE abap_bool,
+      sequential_matching   TYPE abap_bool,
       check_sequence_bounds TYPE abap_bool,
-      multiline_search          TYPE abap_bool,
+      multiline_search      TYPE abap_bool,
     END OF ty_search_settings,
 
     "! Custom code search settings for some object types
@@ -181,10 +183,19 @@ INTERFACE zif_adcoset_ty_global
       single_line_mode_enabled TYPE abap_bool,
     END OF ty_pcre_regex_settings,
 
+    "! Pattern for search
+    BEGIN OF ty_pattern,
+      content TYPE string,
+      flags   TYPE ty_control_flags,
+    END OF ty_pattern,
+
+    "! Table of patterns for search
+    ty_patterns TYPE STANDARD TABLE OF ty_pattern WITH EMPTY KEY,
+
     BEGIN OF ty_pattern_config,
       ignore_case   TYPE abap_bool,
       matcher_type  TYPE ty_matcher_type,
-      pattern_range TYPE RANGE OF string,
+      patterns      TYPE ty_patterns,
       pcre_settings TYPE ty_pcre_regex_settings,
     END OF ty_pattern_config.
 

@@ -72,12 +72,6 @@
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_CHSEB</KEY>
-     <ENTRY>Check Sequence Boundaries</ENTRY>
-     <LENGTH>33</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
      <KEY>P_CLASS</KEY>
      <ENTRY>Classes</ENTRY>
      <LENGTH>15</LENGTH>

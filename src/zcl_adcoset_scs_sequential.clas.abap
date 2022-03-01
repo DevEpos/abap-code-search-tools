@@ -2,7 +2,6 @@
 CLASS zcl_adcoset_scs_sequential DEFINITION
   PUBLIC
   INHERITING FROM zcl_adcoset_scs_base
-  FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -11,32 +10,18 @@ CLASS zcl_adcoset_scs_sequential DEFINITION
     METHODS:
       constructor
         IMPORTING
-          ignore_comment_lines  TYPE abap_bool
-          check_sequence_bounds TYPE abap_bool DEFAULT abap_false
-          matchers              TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+          ignore_comment_lines TYPE abap_bool
+          matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
   PROTECTED SECTION.
-  PRIVATE SECTION.
     DATA:
-      has_more_matches      TYPE abap_bool,
-      check_sequence_bounds TYPE abap_bool,
-      current_line_offset   TYPE i,
-      current_col_offset    TYPE i,
-      current_match         TYPE match_result,
-      end_boundary_matcher  TYPE REF TO zif_adcoset_pattern_matcher,
-      match_start           TYPE match_result.
+      has_more_matches    TYPE abap_bool,
+      current_line_offset TYPE i,
+      current_col_offset  TYPE i,
+      current_match       TYPE match_result,
+      match_start         TYPE match_result,
+      match_end           TYPE match_result.
 
     METHODS:
-      "! Finds the next sequential match by using boundary matching<br/>
-      "! This means the first and last pattern will mark the offset in the
-      "! source code that should contain all other patterns.
-      find_next_full_match_w_bounds
-        CHANGING
-          matches TYPE zif_adcoset_ty_global=>ty_search_matches,
-      "! Finds next sequential match by iterating over all patterns
-      "! and returning only matches where the patterns occur in the given order
-      find_next_full_match_wo_bounds
-        CHANGING
-          matches TYPE zif_adcoset_ty_global=>ty_search_matches,
       find_next_partial_match
         IMPORTING
           matcher            TYPE REF TO zif_adcoset_pattern_matcher
@@ -45,6 +30,12 @@ CLASS zcl_adcoset_scs_sequential DEFINITION
           VALUE(line_offset) TYPE i
           VALUE(col_offset)  TYPE i,
       collect_sequential_match
+        CHANGING
+          matches TYPE zif_adcoset_ty_global=>ty_search_matches.
+  PRIVATE SECTION.
+
+    METHODS:
+      find_next_full_match
         CHANGING
           matches TYPE zif_adcoset_ty_global=>ty_search_matches.
 ENDCLASS.
@@ -57,15 +48,6 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
     super->constructor(
       ignore_comment_lines = ignore_comment_lines
       matchers             = matchers ).
-
-    IF check_sequence_bounds = abap_true AND
-        lines( matchers ) > 2.
-      me->check_sequence_bounds = abap_true.
-      DATA(matcher_count) = lines( matchers ).
-      end_boundary_matcher = matchers[ matcher_count ].
-      DELETE me->matchers INDEX matcher_count.
-    ENDIF.
-
   ENDMETHOD.
 
 
@@ -81,17 +63,13 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
       CLEAR: current_match,
              match_start.
 
-      IF check_sequence_bounds = abap_true.
-        find_next_full_match_w_bounds( CHANGING matches = result ).
-      ELSE.
-        find_next_full_match_wo_bounds( CHANGING matches = result ).
-      ENDIF.
+      find_next_full_match( CHANGING matches = result ).
     ENDWHILE.
 
   ENDMETHOD.
 
 
-  METHOD find_next_full_match_wo_bounds.
+  METHOD find_next_full_match.
 
     LOOP AT matchers ASSIGNING FIELD-SYMBOL(<matcher>).
       DATA(i) = sy-tabix.
@@ -112,50 +90,7 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    collect_sequential_match( CHANGING matches = matches ).
-
-  ENDMETHOD.
-
-
-  METHOD find_next_full_match_w_bounds.
-
-    LOOP AT matchers ASSIGNING FIELD-SYMBOL(<matcher>).
-      DATA(i) = sy-tabix.
-      find_next_partial_match(
-        EXPORTING
-          matcher     = <matcher>
-        IMPORTING
-          match       = current_match
-          line_offset = current_line_offset
-          col_offset  = current_col_offset ).
-
-      IF has_more_matches = abap_false.
-        RETURN.
-      ENDIF.
-
-      IF i = 1.
-        match_start = current_match.
-
-        " look for the end boundary
-        find_next_partial_match(
-          EXPORTING
-            matcher = end_boundary_matcher
-          IMPORTING
-            match   = DATA(end_match) ).
-        IF has_more_matches = abap_false.
-          RETURN.
-        ENDIF.
-      ELSEIF current_match-line > end_match-line OR
-          ( current_match-line = end_match-line AND current_match-offset >= end_match-offset ).
-        " match was found but steps out of the end boundary
-        current_line_offset = end_match-line.
-        current_col_offset = end_match-offset + end_match-length.
-        RETURN.
-      ENDIF.
-    ENDLOOP.
-
-    " set the current match to the end boundary match
-    current_match = end_match.
+    match_end = current_match.
 
     collect_sequential_match( CHANGING matches = matches ).
 
@@ -196,13 +131,13 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
 
   METHOD collect_sequential_match.
 
-    IF current_match IS NOT INITIAL AND
-            match_start IS NOT INITIAL.
+    IF match_start IS NOT INITIAL AND
+        match_end IS NOT INITIAL.
       matches = VALUE #( BASE matches
         ( start_line   = match_start-line
           start_column = match_start-offset
-          end_line     = current_match-line
-          end_column   = current_match-offset + current_match-length
+          end_line     = match_end-line
+          end_column   = match_end-offset + match_end-length
           snippet      = source_code->content[ match_start-line ] ) ).
     ENDIF.
 

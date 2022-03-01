@@ -76,8 +76,7 @@ SELECTION-SCREEN BEGIN OF BLOCK settings WITH FRAME TITLE TEXT-b03.
     p_matcha TYPE abap_bool AS CHECKBOX,
     p_singpm TYPE abap_bool AS CHECKBOX USER-COMMAND single_pattern_mode,
     p_multil TYPE abap_bool AS CHECKBOX USER-COMMAND multiline,
-    p_seqma  TYPE abap_bool AS CHECKBOX USER-COMMAND sequential_matching,
-    p_chseb  TYPE abap_bool AS CHECKBOX.
+    p_seqma  TYPE abap_bool AS CHECKBOX USER-COMMAND sequential_matching.
 SELECTION-SCREEN END OF BLOCK settings.
 
 SELECTION-SCREEN BEGIN OF BLOCK parallel_processing WITH FRAME TITLE TEXT-b04.
@@ -125,7 +124,7 @@ CLASS lcl_report DEFINITION.
           zcx_adcoset_static_error,
       get_patterns
         RETURNING
-          VALUE(result) TYPE zif_adcoset_ty_global=>ty_pattern_config-pattern_range
+          VALUE(result) TYPE zif_adcoset_ty_global=>ty_patterns
         RAISING
           zcx_adcoset_static_error,
       set_icon
@@ -221,9 +220,6 @@ CLASS lcl_report IMPLEMENTATION.
       ELSEIF screen-name = 'P_SEQMA'.
         screen-input = COND #( WHEN p_singpm = abap_true OR
                                     p_multil = abap_true THEN '0' ELSE '1' ).
-        MODIFY SCREEN.
-      ELSEIF screen-name = 'P_CHSEB'.
-        screen-input = COND #( WHEN p_seqma = abap_true THEN '1' ELSE '0' ).
         MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
@@ -349,9 +345,8 @@ CLASS lcl_report IMPLEMENTATION.
       match_all_patterns    = p_matcha
       multiline_search      = p_multil
       sequential_matching   = p_seqma
-      check_sequence_bounds = COND #( WHEN p_seqma = abap_true THEN p_chseb ELSE abap_false )
       ignore_case           = p_ignc
-      pattern_range         = get_patterns( )
+      patterns              = get_patterns( )
       parallel_processing   = VALUE #( enabled = p_parlp server_group = p_servg )
       custom_settings       = VALUE #(
         class = VALUE #(
@@ -478,10 +473,14 @@ CLASS lcl_report IMPLEMENTATION.
       text_table = VALUE #( FOR pattern IN s_patt[] ( CONV #( pattern-low ) ) ).
       DATA(single_pattern) = concat_lines_of( table = text_table sep = |\r\n| ).
       IF single_pattern IS NOT INITIAL.
-        result = VALUE #( ( sign = 'I' option = 'EQ' low = single_pattern ) ).
+        result = VALUE #( ( content = single_pattern ) ).
       ENDIF.
     ELSE.
-      result = VALUE #( FOR pattern IN s_patt[] ( sign = pattern-sign option = 'EQ' low = pattern-low ) ).
+      result = VALUE #( FOR pattern IN s_patt[] ( content = pattern-low ) ).
+    ENDIF.
+
+    IF p_seqma = abap_true.
+      result = zcl_adcoset_pattern_util=>parse_pattern_sequence( result ).
     ENDIF.
 
   ENDMETHOD.
