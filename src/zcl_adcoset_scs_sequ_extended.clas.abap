@@ -100,8 +100,11 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
 
   METHOD find_next_full_match.
 
+    DATA: skip_match_search TYPE abap_bool.
+
     LOOP AT matchers ASSIGNING FIELD-SYMBOL(<matcher>).
       DATA(i) = sy-tabix.
+      CLEAR skip_match_search.
 
       " # check if exclusion flag was set at matcher
       IF <matcher>->control_flags BIT-AND c_pattern_ctrl_flag-exclude =
@@ -110,28 +113,31 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
         CONTINUE.
       ELSEIF <matcher>->control_flags BIT-AND c_pattern_ctrl_flag-boundary_end =
           c_pattern_ctrl_flag-boundary_end.
+        previous_match = current_match.
         current_match = boundary_end.
         current_line_offset = boundary_end-line.
         current_col_offset = boundary_end-offset.
 
         CLEAR: boundary_start,
                boundary_end.
-        CONTINUE.
+        skip_match_search = abap_true.
       ENDIF.
 
-      previous_match = current_match.
+      IF skip_match_search = abap_false.
+        previous_match = current_match.
 
-      " # find match for the current matcher
-      find_next_partial_match(
-        EXPORTING
-          matcher     = <matcher>
-        IMPORTING
-          match       = current_match
-          line_offset = current_line_offset
-          col_offset  = current_col_offset ).
+        " # find match for the current matcher
+        find_next_partial_match(
+          EXPORTING
+            matcher     = <matcher>
+          IMPORTING
+            match       = current_match
+            line_offset = current_line_offset
+            col_offset  = current_col_offset ).
 
-      IF has_more_matches = abap_false.
-        RETURN.
+        IF has_more_matches = abap_false.
+          RETURN.
+        ENDIF.
       ENDIF.
 
       " # check if exclusion table has entries
