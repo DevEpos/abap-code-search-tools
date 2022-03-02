@@ -108,8 +108,7 @@ CLASS lcl_search_query IMPLEMENTATION.
       TRY.
           settings-patterns = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns = settings-patterns ).
         CATCH zcx_adcoset_static_error INTO DATA(parse_error).
-          " TODO: create ADT endpoint to run validation for patterns before hand
-          "    -> better UX as user still has the chance to fix the patterns
+          " Safety precausion. If called from ADT the sequence is already validated
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
             EXPORTING
               previous = parse_error.
