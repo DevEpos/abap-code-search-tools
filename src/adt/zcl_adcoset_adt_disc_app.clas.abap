@@ -25,18 +25,20 @@ CLASS zcl_adcoset_adt_disc_app DEFINITION
       c_search_uri                TYPE string VALUE '/codesearch',
       c_settings_relative_uri     TYPE string VALUE '/settings',
       c_search_scope_relative_uri TYPE string VALUE '/scope',
+      c_pattern_validator_rel_uri TYPE string VALUE '/validatepattern',
       c_static_uri                TYPE string VALUE '/devepos/adt/cst',
       c_root_scheme               TYPE string VALUE 'http://www.devepos.com/adt/cst',
       c_root_rel_scheme           TYPE string VALUE 'http://www.devepos.com/adt/relations/cst',
 
       "! REST handler constants
       BEGIN OF c_handlers,
-        search          TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_SEARCH',
-        search_settings TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_CONFIG',
-        search_scope    TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_SCOPE',
-        appl_comp_vh    TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_APPLC_VH',
-        server_group_vh TYPE string VALUE 'ZCL_ADCOSET_RES_SERVER_GRP_VH',
-        plugin_features TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_FEATURES',
+        search            TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_SEARCH',
+        search_settings   TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_CONFIG',
+        search_scope      TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_SCOPE',
+        appl_comp_vh      TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_APPLC_VH',
+        server_group_vh   TYPE string VALUE 'ZCL_ADCOSET_RES_SERVER_GRP_VH',
+        plugin_features   TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_FEATURES',
+        pattern_validator TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_PATTRNVAL',
       END OF c_handlers.
 
     METHODS:
@@ -82,14 +84,6 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD register_resources.
-    register_code_search( registry ).
-    register_plugin_features( registry ).
-    register_search_value_helps( registry ).
-    register_other_value_helps( registry ).
-  ENDMETHOD.
-
-
   METHOD register_code_search.
 
     DATA(search_collection) = registry->register_discoverable_resource(
@@ -117,7 +111,6 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
       template      = template
       handler_class = c_handlers-search ).
 
-    " register resource for search settings
     registry->register_discoverable_resource(
       url             = |{ c_search_uri }{ c_settings_relative_uri }|
       handler_class   = c_handlers-search_settings
@@ -131,16 +124,13 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
       description     = 'Search scope for ABAP Code Search'
       category_scheme = c_root_scheme
       category_term   = 'codesearchScope' ).
-  ENDMETHOD.
 
-
-  METHOD register_search_value_helps.
     registry->register_discoverable_resource(
-      url             = '/applcomp'
-      handler_class   = c_handlers-appl_comp_vh
-      description     = 'Application Component value help'
+      url             = |{ c_search_uri }{ c_pattern_validator_rel_uri }|
+      handler_class   = c_handlers-pattern_validator
+      description     = 'Pattern Validator for ABAP Code Search'
       category_scheme = c_root_scheme
-      category_term   = 'applcomp' ).
+      category_term   = 'patternValidator' ).
   ENDMETHOD.
 
 
@@ -164,4 +154,20 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD register_resources.
+    register_code_search( registry ).
+    register_plugin_features( registry ).
+    register_search_value_helps( registry ).
+    register_other_value_helps( registry ).
+  ENDMETHOD.
+
+
+  METHOD register_search_value_helps.
+    registry->register_discoverable_resource(
+      url             = '/applcomp'
+      handler_class   = c_handlers-appl_comp_vh
+      description     = 'Application Component value help'
+      category_scheme = c_root_scheme
+      category_term   = 'applcomp' ).
+  ENDMETHOD.
 ENDCLASS.
