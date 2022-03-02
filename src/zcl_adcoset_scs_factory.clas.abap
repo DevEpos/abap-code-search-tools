@@ -25,16 +25,12 @@ CLASS zcl_adcoset_scs_factory IMPLEMENTATION.
     IF settings-sequential_matching = abap_true AND lines( matchers ) > 1.
 
       DATA(is_ctrl_flags_found) = abap_false.
-      IF lines( matchers ) > 2.
-
-        LOOP AT matchers INTO DATA(matcher).
-          IF matcher->control_flags IS NOT INITIAL.
-            is_ctrl_flags_found = abap_true.
-            EXIT.
-          ENDIF.
-        ENDLOOP.
-
-      ENDIF.
+      LOOP AT matchers INTO DATA(matcher).
+        IF matcher->control_flags IS NOT INITIAL.
+          is_ctrl_flags_found = abap_true.
+          EXIT.
+        ENDIF.
+      ENDLOOP.
 
       IF is_ctrl_flags_found = abap_true.
         result = NEW zcl_adcoset_scs_sequ_extended(

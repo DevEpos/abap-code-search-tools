@@ -31,6 +31,7 @@ CLASS zcl_adcoset_pattern_util DEFINITION
     CLASS-DATA:
       ctrl_sequences_regex      TYPE string,
       any_ctrl_sequence_regex   TYPE string,
+      possible_ctrl_seq_range   TYPE RANGE OF zif_adcoset_ty_global=>ty_control_flags,
       ctrl_flag_to_sequence_map TYPE HASHED TABLE OF ty_flag_to_sequence WITH UNIQUE KEY control_sequence.
 
     CLASS-METHODS:
@@ -50,6 +51,13 @@ CLASS zcl_adcoset_pattern_util DEFINITION
         CHANGING
           patterns TYPE zif_adcoset_ty_global=>ty_patterns
         RAISING
+          zcx_adcoset_static_error,
+      parse_sequences
+        IMPORTING
+          ctrl_sequence TYPE string
+        RETURNING
+          VALUE(result) TYPE zif_adcoset_ty_global=>ty_control_flags
+        RAISING
           zcx_adcoset_static_error.
 ENDCLASS.
 
@@ -63,6 +71,8 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
         flag             = c_pattern_ctrl_flag-boundary_start )
       ( control_sequence = c_pattern_ctrl_sequence-boundary_end
         flag             = c_pattern_ctrl_flag-boundary_end )
+      ( control_sequence = c_pattern_ctrl_sequence-match
+        flag             = c_pattern_ctrl_flag-match )
       ( control_sequence = c_pattern_ctrl_sequence-match_start
         flag             = c_pattern_ctrl_flag-match_start )
       ( control_sequence = c_pattern_ctrl_sequence-match_end
@@ -70,9 +80,14 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
       ( control_sequence = c_pattern_ctrl_sequence-exclude
         flag             = c_pattern_ctrl_flag-exclude ) ).
 
+    possible_ctrl_seq_range = VALUE #(
+      sign = 'I' option = 'EQ'
+      ( low = c_pattern_ctrl_flag-match_start BIT-OR c_pattern_ctrl_flag-boundary_start )
+      ( low = c_pattern_ctrl_flag-match_end BIT-OR c_pattern_ctrl_flag-boundary_end ) ).
 
     ctrl_sequences_regex = c_pattern_ctrl_sequence-boundary_start && `|` &&
                            c_pattern_ctrl_sequence-boundary_end && `|` &&
+                           c_pattern_ctrl_sequence-match && `|` &&
                            c_pattern_ctrl_sequence-match_start && `|` &&
                            c_pattern_ctrl_sequence-match_end && `|` &&
                            c_pattern_ctrl_sequence-exclude.
@@ -95,8 +110,8 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
 
   METHOD parse_patterns.
 
-    DATA: parsed_patterns    LIKE result,
-          one_sequence_found TYPE abap_bool.
+    DATA: parsed_patterns   LIKE result,
+          is_sequence_found TYPE abap_bool.
 
     DATA(patterns_count) = lines( patterns ).
 
@@ -114,12 +129,12 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
       ENDIF.
       result = VALUE #( BASE result ( pattern ) ).
 
-      IF one_sequence_found = abap_false AND pattern-flags IS NOT INITIAL.
-        one_sequence_found = abap_true.
+      IF is_sequence_found = abap_false AND pattern-flags IS NOT INITIAL.
+        is_sequence_found = abap_true.
       ENDIF.
     ENDLOOP.
 
-    IF one_sequence_found = abap_false.
+    IF is_sequence_found = abap_false.
       RETURN.
     ENDIF.
 
@@ -133,42 +148,34 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
     FIND FIRST OCCURRENCE OF REGEX ctrl_sequences_regex IN pattern-content
       RESPECTING CASE
       RESULTS DATA(grouped_match).
-    IF sy-subrc <> 0 OR grouped_match IS INITIAL.
-      RETURN.
+    IF sy-subrc <> 0.
+      " check if pattern begins with unrecognized control sequence
+      FIND FIRST OCCURRENCE OF REGEX '^(\(#[^\s)]+\))+' IN pattern-content
+        RESPECTING CASE
+        RESULTS grouped_match.
+      IF sy-subrc = 0.
+        RAISE EXCEPTION TYPE zcx_adcoset_static_error
+          EXPORTING
+            text = |Invalid control seqeuence in pattern '{ pattern-content }' detected|.
+      ELSE.
+        RETURN.
+      ENDIF.
     ENDIF.
 
     DATA(ctrl_sequence) = substring( val = pattern-content len = grouped_match-length ).
-    DATA(pattern_without_ctrl_seq) = substring( val = pattern-content off = grouped_match-length ).
-
+    pattern-content = substring( val = pattern-content off = grouped_match-length ).
 
     DATA(ctrl_sequence_count) = count( val = ctrl_sequence regex = any_ctrl_sequence_regex case = abap_true ).
-
-    IF ctrl_sequence_count = 2.
-      IF ctrl_sequence = c_pattern_ctrl_sequence-match_end && c_pattern_ctrl_sequence-match_start OR
-          ctrl_sequence = c_pattern_ctrl_sequence-match_start && c_pattern_ctrl_sequence-match_end.
-        pattern = VALUE #(
-          content = pattern_without_ctrl_seq
-          flags   = ctrl_flag_to_sequence_map[ control_sequence = c_pattern_ctrl_sequence-match_start ]-flag BIT-OR
-                    ctrl_flag_to_sequence_map[ control_sequence = c_pattern_ctrl_sequence-match_end ]-flag ).
-      ELSE.
-        RAISE EXCEPTION TYPE zcx_adcoset_static_error
-          EXPORTING
-            text = |More than one control sequence at pattern '{ pattern-content }'|.
-      ENDIF.
-    ELSEIF ctrl_sequence_count > 1.
-      RAISE EXCEPTION TYPE zcx_adcoset_static_error
-        EXPORTING
-          text = |More than one control sequence at pattern '{ pattern-content }'|.
+    IF ctrl_sequence_count > 1.
+      pattern-flags = parse_sequences( ctrl_sequence ).
     ELSE.
-      pattern = VALUE #(
-        content = pattern_without_ctrl_seq
-        flags   = ctrl_flag_to_sequence_map[ control_sequence = ctrl_sequence ]-flag ).
+      pattern-flags = ctrl_flag_to_sequence_map[ control_sequence = ctrl_sequence ]-flag.
     ENDIF.
 
-    IF pattern_without_ctrl_seq IS INITIAL.
+    IF pattern-content IS INITIAL.
       RAISE EXCEPTION TYPE zcx_adcoset_static_error
         EXPORTING
-          text = |Control sequence { ctrl_sequence } without a pattern is invalid|.
+          text = |Control sequence { ctrl_sequence } without a pattern is not possible|.
     ENDIF.
 
   ENDMETHOD.
@@ -199,7 +206,9 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
         ENDIF.
         " reset for next boundary
         boundary_start_index = 0.
-      ELSEIF <pattern>-flags BIT-AND c_pattern_ctrl_flag-match_start =
+      ENDIF.
+
+      IF <pattern>-flags BIT-AND c_pattern_ctrl_flag-match_start =
           c_pattern_ctrl_flag-match_start.
         IF match_start_index > 0.
           RAISE EXCEPTION TYPE zcx_adcoset_static_error
@@ -221,7 +230,7 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
           match_start_index = sy-tabix.
         ENDIF.
       ELSEIF <pattern>-flags BIT-AND c_pattern_ctrl_flag-match_end =
-                c_pattern_ctrl_flag-match_end.
+            c_pattern_ctrl_flag-match_end.
         IF match_start_index = 0.
           RAISE EXCEPTION TYPE zcx_adcoset_static_error
             EXPORTING
@@ -246,6 +255,26 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
           text = |Boundary sequence not closed with '{
             c_pattern_ctrl_sequence-boundary_end }'|.
     ENDIF.
+  ENDMETHOD.
+
+
+  METHOD parse_sequences.
+
+    DATA(rest_sequence) = ctrl_sequence.
+
+    WHILE rest_sequence IS NOT INITIAL.
+      DATA(closing_bracket) = find( val = rest_sequence sub = ')' ) + 1.
+      DATA(sequence) = rest_sequence(closing_bracket).
+      result = result BIT-OR ctrl_flag_to_sequence_map[ control_sequence = sequence ]-flag.
+      rest_sequence = rest_sequence+closing_bracket.
+    ENDWHILE.
+
+    IF result NOT IN possible_ctrl_seq_range.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error
+        EXPORTING
+          text = |Invalid control sequence combination in { ctrl_sequence }|.
+    ENDIF.
+
   ENDMETHOD.
 
 ENDCLASS.

@@ -2,9 +2,6 @@
 
 CLASS lcl_test_helper DEFINITION CREATE PRIVATE.
   PUBLIC SECTION.
-    CONSTANTS:
-      c_source_1 TYPE i VALUE 1,
-      c_source_2 TYPE i VALUE 2.
     CLASS-METHODS:
       create_substring_matchers
         IMPORTING
@@ -12,8 +9,6 @@ CLASS lcl_test_helper DEFINITION CREATE PRIVATE.
         RETURNING
           VALUE(result) TYPE zif_adcoset_pattern_matcher=>ty_ref_tab,
       get_source
-        IMPORTING
-          source_id     TYPE i
         RETURNING
           VALUE(result) TYPE REF TO zif_adcoset_source_code.
   PROTECTED SECTION.
@@ -39,21 +34,59 @@ CLASS lcl_test_helper IMPLEMENTATION.
 
 
   METHOD get_source.
-    DATA: mtd_key        TYPE seocpdkey,
-          source_content TYPE string_table.
+    DATA: source_content TYPE string_table.
 
-    CASE source_id.
+    source_content = VALUE #(
+      ( |  METHOD find_next_full_match.| )
+      ( || )
+      ( |    LOOP AT matchers ASSIGNING FIELD-SYMBOL(<matcher>).| )
+      ( |      DATA(i) = sy-tabix.| )
+      ( || )
+      ( |      " # check if exclusion flag was set at matcher| )
+      ( |      IF <matcher>->control_flags BIT-AND c_pattern_ctrl_flag-exclude =| )
+      ( |          c_pattern_ctrl_flag-exclude.| )
+      ( |        APPEND <matcher> TO exclusion_matchers.| )
+      ( |        CONTINUE.| )
+      ( |      ELSEIF <matcher>->control_flags BIT-AND c_pattern_ctrl_flag-boundary_end =| )
+      ( |          c_pattern_ctrl_flag-boundary_end.| )
+      ( |        current_match = boundary_end.| )
+      ( |        current_line_offset = boundary_end-line.| )
+      ( |        current_col_offset = boundary_end-offset.| )
+      ( || )
+      ( |        CLEAR: boundary_start,| )
+      ( |               boundary_end.| )
+      ( |        CONTINUE.| )
+      ( |      ENDIF.| )
+      ( || )
+      ( |      SELECT *| )
+      ( |        FROM mara INTO DATA(mara_res).| )
+      ( || )
+      ( || )
+      ( |      LOOP AT mara_res INTO DATA(mara_res_line).| )
+      ( |        SELECT SINGLE werks| )
+      ( |          FROM marc| )
+      ( |          WHERE matnr = @mara_res_line-matnr| )
+      ( |          INTO @DATA(marc_res).| )
+      ( |      ENDLOOP.| )
+      ( || )
+      ( |      previous_match = current_match.| )
+      ( || )
+      ( |      " # find match for the current matcher| )
+      ( |      find_next_partial_match(| )
+      ( |        EXPORTING| )
+      ( |          matcher     = <matcher>| )
+      ( |        IMPORTING| )
+      ( |          match       = current_match| )
+      ( |          line_offset = current_line_offset| )
+      ( |          col_offset  = current_col_offset ).| )
+      ( || )
+      ( |      IF has_more_matches = abap_false.| )
+      ( |        RETURN.| )
+      ( |      ENDIF.| )
+      ( | ENDLOOP.| )
+      ( || )
+      ( |  ENDMETHOD.| ) ).
 
-      WHEN c_source_1.
-        mtd_key = VALUE #( clsname = 'ZCL_ADCOSET_SCS_SEQU_EXTENDED' cpdname = 'FIND_NEXT_FULL_MATCH' ).
-
-      WHEN c_source_2.
-        mtd_key = VALUE #( clsname = 'ZCL_ADCOSET_SCS_SEQU_EXTENDED' cpdname = 'FIND_NEXT_BOUNDARY_END' ).
-
-    ENDCASE.
-
-    DATA(include_name) = cl_oo_classname_service=>get_method_include( mtdkey = mtd_key ).
-    READ REPORT include_name INTO source_content.
     result = NEW zcl_adcoset_source_code(
       source        = source_content
       comment_regex = '^(\*|\s*")' ).
@@ -70,6 +103,7 @@ CLASS ltcl_abap_unit DEFINITION FINAL FOR TESTING
 
     METHODS:
       test_match_found1 FOR TESTING,
+      test_match_found2 FOR TESTING,
       test_no_match_found1 FOR TESTING,
       test_no_match_found2 FOR TESTING.
 ENDCLASS.
@@ -83,16 +117,30 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
         ( content = ' loop'       )
         ( content = ' assigning'  )
         ( content = '.'           )
-        ( content = ' find_next_partial_match' flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match_start BIT-OR
-                                                       zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match_end )
+        ( content = 'control_flags' flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match )
       ) )
     ).
 
-    DATA(source_code) = lcl_test_helper=>get_source( lcl_test_helper=>c_source_2 ).
-
-    DATA(matches) = cut->zif_adcoset_src_code_searcher~search( source_code ).
+    DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
 
     cl_abap_unit_assert=>assert_not_initial( matches ).
+  ENDMETHOD.
+
+  METHOD test_match_found2.
+    cut = NEW zcl_adcoset_scs_sequ_extended(
+      ignore_comment_lines = abap_true
+      matchers             = lcl_test_helper=>create_substring_matchers( VALUE #(
+        ( content = ' loop'       )
+        ( content = ' assigning'  )
+        ( content = '.'           )
+        ( content = ' if ' flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-exclude )
+        ( content = 'control_flags' flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match )
+      ) )
+    ).
+
+    DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
+
+    cl_abap_unit_assert=>assert_initial( matches ).
   ENDMETHOD.
 
 
@@ -108,9 +156,7 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
         ( content = '.'           flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match_end ) ) )
     ).
 
-    DATA(source_code) = lcl_test_helper=>get_source( lcl_test_helper=>c_source_1 ).
-
-    DATA(matches) = cut->zif_adcoset_src_code_searcher~search( source_code ).
+    DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
 
     cl_abap_unit_assert=>assert_initial( matches ).
   ENDMETHOD.
@@ -124,14 +170,11 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
         ( content = ' assigning'  )
         ( content = '.'           )
         ( content = ' if ' flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-exclude )
-        ( content = ' find_next_partial_match' flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match_start BIT-OR
-                                                       zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match_end )
+        ( content = 'control_flags' flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match )
       ) )
     ).
 
-    DATA(source_code) = lcl_test_helper=>get_source( lcl_test_helper=>c_source_2 ).
-
-    DATA(matches) = cut->zif_adcoset_src_code_searcher~search( source_code ).
+    DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
 
     cl_abap_unit_assert=>assert_initial( matches ).
   ENDMETHOD.

@@ -63,11 +63,13 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
       ignore_comment_lines = ignore_comment_lines
       matchers             = matchers ).
 
-
     LOOP AT matchers INTO DATA(matcher).
-      IF matcher->control_flags BIT-AND c_pattern_ctrl_flag-match_start =
-          c_pattern_ctrl_flag-match_start.
+      IF ( matcher->control_flags BIT-AND c_pattern_ctrl_flag-match_start =
+           c_pattern_ctrl_flag-match_start ) OR
+          ( matcher->control_flags BIT-AND c_pattern_ctrl_flag-match =
+            c_pattern_ctrl_flag-match ).
         has_custom_match_boundary = abap_true.
+        EXIT.
       ENDIF.
     ENDLOOP.
 
@@ -173,9 +175,12 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
       IF <matcher>->control_flags BIT-AND c_pattern_ctrl_flag-match_start =
           c_pattern_ctrl_flag-match_start.
         match_start = current_match.
-      ENDIF.
-      IF <matcher>->control_flags BIT-AND c_pattern_ctrl_flag-match_end =
+      ELSEIF <matcher>->control_flags BIT-AND c_pattern_ctrl_flag-match_end =
           c_pattern_ctrl_flag-match_end.
+        match_end = current_match.
+      ELSEIF <matcher>->control_flags BIT-AND c_pattern_ctrl_flag-match =
+          c_pattern_ctrl_flag-match.
+        match_start = current_match.
         match_end = current_match.
       ENDIF.
 

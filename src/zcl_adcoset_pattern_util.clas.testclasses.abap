@@ -8,12 +8,14 @@ CLASS ltcl_abap_unit DEFINITION FINAL FOR TESTING
       test_valid_sequence1 FOR TESTING,
       test_valid_sequence2 FOR TESTING,
       test_valid_sequence3 FOR TESTING,
+      test_valid_sequence4 FOR TESTING,
       test_invalid_sequence1 FOR TESTING,
       test_invalid_sequence2 FOR TESTING,
       test_invalid_sequence3 FOR TESTING,
       test_invalid_sequence4 FOR TESTING,
       test_invalid_sequence5 FOR TESTING,
-      test_invalid_sequence6 FOR TESTING.
+      test_invalid_sequence6 FOR TESTING,
+      test_invalid_sequence7 FOR TESTING.
 ENDCLASS.
 
 CLASS ltcl_abap_unit IMPLEMENTATION.
@@ -62,7 +64,25 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
     DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
       ( content = '(#b-start) data(' )
       ( content = '(#exclude)val' )
-      ( content = '(#m-start)(#m-end) = ' )
+      ( content = '(#match) = ' )
+      ( content = '(#b-end).' )
+    ).
+
+    TRY.
+        DATA(valid_patterns) = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
+        cl_abap_unit_assert=>assert_equals( exp = lines( patterns ) act = lines( valid_patterns ) ).
+      CATCH zcx_adcoset_static_error INTO DATA(error).
+        cl_abap_unit_assert=>fail(
+          msg = error->get_text( ) ).
+    ENDTRY.
+  ENDMETHOD.
+
+
+  METHOD test_valid_sequence4.
+    DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
+      ( content = '(#b-start)(#m-start) data(' )
+      ( content = '(#exclude)val' )
+      ( content = '(#m-end) = ' )
       ( content = '(#b-end).' )
     ).
 
@@ -168,6 +188,19 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
         zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
         cl_abap_unit_assert=>fail(
           msg = 'Multiple seqeuences at a single pattern assigned' ).
+      CATCH zcx_adcoset_static_error.
+    ENDTRY.
+  ENDMETHOD.
+
+
+  METHOD test_invalid_sequence7.
+    DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
+      ( content = '(#b-Start) value' ) ).
+
+    TRY.
+        zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
+        cl_abap_unit_assert=>fail(
+          msg = 'Invalid Sequence found' ).
       CATCH zcx_adcoset_static_error.
     ENDTRY.
   ENDMETHOD.
