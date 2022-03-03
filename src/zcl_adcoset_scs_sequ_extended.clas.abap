@@ -29,13 +29,16 @@ CLASS zcl_adcoset_scs_sequ_extended DEFINITION
       end_boundary_matcher      TYPE REF TO zif_adcoset_pattern_matcher,
       boundary_start            TYPE match_result,
       boundary_end              TYPE match_result,
-      exclusion_matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+      exclusion_matchers        TYPE zif_adcoset_pattern_matcher=>ty_ref_tab,
+      source_line_count         TYPE i.
 
     METHODS:
       find_next_full_match
         CHANGING
           matches TYPE zif_adcoset_ty_global=>ty_search_matches,
       has_matches_for_exclusions
+        IMPORTING
+          lookahead     TYPE abap_bool OPTIONAL
         RETURNING
           VALUE(result) TYPE abap_bool,
       find_next_boundary_end
@@ -78,6 +81,7 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
   METHOD zif_adcoset_src_code_searcher~search.
     " set the source code attribute for this search call
     me->source_code = source_code.
+    source_line_count = lines( source_code->content ).
     has_more_matches = abap_true.
 
     CLEAR: current_line_offset,
@@ -171,11 +175,10 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
       ENDIF.
 
       " # check if custom match patterns were specified, if not
-      "   the match will span from the first pattern matcher to the last
-      IF i = 1.
-        IF has_custom_match_boundary = abap_false.
-          match_start = current_match.
-        ENDIF.
+      "   the match will span from the first non exclusion pattern matcher to the last
+      IF has_custom_match_boundary = abap_false AND
+          match_start IS INITIAL.
+        match_start = current_match.
       ENDIF.
 
       IF <matcher>->control_flags BIT-AND c_pattern_ctrl_flag-match_start =
@@ -192,6 +195,13 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
 
     ENDLOOP.
 
+    " test if exclusion occurred at end of sequence
+    IF exclusion_matchers IS NOT INITIAL.
+      IF has_matches_for_exclusions( lookahead = abap_true ).
+        RETURN.
+      ENDIF.
+    ENDIF.
+
     IF has_custom_match_boundary = abap_false.
       match_end = current_match.
     ENDIF.
@@ -202,8 +212,22 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
 
 
   METHOD has_matches_for_exclusions.
+    DATA: range_match_start TYPE match_result,
+          range_match_end   TYPE match_result.
 
-    DATA(range_match_start) = previous_match.
+    IF lookahead = abap_true.
+      range_match_start = current_match.
+      range_match_end = VALUE #(
+        line   = source_line_count
+        offset = strlen( source_code->content[ source_line_count ] ) ).
+    ELSE.
+      range_match_start = previous_match.
+      range_match_end = current_match.
+      " maybe exclusion pattern was found at start of sequence
+      IF range_match_start-line IS INITIAL.
+        range_match_start = VALUE #( line = 1 ).
+      ENDIF.
+    ENDIF.
 
     LOOP AT exclusion_matchers ASSIGNING FIELD-SYMBOL(<matcher>).
 
@@ -211,8 +235,8 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
            matcher    = <matcher>
            start_line = range_match_start-line
            offset     = range_match_start-offset
-           end_line   = current_match-line
-           end_offset = current_match-offset ).
+           end_line   = range_match_end-line
+           end_offset = range_match_end-offset ).
 
         result = abap_true.
         RETURN.

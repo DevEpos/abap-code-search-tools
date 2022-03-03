@@ -118,15 +118,6 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
     LOOP AT patterns INTO DATA(pattern).
       parse_pattern( CHANGING pattern = pattern ).
 
-      " exclusion sequence must not occur at start or end of sequence
-      IF ( sy-tabix = 1 OR sy-tabix = patterns_count ) AND
-          pattern-flags BIT-AND c_pattern_ctrl_flag-exclude = c_pattern_ctrl_flag-exclude.
-        RAISE EXCEPTION TYPE zcx_adcoset_static_error
-          EXPORTING
-            text = |The control seqeuence { c_pattern_ctrl_sequence-exclude } must not occur in the| &&
-                   | { COND string( WHEN sy-tabix = 1 THEN 'first' ELSE 'last' ) } pattern|.
-
-      ENDIF.
       result = VALUE #( BASE result ( pattern ) ).
 
       IF is_sequence_found = abap_false AND pattern-flags IS NOT INITIAL.

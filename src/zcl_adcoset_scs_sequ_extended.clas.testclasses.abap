@@ -105,7 +105,8 @@ CLASS ltcl_abap_unit DEFINITION FINAL FOR TESTING
       test_match_found1 FOR TESTING,
       test_match_found2 FOR TESTING,
       test_no_match_found1 FOR TESTING,
-      test_no_match_found2 FOR TESTING.
+      test_no_match_found2 FOR TESTING,
+      test_no_match_found3 FOR TESTING.
 ENDCLASS.
 
 CLASS ltcl_abap_unit IMPLEMENTATION.
@@ -171,6 +172,21 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
         ( content = '.'           )
         ( content = ' if ' flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-exclude )
         ( content = 'control_flags' flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match )
+      ) )
+    ).
+
+    DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
+
+    cl_abap_unit_assert=>assert_initial( matches ).
+  ENDMETHOD.
+
+
+  METHOD test_no_match_found3.
+    cut = NEW zcl_adcoset_scs_sequ_extended(
+      ignore_comment_lines = abap_true
+      matchers             = lcl_test_helper=>create_substring_matchers( VALUE #(
+        ( content = '(#exclude) loop '       )
+        ( content = ' select '  )
       ) )
     ).
 

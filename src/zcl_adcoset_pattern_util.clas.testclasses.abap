@@ -150,7 +150,7 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   METHOD test_invalid_sequence4.
     DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
       ( content = '(#exclude)loop' )
-      ( content = '(#m-end) select' )
+      ( content = '(#m-start) select' )
       ( content = '(#m-end).' )
     ).
 
@@ -166,9 +166,9 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   METHOD test_invalid_sequence5.
     DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
       ( content = ' loop' )
-      ( content = '(#m-end) select' )
+      ( content = '(#m-start) select' )
       ( content = '(#m-end).' )
-      ( content = '(#exclude)' )
+      ( content = '(#exclude) endloop' )
     ).
 
     TRY.
