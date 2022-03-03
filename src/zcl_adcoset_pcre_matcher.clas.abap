@@ -111,7 +111,7 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
   ENDMETHOD.
 
 
-  method zif_adcoset_pattern_matcher~find_matches_in_range.
+  METHOD zif_adcoset_pattern_matcher~find_matches_in_range.
     IF matcher_classname IS INITIAL.
       matcher_classname = |\\PROGRAM={ generate_matcher_program( ) }\\CLASS=LCL_PCRE_MATCHER|.
     ENDIF.
@@ -124,7 +124,9 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
         start_line  = start_line
         offset      = offset
         end_line    = end_line
-        end_offset  = end_offset.
+        end_offset  = end_offset
+      RECEIVING
+        result      = result.
   ENDMETHOD.
 
 
@@ -141,7 +143,9 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
         start_line  = start_line
         offset      = offset
         end_line    = end_line
-        end_offset  = end_offset.
+        end_offset  = end_offset
+      RECEIVING
+        result      = result.
   ENDMETHOD.
 
 
