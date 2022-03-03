@@ -173,6 +173,7 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
 
 
   METHOD validate_sequence.
+    DATA(excludes_count) = 0.
     DATA(match_start_index) = 0.
     DATA(boundary_start_index) = 0.
     DATA(match_found) = abap_false.
@@ -187,6 +188,9 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
                 c_pattern_ctrl_sequence-boundary_end }'|.
         ENDIF.
         boundary_start_index = sy-tabix.
+      ELSEIF <pattern>-flags BIT-AND c_pattern_ctrl_flag-exclude =
+          c_pattern_ctrl_flag-exclude.
+        excludes_count = excludes_count + 1.
       ELSEIF <pattern>-flags BIT-AND c_pattern_ctrl_flag-boundary_end =
           c_pattern_ctrl_flag-boundary_end.
         IF boundary_start_index = 0.
@@ -232,6 +236,12 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
         match_start_index = 0.
       ENDIF.
     ENDLOOP.
+
+    IF lines( patterns ) = excludes_count.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error
+        EXPORTING
+          text = |The sequence can not contain only excludes|.
+    ENDIF.
 
     IF match_found = abap_false AND match_start_index > 0.
       RAISE EXCEPTION TYPE zcx_adcoset_static_error
