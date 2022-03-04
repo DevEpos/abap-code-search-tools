@@ -15,6 +15,7 @@ CLASS ltcl_abap_unit DEFINITION FINAL FOR TESTING
       test_invalid_sequence2 FOR TESTING,
       test_invalid_sequence3 FOR TESTING,
       test_invalid_sequence4 for testing,
+      test_invalid_sequence5 FOR TESTING,
       test_invalid_sequence6 FOR TESTING,
       test_invalid_sequence7 FOR TESTING,
       test_invalid_sequence8 FOR TESTING.
@@ -185,6 +186,22 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
       ( content = '(#b-start) select' )
       ( content = '(#b-start) d' )
       ( content = '(#m-end).' )
+    ).
+
+    TRY.
+        DATA(valid_patterns) = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
+        cl_abap_unit_assert=>fail(
+          msg = 'Pattern sequence validation should have failed' ).
+      CATCH zcx_adcoset_static_error.
+    ENDTRY.
+  ENDMETHOD.
+
+
+  METHOD test_invalid_sequence5.
+    DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
+      ( content = '(#match).' )
+      ( content = '(#exclude) loop' )
+      ( content = '(#match) 2' )
     ).
 
     TRY.

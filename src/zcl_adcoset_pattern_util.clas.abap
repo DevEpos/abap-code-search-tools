@@ -209,6 +209,10 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
             EXPORTING
               text = |{ c_pattern_ctrl_sequence-match_start }/{ c_pattern_ctrl_sequence-match_end } and { c_pattern_ctrl_sequence-match } | &&
                      |are exclusive and can not occur in one pattern sequence|.
+        ELSEIF single_match_seq_found = abap_true.
+          RAISE EXCEPTION TYPE zcx_adcoset_static_error
+            EXPORTING
+              text = |The sequence '{ c_pattern_ctrl_sequence-match }' can only occur one time in a pattern sequence|.
         ENDIF.
         single_match_seq_found = abap_true.
       ENDIF.
