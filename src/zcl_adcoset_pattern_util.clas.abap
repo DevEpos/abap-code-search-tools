@@ -174,9 +174,10 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
 
   METHOD validate_sequence.
     DATA(excludes_count) = 0.
-    DATA(match_start_index) = 0.
     DATA(boundary_start_index) = 0.
+    DATA(match_start_index) = 0.
     DATA(match_found) = abap_false.
+    DATA(single_match_seq_found) = abap_false.
 
     LOOP AT patterns ASSIGNING FIELD-SYMBOL(<pattern>) WHERE flags IS NOT INITIAL.
       IF <pattern>-flags BIT-AND c_pattern_ctrl_flag-boundary_start =
@@ -201,53 +202,54 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
         ENDIF.
         " reset for next boundary
         boundary_start_index = 0.
+      ELSEIF <pattern>-flags BIT-AND c_pattern_ctrl_flag-match =
+                c_pattern_ctrl_flag-match.
+        IF match_found = abap_true.
+          RAISE EXCEPTION TYPE zcx_adcoset_static_error
+            EXPORTING
+              text = |{ c_pattern_ctrl_sequence-match_start }/{ c_pattern_ctrl_sequence-match_end } and { c_pattern_ctrl_sequence-match } | &&
+                     |are exclusive and can not occur in one pattern sequence|.
+        ENDIF.
+        single_match_seq_found = abap_true.
       ENDIF.
 
       IF <pattern>-flags BIT-AND c_pattern_ctrl_flag-match_start =
           c_pattern_ctrl_flag-match_start.
-        IF match_start_index > 0.
+        IF match_found = abap_true.
           RAISE EXCEPTION TYPE zcx_adcoset_static_error
             EXPORTING
-              text = |Match sequence not closed with '{
-                c_pattern_ctrl_sequence-match_end }'|.
-        ELSEIF match_found = abap_true.
+              text = |The match start/end sequence can only occur one time in a pattern sequence|.
+        ELSEIF single_match_seq_found = abap_true.
           RAISE EXCEPTION TYPE zcx_adcoset_static_error
             EXPORTING
-              text = |The match sequence can only occur one time in a pattern sequence|.
+              text = |{ c_pattern_ctrl_sequence-match } and { c_pattern_ctrl_sequence-match_start }/{ c_pattern_ctrl_sequence-match_end } | &&
+                     |are exclusive and can not occur in one pattern sequence|.
         ENDIF.
-
+        match_start_index = sy-tabix.
         match_found = abap_true.
-
-        " Match can occur in a single pattern
-        IF <pattern>-flags BIT-AND c_pattern_ctrl_flag-match_end =
-          c_pattern_ctrl_flag-match_end.
-        ELSE.
-          match_start_index = sy-tabix.
-        ENDIF.
       ELSEIF <pattern>-flags BIT-AND c_pattern_ctrl_flag-match_end =
             c_pattern_ctrl_flag-match_end.
-        IF match_start_index = 0.
+        IF match_found = abap_false.
           RAISE EXCEPTION TYPE zcx_adcoset_static_error
             EXPORTING
               text = |No match sequence started with '{
                 c_pattern_ctrl_sequence-match_start }'|.
         ENDIF.
-
         match_start_index = 0.
       ENDIF.
     ENDLOOP.
+
+    IF match_found = abap_true AND match_start_index > 0.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error
+        EXPORTING
+          text = |Match sequence not closed with '{
+            c_pattern_ctrl_sequence-match_end }'|.
+    ENDIF.
 
     IF lines( patterns ) = excludes_count.
       RAISE EXCEPTION TYPE zcx_adcoset_static_error
         EXPORTING
           text = |The sequence can not contain only excludes|.
-    ENDIF.
-
-    IF match_found = abap_false AND match_start_index > 0.
-      RAISE EXCEPTION TYPE zcx_adcoset_static_error
-        EXPORTING
-          text = |Match sequence not closed with '{
-            c_pattern_ctrl_sequence-match_end }'|.
     ENDIF.
 
     IF boundary_start_index > 0.

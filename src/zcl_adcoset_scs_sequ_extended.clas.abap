@@ -149,7 +149,6 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
         IF has_matches_for_exclusions( ).
           RETURN.
         ENDIF.
-      ELSE.
         CLEAR exclusion_matchers.
       ENDIF.
 

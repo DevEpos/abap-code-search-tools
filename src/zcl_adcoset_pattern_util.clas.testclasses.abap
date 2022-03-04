@@ -9,13 +9,15 @@ CLASS ltcl_abap_unit DEFINITION FINAL FOR TESTING
       test_valid_sequence2 FOR TESTING,
       test_valid_sequence3 FOR TESTING,
       test_valid_sequence4 FOR TESTING,
+      test_valid_sequence5 FOR TESTING,
+      test_valid_sequence6 FOR TESTING,
       test_invalid_sequence1 FOR TESTING,
       test_invalid_sequence2 FOR TESTING,
       test_invalid_sequence3 FOR TESTING,
-      test_invalid_sequence4 FOR TESTING,
-      test_invalid_sequence5 FOR TESTING,
+      test_invalid_sequence4 for testing,
       test_invalid_sequence6 FOR TESTING,
-      test_invalid_sequence7 FOR TESTING.
+      test_invalid_sequence7 FOR TESTING,
+      test_invalid_sequence8 FOR TESTING.
 ENDCLASS.
 
 CLASS ltcl_abap_unit IMPLEMENTATION.
@@ -96,6 +98,37 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD test_valid_sequence5.
+    DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
+      ( content = '(#exclude)loop' )
+      ( content = '(#m-start) select' )
+      ( content = '(#m-end).' )
+    ).
+
+    TRY.
+        DATA(valid_patterns) = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
+      CATCH zcx_adcoset_static_error INTO DATA(error).
+        cl_abap_unit_assert=>fail( msg = error->get_text( ) ).
+    ENDTRY.
+  ENDMETHOD.
+
+
+  METHOD test_valid_sequence6.
+    DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
+      ( content = ' loop' )
+      ( content = '(#m-start) select' )
+      ( content = '(#m-end).' )
+      ( content = '(#exclude) endloop' )
+    ).
+
+    TRY.
+        DATA(valid_patterns) = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
+      CATCH zcx_adcoset_static_error into data(error).
+        cl_abap_unit_assert=>fail( error->get_text( ) ).
+    ENDTRY.
+  ENDMETHOD.
+
+
   METHOD test_invalid_sequence1.
     DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
       ( content = '(#b-end) loop at' )
@@ -149,26 +182,9 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
 
   METHOD test_invalid_sequence4.
     DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
-      ( content = '(#exclude)loop' )
-      ( content = '(#m-start) select' )
+      ( content = '(#b-start) select' )
+      ( content = '(#b-start) d' )
       ( content = '(#m-end).' )
-    ).
-
-    TRY.
-        DATA(valid_patterns) = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
-        cl_abap_unit_assert=>fail(
-          msg = 'Pattern sequence validation should have failed' ).
-      CATCH zcx_adcoset_static_error.
-    ENDTRY.
-  ENDMETHOD.
-
-
-  METHOD test_invalid_sequence5.
-    DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
-      ( content = ' loop' )
-      ( content = '(#m-start) select' )
-      ( content = '(#m-end).' )
-      ( content = '(#exclude) endloop' )
     ).
 
     TRY.
@@ -196,6 +212,21 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   METHOD test_invalid_sequence7.
     DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
       ( content = '(#b-Start) value' ) ).
+
+    TRY.
+        zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
+        cl_abap_unit_assert=>fail(
+          msg = 'Invalid Sequence found' ).
+      CATCH zcx_adcoset_static_error.
+    ENDTRY.
+  ENDMETHOD.
+
+
+  METHOD test_invalid_sequence8.
+    DATA(patterns) = VALUE zif_adcoset_ty_global=>ty_patterns(
+      ( content = 'value' )
+      ( content = '(#exclude) endloop' )
+      ( content = '(#m-start) test' ) ).
 
     TRY.
         zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
