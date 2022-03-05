@@ -42,7 +42,10 @@ CLASS zcl_adcoset_search_scope DEFINITION
           search_scope TYPE zif_adcoset_ty_global=>ty_search_scope,
       init_scope
         IMPORTING
-          search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
+          search_scope TYPE zif_adcoset_ty_global=>ty_search_scope,
+      increase_scope_expiration
+        IMPORTING
+          scope_id TYPE sysuuid_x16.
 ENDCLASS.
 
 
@@ -247,8 +250,9 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    current_offset = search_scope-current_offset.
+    increase_scope_expiration( scope_id = search_scope-scope_id ).
 
+    current_offset = search_scope-current_offset.
     max_objects =
       package_size = search_scope-max_objects.
     " set fixed object count
@@ -272,6 +276,22 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     determine_count( ).
 
     obj_count_for_package_building = object_count.
+  ENDMETHOD.
+
+
+  METHOD increase_scope_expiration.
+    DATA: expiration TYPE zadcoset_csscope-expiration_datetime.
+
+    GET TIME STAMP FIELD expiration.
+    expiration = cl_abap_tstmp=>add(
+      tstmp = expiration
+      secs  = zif_adcoset_c_global=>c_default_scope_expiration ).
+
+    UPDATE zadcoset_csscope SET expiration_datetime = expiration
+                            WHERE id = scope_id.
+    IF sy-subrc = 0.
+      COMMIT WORK.
+    ENDIF.
   ENDMETHOD.
 
 ENDCLASS.

@@ -11,9 +11,7 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     CONSTANTS:
-      c_value_separator TYPE string VALUE ',' ##NO_TEXT,
-      c_no_expiration   TYPE i VALUE -1,
-      c_max_expiration  TYPE timestampl VALUE '99991231235959'.
+      c_value_separator      TYPE string VALUE ',' ##NO_TEXT.
 
     TYPES:
       BEGIN OF ty_param_flags,
@@ -91,12 +89,6 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     delete_expired_scopes( ).
 
-    " determine the expiration timestamp for the scope
-    expiration = zcl_adcoset_adt_request_util=>get_integer_query_parameter(
-      param_name    = zif_adcoset_c_global=>c_scope_params-expiration
-      default_value = 2
-      request       = request ).
-
     request->get_body_data(
       EXPORTING
         content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_params_ch( )
@@ -124,7 +116,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
     GET TIME STAMP FIELD current_time.
 
     DELETE FROM zadcoset_csscope WHERE created_by = sy-uname
-                                   AND expiration_datetime <= current_time.
+                                   AND expiration_datetime < current_time.
   ENDMETHOD.
 
 
@@ -184,14 +176,10 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
             previous = uuid_error.
     ENDTRY.
 
-    IF expiration = c_no_expiration.
-      scope_db-expiration_datetime = c_max_expiration.
-    ELSE.
-      GET TIME STAMP FIELD scope_db-expiration_datetime.
-      scope_db-expiration_datetime = cl_abap_tstmp=>add(
-        tstmp = scope_db-expiration_datetime
-        secs  = 60 * 60 * expiration ).
-    ENDIF.
+    GET TIME STAMP FIELD scope_db-expiration_datetime.
+    scope_db-expiration_datetime = cl_abap_tstmp=>add(
+      tstmp = scope_db-expiration_datetime
+      secs  = zif_adcoset_c_global=>c_default_scope_expiration ).
 
     INSERT zadcoset_csscope FROM scope_db.
 

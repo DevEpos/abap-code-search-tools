@@ -7,6 +7,10 @@ INTERFACE zif_adcoset_c_global
     "! processing will be used.
     c_parl_proc_min_objects   TYPE i VALUE 100,
 
+    "! Default scope expiration in seconds. <br/>
+    "! A scope is therefore valid for the duration of the current search query
+    c_default_scope_expiration type i value 600,
+
     "! Minimum package size for a single ADT request with parallel processing enabled
     c_parl_proc_min_pack_size TYPE i VALUE 500,
 
@@ -61,11 +65,6 @@ INTERFACE zif_adcoset_c_global
       fugr_includes         TYPE string VALUE 'fugrIncludes',
       max_objects           TYPE string VALUE 'maxObjects',
     END OF c_search_params,
-
-    "! Parameters for Scope Endpoint
-    BEGIN OF c_scope_params,
-      expiration TYPE string VALUE 'expiration',
-    END OF c_scope_params,
 
     "! <p class="shorttext synchronized" lang="en">Include id's for class</p>
     BEGIN OF c_class_include_id,
