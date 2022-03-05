@@ -89,14 +89,15 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
         search_scope  = search_config-search_scope )
       settings            = search_config-internal_settings ).
 
-    DATA(timer) = NEW zcl_adcoset_timer( )->start( ).
+    DATA(timer) = cl_abap_runtime=>create_hr_timer( ).
+    timer->get_runtime( ).
     query->run( ).
-    timer->stop( ).
+    DATA(duration) = timer->get_runtime( ).
 
     result = VALUE #(
       results                = query->get_results( )
       messages               = zcl_adcoset_log=>get_messages( )
-      duration_in_ms         = timer->get_duration_in_ms( )
+      duration_in_ms         = duration / 1000
       searched_objects_count = zcl_adcoset_search_protocol=>get_searched_object_count( )
       searched_sources_count = zcl_adcoset_search_protocol=>get_searched_sources_count( ) ).
   ENDMETHOD.
