@@ -43,3 +43,11 @@ You can execute the search via report `ZADCOSET_SEARCH`, where most of the optio
 ## Installation
 
 Install this repository using [abapGit](https://github.com/abapGit/abapGit#abapgit).
+
+## Necessary Authorizations
+
+To access the backend from ADT a user must have the following authorizations
+Authorization Object | Authorization Field | Value
+---------------------| ------------------- | -----
+S_ADT_RES            | URI                 | /devepos/adt/cst/*
+
