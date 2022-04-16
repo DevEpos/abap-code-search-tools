@@ -35,7 +35,7 @@ You can execute the search via report `ZADCOSET_SEARCH`, where most of the optio
   ZADCOSET_SEARCH           | ABAP Report for executing the code search
   
 - **/src/adt**  
-  Implementation of the ADT backend which is needed for future ADT plugin
+  Implementation of the ADT backend
   
 - **/src/parl**  
   Implementation of parallel processing - needed for the code search
