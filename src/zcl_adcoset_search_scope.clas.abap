@@ -32,7 +32,10 @@ CLASS zcl_adcoset_search_scope DEFINITION
       current_offset                 TYPE i,
       all_packages_read              TYPE abap_bool,
       package_size                   TYPE i VALUE c_serial_package_size,
-      is_more_objects_available      TYPE abap_bool.
+      is_more_objects_available      TYPE abap_bool,
+      dyn_from_clause                TYPE string,
+      tags_dyn_where_cond            TYPE string,
+      appl_comp_dyn_where_cond       TYPE string.
 
     METHODS:
       determine_count,
@@ -45,7 +48,8 @@ CLASS zcl_adcoset_search_scope DEFINITION
           search_scope TYPE zif_adcoset_ty_global=>ty_search_scope,
       increase_scope_expiration
         IMPORTING
-          scope_id TYPE sysuuid_x16.
+          scope_id TYPE sysuuid_x16,
+      config_dyn_where_clauses.
 ENDCLASS.
 
 
@@ -73,50 +77,28 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
 
   METHOD zif_adcoset_search_scope~next_package.
-
     DATA(max_rows) = package_size.
     IF current_offset IS INITIAL AND
         ( object_count  < package_size OR package_size = 0 ).
       max_rows = object_count.
     ENDIF.
 
-    IF search_ranges-appl_comp_range IS NOT INITIAL.
-      SELECT object_type AS type,
-             object_name AS name,
-             owner,
-             devclass AS package_name
-        FROM zadcoset_srccobj
-        WHERE object_type IN @search_ranges-object_type_range
-          AND object_name IN @search_ranges-object_name_range
-          AND devclass IN @search_ranges-package_range
-          AND devclass IN (
-            SELECT devclass
-              FROM tdevc
-                INNER JOIN df14l
-                  ON tdevc~component = df14l~fctr_id
-              WHERE ps_posid IN @search_ranges-appl_comp_range )
-          AND owner IN @search_ranges-owner_range
-          AND created_date IN @search_ranges-created_on_range
-        ORDER BY pgmid
-        INTO CORRESPONDING FIELDS OF TABLE @result
-        UP TO @max_rows ROWS
-        OFFSET @current_offset.
-    ELSE.
-      SELECT object_type AS type,
-             object_name AS name,
-             owner,
-             devclass AS package_name
-        FROM zadcoset_srccobj
-        WHERE object_type IN @search_ranges-object_type_range
-          AND object_name IN @search_ranges-object_name_range
-          AND devclass IN @search_ranges-package_range
-          AND owner IN @search_ranges-owner_range
-          AND created_date IN @search_ranges-created_on_range
-        ORDER BY pgmid
-        INTO CORRESPONDING FIELDS OF TABLE @result
-        UP TO @max_rows ROWS
-        OFFSET @current_offset.
-    ENDIF.
+    SELECT obj~object_type AS type,
+           obj~object_name AS name,
+           obj~owner,
+           obj~devclass AS package_name
+      FROM (dyn_from_clause)
+      WHERE (tags_dyn_where_cond)
+        AND obj~object_type IN @search_ranges-object_type_range
+        AND obj~object_name IN @search_ranges-object_name_range
+        AND obj~devclass IN @search_ranges-package_range
+        AND obj~owner IN @search_ranges-owner_range
+        AND obj~created_date IN @search_ranges-created_on_range
+        AND (appl_comp_dyn_where_cond)
+      ORDER BY obj~pgmid
+      INTO CORRESPONDING FIELDS OF TABLE @result
+      UP TO @max_rows ROWS
+      OFFSET @current_offset.
 
     DATA(package_result_count) = lines( result ).
     current_offset = current_offset + package_result_count.
@@ -167,33 +149,17 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       WHEN max_objects > 0 THEN max_objects + 1
                            ELSE 0 ).
 
-    IF search_ranges-appl_comp_range IS NOT INITIAL.
-      SELECT COUNT(*)
-        FROM zadcoset_srccobj
-        WHERE object_type IN @search_ranges-object_type_range
-          AND object_name IN @search_ranges-object_name_range
-          AND devclass IN @search_ranges-package_range
-          AND devclass IN (
-            SELECT devclass
-              FROM tdevc
-                INNER JOIN df14l
-                  ON tdevc~component = df14l~fctr_id
-              WHERE ps_posid IN @search_ranges-appl_comp_range )
-          AND owner IN @search_ranges-owner_range
-          AND created_date IN @search_ranges-created_on_range
-        INTO @object_count
-        UP TO @selection_limit ROWS.
-    ELSE.
-      SELECT COUNT(*)
-        FROM zadcoset_srccobj
-        WHERE object_type IN @search_ranges-object_type_range
-          AND object_name IN @search_ranges-object_name_range
-          AND devclass IN @search_ranges-package_range
-          AND owner IN @search_ranges-owner_range
-          AND created_date IN @search_ranges-created_on_range
-        INTO @object_count
-        UP TO @selection_limit ROWS.
-    ENDIF.
+    SELECT COUNT(*)
+      FROM (dyn_from_clause)
+      WHERE (tags_dyn_where_cond)
+        AND obj~object_type IN @search_ranges-object_type_range
+        AND obj~object_name IN @search_ranges-object_name_range
+        AND obj~devclass IN @search_ranges-package_range
+        AND obj~owner IN @search_ranges-owner_range
+        AND obj~created_date IN @search_ranges-created_on_range
+        AND (appl_comp_dyn_where_cond)
+      INTO @object_count
+      UP TO @selection_limit ROWS.
 
     IF object_count = selection_limit.
       object_count = max_objects.
@@ -266,12 +232,16 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         RESULT data = search_ranges.
     ENDIF.
 
+    config_dyn_where_clauses( ).
+
   ENDMETHOD.
 
 
   METHOD init_scope.
     max_objects = search_scope-max_objects.
     search_ranges = search_scope-ranges.
+
+    config_dyn_where_clauses( ).
     resolve_packages( ).
     determine_count( ).
 
@@ -291,6 +261,30 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
                             WHERE id = scope_id.
     IF sy-subrc = 0.
       COMMIT WORK.
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD config_dyn_where_clauses.
+    IF search_ranges-tag_id_range IS NOT INITIAL.
+      tags_dyn_where_cond = `tgobj~tag_id in @search_ranges-tag_id_range`.
+      dyn_from_clause =
+        `ZADCOSET_SRCCOBJ AS obj` &&
+        `  INNER JOIN ZABAPTAGS_TGOBJ AS tgobj` &&
+        `    ON  obj~object_name = tgobj~object_name` &&
+        `    AND obj~object_type = tgobj~object_type`.
+    ELSE.
+      dyn_from_clause = 'ZADCOSET_SRCCOBJ AS obj'.
+    ENDIF.
+
+    IF search_ranges-appl_comp_range IS NOT INITIAL.
+      appl_comp_dyn_where_cond =
+        `obj~devclass IN (` &&
+        `   SELECT devclass` &&
+        `     FROM tdevc` &&
+        `       INNER JOIN df14l` &&
+        `         ON tdevc~component = df14l~fctr_id` &&
+        `     WHERE ps_posid IN @search_ranges-appl_comp_range )`.
     ENDIF.
   ENDMETHOD.
 
