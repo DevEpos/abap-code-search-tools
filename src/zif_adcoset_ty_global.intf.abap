@@ -70,6 +70,7 @@ INTERFACE zif_adcoset_ty_global
       owner_range       TYPE RANGE OF uname,
       created_on_range  TYPE RANGE OF tadir-created_on,
       appl_comp_range   TYPE RANGE OF df14l-ps_posid,
+      tag_id_range      TYPE RANGE OF sysuuid_x16,
     END OF ty_search_scope_ranges.
 
   "! <p class="shorttext synchronized" lang="en">Ranges / data to define an object scope</p>

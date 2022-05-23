@@ -63,6 +63,9 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
           param_value TYPE string
         RAISING
           cx_adt_rest,
+      extract_tag_ids
+        IMPORTING
+          param_value TYPE string,
       split_into_range
         IMPORTING
           filter_name TYPE string
@@ -143,6 +146,9 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
         WHEN zif_adcoset_c_global=>c_search_params-created_date.
           extract_created_dates( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-tag_id.
+          extract_tag_ids( <param>-value ).
       ENDCASE.
 
     ENDLOOP.
@@ -268,6 +274,35 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
       <created_range> = <date>.
     ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD extract_tag_ids.
+    DATA: ext_uuids TYPE string_table,
+          int_uuid  TYPE sysuuid_x16.
+
+    " safety check, in case API was not called from ADT Code Search Plugin
+    CHECK zcl_adcoset_extensions_util=>is_abap_tags_available( ).
+
+    DATA(ext_uuid_csv) = param_value.
+
+    SPLIT ext_uuid_csv AT c_value_separator INTO TABLE ext_uuids.
+
+    LOOP AT ext_uuids INTO DATA(ext_uuid).
+      CLEAR int_uuid.
+      REPLACE ALL OCCURRENCES OF '-' IN ext_uuid WITH space.
+      TRY.
+          cl_system_uuid=>convert_uuid_c32_static(
+            EXPORTING
+              uuid     = to_upper( ext_uuid )
+            IMPORTING
+              uuid_x16 = int_uuid ).
+          scope_ranges-tag_id_range = VALUE #( BASE scope_ranges-tag_id_range
+            ( sign = 'I' option = 'EQ' low = int_uuid ) ).
+        CATCH cx_uuid_error.
+      ENDTRY.
+    ENDLOOP.
+
   ENDMETHOD.
 
 

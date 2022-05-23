@@ -8,7 +8,8 @@ CLASS zcl_adcoset_adt_disc_app DEFINITION
   PUBLIC SECTION.
     CLASS-DATA:
       "! URI for search settings resource
-      search_settings_uri TYPE string READ-ONLY.
+      search_settings_uri TYPE string READ-ONLY,
+      search_scope_uri type string read-only.
 
     CLASS-METHODS
       class_constructor.
@@ -63,6 +64,7 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
 
   METHOD class_constructor.
     search_settings_uri = |{ c_static_uri }{ c_search_uri }{ c_settings_relative_uri }|.
+    search_scope_uri = |{ c_static_uri }{ c_search_uri }{ c_search_scope_relative_uri }|.
   ENDMETHOD.
 
 

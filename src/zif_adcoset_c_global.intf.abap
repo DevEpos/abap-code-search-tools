@@ -5,20 +5,20 @@ INTERFACE zif_adcoset_c_global
   CONSTANTS:
     "! Minium Objects in scope that are needed so parallel
     "! processing will be used.
-    c_parl_proc_min_objects   TYPE i VALUE 100,
+    c_parl_proc_min_objects    TYPE i VALUE 100,
 
     "! Default scope expiration in seconds. <br/>
     "! A scope is therefore valid for the duration of the current search query
-    c_default_scope_expiration type i value 600,
+    c_default_scope_expiration TYPE i VALUE 600,
 
     "! Minimum package size for a single ADT request with parallel processing enabled
-    c_parl_proc_min_pack_size TYPE i VALUE 500,
+    c_parl_proc_min_pack_size  TYPE i VALUE 500,
 
     "! Maximum package size for a single ADT request with parallel processing enabled
-    c_parl_proc_max_pack_size TYPE i VALUE 10000,
+    c_parl_proc_max_pack_size  TYPE i VALUE 10000,
 
     "! Type for Server Group (see RZ12)
-    c_group_type_server_group TYPE rzlli_grpt VALUE 'S',
+    c_group_type_server_group  TYPE rzlli_grpt VALUE 'S',
 
     "! <p class="shorttext synchronized" lang="en">Regex pattern to detect comment lines in CDS sources</p>
     "! Can be used for the following source types:
@@ -27,7 +27,7 @@ INTERFACE zif_adcoset_c_global
     "!   <li>DCLS</li>
     "!   <li>DDLX</li>
     "! </ul>
-    c_cds_comment_regex       TYPE string VALUE '^\s*(//|/\*|--)',
+    c_cds_comment_regex        TYPE string VALUE '^\s*(//|/\*|--)',
 
     "! <p class="shorttext synchronized" lang="en">Matcher types</p>
     BEGIN OF c_matcher_type,
@@ -46,24 +46,25 @@ INTERFACE zif_adcoset_c_global
 
     "! <p class="shorttext synchronized" lang="en">Names of code search parameters</p>
     BEGIN OF c_search_params,
-      scope_id              TYPE string VALUE 'scopeId',
-      scope_offset          TYPE string VALUE 'scopeOffset',
-      package               TYPE string VALUE 'packageName',
-      owner                 TYPE string VALUE 'owner',
-      use_regex             TYPE string VALUE 'useRegex',
-      match_all_patterns    TYPE string VALUE 'matchAll',
-      sequential_matching   TYPE string VALUE 'seqMatching',
-      ignore_comment_lines  TYPE string VALUE 'ignoreCommentLines',
-      ignore_case           TYPE string VALUE 'ignoreCase',
-      multi_line            TYPE string VALUE 'multiLine',
-      appl_comp             TYPE string VALUE 'applComp',
-      object_name           TYPE string VALUE 'objectName',
-      object_type           TYPE string VALUE 'objectType',
-      search_pattern        TYPE string VALUE 'searchPattern',
-      created_date          TYPE string VALUE 'createdDate',
-      class_includes        TYPE string VALUE 'classIncludes',
-      fugr_includes         TYPE string VALUE 'fugrIncludes',
-      max_objects           TYPE string VALUE 'maxObjects',
+      scope_id             TYPE string VALUE 'scopeId',
+      scope_offset         TYPE string VALUE 'scopeOffset',
+      package              TYPE string VALUE 'packageName',
+      owner                TYPE string VALUE 'owner',
+      use_regex            TYPE string VALUE 'useRegex',
+      match_all_patterns   TYPE string VALUE 'matchAll',
+      sequential_matching  TYPE string VALUE 'seqMatching',
+      ignore_comment_lines TYPE string VALUE 'ignoreCommentLines',
+      ignore_case          TYPE string VALUE 'ignoreCase',
+      multi_line           TYPE string VALUE 'multiLine',
+      appl_comp            TYPE string VALUE 'applComp',
+      object_name          TYPE string VALUE 'objectName',
+      object_type          TYPE string VALUE 'objectType',
+      search_pattern       TYPE string VALUE 'searchPattern',
+      created_date         TYPE string VALUE 'createdDate',
+      class_includes       TYPE string VALUE 'classIncludes',
+      fugr_includes        TYPE string VALUE 'fugrIncludes',
+      max_objects          TYPE string VALUE 'maxObjects',
+      tag_id               TYPE string VALUE 'tagId',
     END OF c_search_params,
 
     "! <p class="shorttext synchronized" lang="en">Include id's for class</p>
