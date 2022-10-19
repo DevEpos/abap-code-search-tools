@@ -142,7 +142,7 @@ CLASS zcl_adcoset_scs_base IMPLEMENTATION.
       long_snippet = substring(
         val = source_code->content[ 1 ]
         off = start_line-offset
-        len = raw_match-length ) ).
+        len = raw_match-length + ( raw_match-offset - start_line-offset ) ) ).
   ENDMETHOD.
 
 
