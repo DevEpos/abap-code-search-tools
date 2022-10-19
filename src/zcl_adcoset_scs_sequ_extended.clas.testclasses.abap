@@ -114,6 +114,7 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   METHOD test_match_found1.
     cut = NEW zcl_adcoset_scs_sequ_extended(
       ignore_comment_lines = abap_true
+      line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
       matchers             = lcl_test_helper=>create_substring_matchers( VALUE #(
         ( content = ' loop'       )
         ( content = ' assigning'  )
@@ -130,6 +131,7 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   METHOD test_match_found2.
     cut = NEW zcl_adcoset_scs_sequ_extended(
       ignore_comment_lines = abap_true
+      line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
       matchers             = lcl_test_helper=>create_substring_matchers( VALUE #(
         ( content = ' loop'       )
         ( content = ' assigning'  )
@@ -148,6 +150,7 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   METHOD test_no_match_found1.
     cut = NEW zcl_adcoset_scs_sequ_extended(
       ignore_comment_lines = abap_true
+      line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
       matchers             = lcl_test_helper=>create_substring_matchers( VALUE #(
         ( content = ' loop'       flags = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-boundary_start )
         ( content = ' assigning' )
@@ -166,6 +169,7 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   METHOD test_no_match_found2.
     cut = NEW zcl_adcoset_scs_sequ_extended(
       ignore_comment_lines = abap_true
+      line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
       matchers             = lcl_test_helper=>create_substring_matchers( VALUE #(
         ( content = ' loop'       )
         ( content = ' assigning'  )
@@ -184,6 +188,7 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   METHOD test_no_match_found3.
     cut = NEW zcl_adcoset_scs_sequ_extended(
       ignore_comment_lines = abap_true
+      line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
       matchers             = lcl_test_helper=>create_substring_matchers( VALUE #(
         ( content = '(#exclude) loop '       )
         ( content = ' select '  )

@@ -18,8 +18,9 @@ INTERFACE zif_adcoset_ty_adt_types
     END OF ty_adt_obj_ref,
 
     BEGIN OF ty_code_search_match,
-      uri     TYPE string,
-      snippet TYPE string,
+      uri          TYPE string,
+      snippet      TYPE string,
+      long_snippet TYPE string,
     END OF ty_code_search_match,
 
     ty_code_search_matches TYPE STANDARD TABLE OF ty_code_search_match WITH EMPTY KEY,

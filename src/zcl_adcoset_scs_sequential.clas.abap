@@ -11,10 +11,12 @@ CLASS zcl_adcoset_scs_sequential DEFINITION
       constructor
         IMPORTING
           ignore_comment_lines TYPE abap_bool
+          line_feed            TYPE string
           matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
   PROTECTED SECTION.
     DATA:
       has_more_matches    TYPE abap_bool,
+      line_feed           TYPE string,
       current_line_offset TYPE i,
       current_col_offset  TYPE i,
       current_match       TYPE match_result,
@@ -48,6 +50,7 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
     super->constructor(
       ignore_comment_lines = ignore_comment_lines
       matchers             = matchers ).
+    me->line_feed = line_feed.
   ENDMETHOD.
 
 
@@ -131,15 +134,33 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
 
   METHOD collect_sequential_match.
 
-    IF match_start IS NOT INITIAL AND
-        match_end IS NOT INITIAL.
-      matches = VALUE #( BASE matches
-        ( start_line   = match_start-line
-          start_column = match_start-offset
-          end_line     = match_end-line
-          end_column   = match_end-offset + match_end-length
-          snippet      = source_code->content[ match_start-line ] ) ).
+    IF match_start IS INITIAL OR
+        match_end IS INITIAL.
+      RETURN.
     ENDIF.
+
+    DATA(seq_match) = VALUE zif_adcoset_ty_global=>ty_search_match(
+      start_line   = match_start-line
+      start_column = match_start-offset
+      end_line     = match_end-line
+      end_column   = match_end-offset + match_end-length
+      snippet      = source_code->content[ match_start-line ] ).
+
+    DATA(index) = seq_match-start_line + 1.
+    seq_match-long_snippet = seq_match-snippet.
+
+    WHILE index <= seq_match-end_line.
+
+      IF index = seq_match-end_line.
+        seq_match-long_snippet = |{ seq_match-long_snippet }{ line_feed }| &&
+          |{ substring( val = source_code->content[ index ] len = seq_match-end_column ) }|.
+      ELSE.
+        seq_match-long_snippet = |{ seq_match-long_snippet }{ line_feed }{ source_code->content[ index ] }|.
+      ENDIF.
+      index = index + 1.
+    ENDWHILE.
+
+    matches = VALUE #( BASE matches ( seq_match ) ).
 
   ENDMETHOD.
 

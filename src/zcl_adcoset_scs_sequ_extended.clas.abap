@@ -15,6 +15,7 @@ CLASS zcl_adcoset_scs_sequ_extended DEFINITION
       constructor
         IMPORTING
           ignore_comment_lines TYPE abap_bool
+          line_feed            TYPE string
           matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -64,6 +65,7 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
   METHOD constructor.
     super->constructor(
       ignore_comment_lines = ignore_comment_lines
+      line_feed            = line_feed
       matchers             = matchers ).
 
     LOOP AT matchers INTO DATA(matcher).

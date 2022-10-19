@@ -440,8 +440,9 @@ CLASS lcl_result_converter IMPLEMENTATION.
     ENDTRY.
 
     search_result_object->matches = VALUE #( BASE search_result_object->matches
-      ( uri     = match_object_ref-uri
-        snippet = raw_match-snippet ) ).
+      ( uri          = match_object_ref-uri
+        snippet      = raw_match-snippet
+        long_snippet = raw_match-long_snippet ) ).
 
     ADD 1 TO adt_result-number_of_results.
 

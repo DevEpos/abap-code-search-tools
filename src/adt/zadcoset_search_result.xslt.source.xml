@@ -92,6 +92,10 @@
 
         <cst:snippet tt:value-ref="$ref.snippet"/>
 
+        <tt:cond check="not-initial($ref.long_snippet)">
+          <cst:longSnippet tt:value-ref="$ref.long_snippet"/>
+        </tt:cond>
+
       </cst:match>
     </tt:loop>
 

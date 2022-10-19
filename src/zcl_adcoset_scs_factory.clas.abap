@@ -35,10 +35,12 @@ CLASS zcl_adcoset_scs_factory IMPLEMENTATION.
       IF is_ctrl_flags_found = abap_true.
         result = NEW zcl_adcoset_scs_sequ_extended(
           ignore_comment_lines = settings-ignore_comment_lines
+          line_feed            = settings-line_feed
           matchers             = matchers ).
       ELSE.
         result = NEW zcl_adcoset_scs_sequential(
           ignore_comment_lines = settings-ignore_comment_lines
+          line_feed            = settings-line_feed
           matchers             = matchers ).
       ENDIF.
 

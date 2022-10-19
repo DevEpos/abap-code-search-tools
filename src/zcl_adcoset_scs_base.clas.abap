@@ -135,11 +135,14 @@ CLASS zcl_adcoset_scs_base IMPLEMENTATION.
       start_column = start_col
       end_line     = end_line-number
       end_column   = end_col
-      " for now, only the start line of the match will be taken
       snippet      = substring(
-        val  = source_code->content[ 1 ]
-        off  = start_line-offset
-        len  = start_line-length ) ).
+        val = source_code->content[ 1 ]
+        off = start_line-offset
+        len = start_line-length )
+      long_snippet = substring(
+        val = source_code->content[ 1 ]
+        off = start_line-offset
+        len = raw_match-length ) ).
   ENDMETHOD.
 
 

@@ -105,7 +105,8 @@ INTERFACE zif_adcoset_ty_global
     start_column TYPE i,
     end_line     TYPE i,
     end_column   TYPE i,
-    snippet      TYPE string.
+    snippet      TYPE string,
+    long_snippet TYPE string.
   TYPES END OF ty_search_match.
 
   TYPES ty_search_matches TYPE STANDARD TABLE OF ty_search_match WITH EMPTY KEY.
