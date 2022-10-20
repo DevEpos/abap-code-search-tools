@@ -146,19 +146,21 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
       end_column   = match_end-offset + match_end-length
       snippet      = source_code->content[ match_start-line ] ).
 
-    DATA(index) = seq_match-start_line + 1.
-    seq_match-long_snippet = seq_match-snippet.
+    IF seq_match-end_line > seq_match-start_line.
+      DATA(index) = seq_match-start_line + 1.
+      seq_match-long_snippet = seq_match-snippet.
 
-    WHILE index <= seq_match-end_line.
+      WHILE index <= seq_match-end_line.
 
-      IF index = seq_match-end_line.
-        seq_match-long_snippet = |{ seq_match-long_snippet }{ line_feed }| &&
-          |{ substring( val = source_code->content[ index ] len = seq_match-end_column ) }|.
-      ELSE.
-        seq_match-long_snippet = |{ seq_match-long_snippet }{ line_feed }{ source_code->content[ index ] }|.
-      ENDIF.
-      index = index + 1.
-    ENDWHILE.
+        IF index = seq_match-end_line.
+          seq_match-long_snippet = |{ seq_match-long_snippet }{ line_feed }| &&
+            |{ substring( val = source_code->content[ index ] len = seq_match-end_column ) }|.
+        ELSE.
+          seq_match-long_snippet = |{ seq_match-long_snippet }{ line_feed }{ source_code->content[ index ] }|.
+        ENDIF.
+        index = index + 1.
+      ENDWHILE.
+    ENDIF.
 
     matches = VALUE #( BASE matches ( seq_match ) ).
 
