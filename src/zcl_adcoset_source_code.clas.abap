@@ -35,6 +35,13 @@ CLASS zcl_adcoset_source_code IMPLEMENTATION.
     me->comment_regex = comment_regex.
     line_count = lines( line_indexes ).
     is_single_line_content = xsdbool( line_count IS NOT INITIAL ).
+
+    IF is_single_line_content = abap_true.
+      zcl_adcoset_search_protocol=>add_loc( lines( line_indexes ) ).
+    ELSE.
+      zcl_adcoset_search_protocol=>add_loc( lines( source ) ).
+    ENDIF.
+
   ENDMETHOD.
 
 ENDCLASS.

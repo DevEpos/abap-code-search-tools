@@ -71,6 +71,7 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
       result_objects         = query->get_results( )
       searched_objects_count = zcl_adcoset_search_protocol=>get_searched_object_count( )
       searched_sources_count = zcl_adcoset_search_protocol=>get_searched_sources_count( )
+      loc                    = zcl_adcoset_search_protocol=>get_loc( )
       messages               = zcl_adcoset_log=>get_messages( ) ).
   ENDMETHOD.
 
@@ -99,7 +100,8 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
       messages               = zcl_adcoset_log=>get_messages( )
       duration_in_ms         = duration / 1000
       searched_objects_count = zcl_adcoset_search_protocol=>get_searched_object_count( )
-      searched_sources_count = zcl_adcoset_search_protocol=>get_searched_sources_count( ) ).
+      searched_sources_count = zcl_adcoset_search_protocol=>get_searched_sources_count( )
+      loc                    = zcl_adcoset_search_protocol=>get_loc( ) ).
   ENDMETHOD.
 
 

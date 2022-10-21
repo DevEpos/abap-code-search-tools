@@ -252,6 +252,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
     adt_result-query_time_in_ms = raw_result-duration_in_ms.
     adt_result-number_of_searched_objects = raw_result-searched_objects_count.
     adt_result-number_of_searched_sources = raw_result-searched_sources_count.
+    adt_result-loc = raw_result-loc.
   ENDMETHOD.
 
 

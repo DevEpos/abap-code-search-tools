@@ -51,6 +51,7 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
       zcl_adcoset_log=>add_all_messages( <package_result>-messages ).
       zcl_adcoset_search_protocol=>increase_searchd_objects_count( <package_result>-searched_objects_count ).
       zcl_adcoset_search_protocol=>increase_searchd_sources_count( <package_result>-searched_sources_count ).
+      zcl_adcoset_search_protocol=>add_loc( <package_result>-loc ).
     ENDIF.
   ENDMETHOD.
 

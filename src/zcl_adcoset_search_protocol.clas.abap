@@ -8,6 +8,10 @@ CLASS zcl_adcoset_search_protocol DEFINITION
     CLASS-METHODS:
       "! <p class="shorttext synchronized" lang="en">Resets the protocol values</p>
       reset,
+      "! <p class="shorttext synchronized" lang="en">Adds Lines of Code to total searched LoC</p>
+      add_loc
+        IMPORTING
+          loc TYPE i,
       "! <p class="shorttext synchronized" lang="en">Increments the count of searched objects</p>
       increment_searched_objs_count,
       "! <p class="shorttext synchronized" lang="en">Increments the count of searched sources</p>
@@ -20,6 +24,10 @@ CLASS zcl_adcoset_search_protocol DEFINITION
       increase_searchd_objects_count
         IMPORTING
           value TYPE i,
+      "! <p class="shorttext synchronized" lang="en">Retrieves searched Lines of Code</p>
+      get_loc
+        RETURNING
+          VALUE(result) TYPE i,
       "! <p class="shorttext synchronized" lang="en">Returns count of searched objects</p>
       get_searched_object_count
         RETURNING
@@ -32,12 +40,18 @@ CLASS zcl_adcoset_search_protocol DEFINITION
   PRIVATE SECTION.
     CLASS-DATA:
       searched_objects_count TYPE i,
+      loc                    TYPE i,
       searched_sources_count TYPE i.
 ENDCLASS.
 
 
 
 CLASS zcl_adcoset_search_protocol IMPLEMENTATION.
+
+  METHOD add_loc.
+    zcl_adcoset_search_protocol=>loc = zcl_adcoset_search_protocol=>loc + loc.
+  ENDMETHOD.
+
 
   METHOD increment_searched_objs_count.
     searched_objects_count = searched_objects_count + 1.
@@ -52,7 +66,8 @@ CLASS zcl_adcoset_search_protocol IMPLEMENTATION.
   METHOD reset.
     CLEAR:
       searched_objects_count,
-      searched_sources_count.
+      searched_sources_count,
+      loc.
   ENDMETHOD.
 
 
@@ -73,6 +88,11 @@ CLASS zcl_adcoset_search_protocol IMPLEMENTATION.
 
   METHOD increase_searchd_objects_count.
     searched_objects_count = searched_objects_count + value.
+  ENDMETHOD.
+
+
+  METHOD get_loc.
+    result = loc.
   ENDMETHOD.
 
 ENDCLASS.
