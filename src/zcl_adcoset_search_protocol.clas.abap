@@ -11,7 +11,7 @@ CLASS zcl_adcoset_search_protocol DEFINITION
       "! <p class="shorttext synchronized" lang="en">Adds Lines of Code to total searched LoC</p>
       add_loc
         IMPORTING
-          loc TYPE i,
+          loc TYPE f,
       "! <p class="shorttext synchronized" lang="en">Increments the count of searched objects</p>
       increment_searched_objs_count,
       "! <p class="shorttext synchronized" lang="en">Increments the count of searched sources</p>
@@ -40,7 +40,7 @@ CLASS zcl_adcoset_search_protocol DEFINITION
   PRIVATE SECTION.
     CLASS-DATA:
       searched_objects_count TYPE i,
-      loc                    TYPE i,
+      loc                    TYPE f,
       searched_sources_count TYPE i.
 ENDCLASS.
 

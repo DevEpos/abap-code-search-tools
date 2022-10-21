@@ -18,7 +18,7 @@ CLASS zcl_adcoset_adt_res_search IMPLEMENTATION.
 
 
   METHOD get.
-    DATA(result) = new lcl_search_query( request )->run( ).
+    DATA(result) = NEW lcl_search_query( request )->run( ).
     response->set_body_data(
       content_handler = zcl_adcoset_adt_ch_factory=>create_search_result_ch( )
       data            = result ).

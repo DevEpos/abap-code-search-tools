@@ -41,7 +41,7 @@ INTERFACE zif_adcoset_ty_adt_types
       number_of_searched_objects TYPE i,
       number_of_searched_sources TYPE i,
       query_time_in_ms           TYPE i,
-      loc                        TYPE i,
+      loc                        TYPE f,
     END OF ty_code_search_result,
 
     "! Describes a feature of an ADT plugin

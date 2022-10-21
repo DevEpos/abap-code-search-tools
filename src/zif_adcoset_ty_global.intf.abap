@@ -125,7 +125,7 @@ INTERFACE zif_adcoset_ty_global
       results                TYPE ty_search_result_objects,
       searched_objects_count TYPE i,
       searched_sources_count TYPE i,
-      loc                    TYPE i,
+      loc                    TYPE f,
       messages               TYPE ty_messages,
       duration_in_ms         TYPE ty_duration_in_ms,
     END OF ty_search_result,
@@ -232,7 +232,7 @@ INTERFACE zif_adcoset_ty_global
       result_objects         TYPE ty_search_result_objects,
       searched_objects_count TYPE i,
       searched_sources_count TYPE i,
-      loc                    TYPE i,
+      loc                    TYPE f,
       messages               TYPE ty_messages,
     END OF ty_search_package_result,
 
