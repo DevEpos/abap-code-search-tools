@@ -1,4 +1,4 @@
-![](https://img.shields.io/badge/ABAP-v7.40sp09+-green)
+![](https://img.shields.io/badge/ABAP-v7.40sp08+-green)
 # abap-code-search
 ABAP Advanced Code Search Tools
 
