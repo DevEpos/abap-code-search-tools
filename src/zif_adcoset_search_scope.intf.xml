@@ -12,37 +12,31 @@
    </VSEOINTERF>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
      <CMPNAME>CONFIGURE_PACKAGE_SIZE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Configures the package size of the processor</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
      <CMPNAME>COUNT</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves number of objects in scope</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
      <CMPNAME>GET_SCOPE_RANGES</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves the ranges of this scope</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
      <CMPNAME>HAS_NEXT_PACKAGE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Returns &apos;X&apos; if another package exists</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
      <CMPNAME>MORE_OBJECTS_IN_SCOPE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Returns &apos;X&apos; if more results would have been in scope</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SEARCH_SCOPE</CLSNAME>
      <CMPNAME>NEXT_PACKAGE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves the next package of objects in scope</DESCRIPT>

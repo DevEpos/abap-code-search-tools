@@ -13,7 +13,6 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_ADCOSET_SEARCH_SETTINGS</CLSNAME>
      <CMPNAME>GET_SETTINGS</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves server side code search settings</DESCRIPT>

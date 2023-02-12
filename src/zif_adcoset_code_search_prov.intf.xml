@@ -12,7 +12,6 @@
    </VSEOINTERF>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_CODE_SEARCH_PROV</CLSNAME>
      <CMPNAME>SEARCH</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Searches for matches in the given object</DESCRIPT>

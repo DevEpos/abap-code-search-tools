@@ -12,7 +12,6 @@
    </VSEOINTERF>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_SRC_CODE_READER</CLSNAME>
      <CMPNAME>GET_SOURCE_CODE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves source code instance of object via name</DESCRIPT>

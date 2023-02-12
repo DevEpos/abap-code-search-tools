@@ -12,19 +12,16 @@
    </VSEOINTERF>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_PATTERN_MATCHER</CLSNAME>
      <CMPNAME>FIND_MATCHES</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves the matches in the given source</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_PATTERN_MATCHER</CLSNAME>
      <CMPNAME>FIND_MATCHES_IN_RANGE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves matches in the given source and range</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZIF_ADCOSET_PATTERN_MATCHER</CLSNAME>
      <CMPNAME>FIND_NEXT_MATCH</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves the next match in the given source and offset</DESCRIPT>

@@ -13,7 +13,6 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_ADCOSET_SCR_FACTORY</CLSNAME>
      <CMPNAME>GET_READER</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves source code reader for type</DESCRIPT>
