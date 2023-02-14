@@ -30,12 +30,14 @@ CLASS zcl_adcoset_search_scope DEFINITION
       "! This holds the object count for the current scope
       object_count                   TYPE i,
       current_offset                 TYPE i,
-      all_packages_read              TYPE abap_bool,
       package_size                   TYPE i VALUE c_serial_package_size,
       is_more_objects_available      TYPE abap_bool,
       dyn_from_clause                TYPE string,
       tags_dyn_where_cond            TYPE string,
-      appl_comp_dyn_where_cond       TYPE string.
+      appl_comp_dyn_where_cond       TYPE string,
+
+      "! Reader for packages of object scope
+      scope_pack_reader              TYPE REF TO lif_adbc_scope_obj_reader.
 
     METHODS:
       determine_count,
@@ -49,13 +51,13 @@ CLASS zcl_adcoset_search_scope DEFINITION
       increase_scope_expiration
         IMPORTING
           scope_id TYPE sysuuid_x16,
-      config_dyn_where_clauses.
+      config_dyn_where_clauses,
+      init_package_reader.
 ENDCLASS.
 
 
 
 CLASS zcl_adcoset_search_scope IMPLEMENTATION.
-
 
   METHOD constructor.
     IF search_scope-scope_id IS NOT INITIAL.
@@ -63,6 +65,8 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ELSE.
       init_scope( search_scope ).
     ENDIF.
+
+    init_package_reader( ).
   ENDMETHOD.
 
 
@@ -72,40 +76,12 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
 
   METHOD zif_adcoset_search_scope~has_next_package.
-    result = xsdbool( all_packages_read = abap_false AND current_offset < object_count ).
+    result = scope_pack_reader->has_more_packages( ).
   ENDMETHOD.
 
 
   METHOD zif_adcoset_search_scope~next_package.
-    DATA(max_rows) = package_size.
-    IF current_offset IS INITIAL AND
-        ( object_count  < package_size OR package_size = 0 ).
-      max_rows = object_count.
-    ENDIF.
-
-    SELECT obj~object_type AS type,
-           obj~object_name AS name,
-           obj~owner,
-           obj~devclass AS package_name
-      FROM (dyn_from_clause)
-      WHERE (tags_dyn_where_cond)
-        AND obj~object_type IN @search_ranges-object_type_range
-        AND obj~object_name IN @search_ranges-object_name_range
-        AND obj~devclass IN @search_ranges-package_range
-        AND obj~owner IN @search_ranges-owner_range
-        AND obj~created_date IN @search_ranges-created_on_range
-        AND (appl_comp_dyn_where_cond)
-      ORDER BY obj~pgmid
-      INTO CORRESPONDING FIELDS OF TABLE @result
-      UP TO @max_rows ROWS
-      OFFSET @current_offset.
-
-    DATA(package_result_count) = lines( result ).
-    current_offset = current_offset + package_result_count.
-
-    IF package_result_count < max_rows.
-      all_packages_read = abap_true.
-    ENDIF.
+    result = scope_pack_reader->read_next_package( ).
   ENDMETHOD.
 
 
@@ -140,6 +116,9 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ELSE.
       package_size = determined_pack_size.
     ENDIF.
+
+    scope_pack_reader->set_object_count( object_count ).
+    scope_pack_reader->set_package_size( package_size ).
 
   ENDMETHOD.
 
@@ -205,6 +184,33 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD init_package_reader.
+    IF NOT lcl_adbc_scope_reader_fac=>is_db_supported( ).
+      MESSAGE a000(00) WITH |DB '{ sy-dbsys }' is not supported by ABAP Code Search|.
+    ENDIF.
+
+    IF scope_pack_reader IS INITIAL.
+      scope_pack_reader = lcl_adbc_scope_reader_fac=>create_package_reader(
+        search_ranges  = search_ranges
+        current_offset = current_offset ).
+      scope_pack_reader->set_object_count( object_count ).
+      scope_pack_reader->set_package_size( package_size ).
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD init_scope.
+    max_objects = search_scope-max_objects.
+    search_ranges = search_scope-ranges.
+
+    config_dyn_where_clauses( ).
+    resolve_packages( ).
+    determine_count( ).
+
+    obj_count_for_package_building = object_count.
+  ENDMETHOD.
+
+
   METHOD init_scope_from_db.
     SELECT SINGLE *
       FROM zadcoset_csscope
@@ -237,18 +243,6 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD init_scope.
-    max_objects = search_scope-max_objects.
-    search_ranges = search_scope-ranges.
-
-    config_dyn_where_clauses( ).
-    resolve_packages( ).
-    determine_count( ).
-
-    obj_count_for_package_building = object_count.
-  ENDMETHOD.
-
-
   METHOD increase_scope_expiration.
     DATA: expiration TYPE zadcoset_csscope-expiration_datetime.
 
@@ -266,25 +260,29 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
 
   METHOD config_dyn_where_clauses.
+    dyn_from_clause = `ZADCOSET_SRCCOBJ AS obj `.
+
     IF search_ranges-tag_id_range IS NOT INITIAL.
       tags_dyn_where_cond = `tgobj~tag_id in @search_ranges-tag_id_range`.
-      dyn_from_clause =
-        `ZADCOSET_SRCCOBJ AS obj` &&
-        `  INNER JOIN ZABAPTAGS_TGOBJ AS tgobj` &&
-        `    ON  obj~object_name = tgobj~object_name` &&
-        `    AND obj~object_type = tgobj~object_type`.
-    ELSE.
-      dyn_from_clause = 'ZADCOSET_SRCCOBJ AS obj'.
+
+      " HINT: An object could be tagged twice and then it would appear
+      "       more than once in the result -> this would result in possibly processing
+      "       an object twice
+      "       --> add group by clause if tags are supplied (possibly the only solution)
+      dyn_from_clause = dyn_from_clause &&
+        `INNER JOIN ZABAPTAGS_TGOBJ AS tgobj ` &&
+        `ON  obj~object_name = tgobj~object_name ` &&
+        `AND obj~object_type = tgobj~object_type `.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
-      appl_comp_dyn_where_cond =
-        `obj~devclass IN (` &&
-        `   SELECT devclass` &&
-        `     FROM tdevc` &&
-        `       INNER JOIN df14l` &&
-        `         ON tdevc~component = df14l~fctr_id` &&
-        `     WHERE ps_posid IN @search_ranges-appl_comp_range )`.
+      dyn_from_clause = dyn_from_clause &&
+        `INNER JOIN tdevc AS pack ` &&
+        `ON obj~devclass = pack~devclass ` &&
+        `INNER JOIN df14l AS appl ` &&
+        `ON pack~component = appl~fctr_id `.
+
+      appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
     ENDIF.
   ENDMETHOD.
 
