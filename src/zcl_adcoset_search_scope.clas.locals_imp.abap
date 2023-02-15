@@ -6,16 +6,16 @@ CLASS lcl_adbc_scope_reader_fac IMPLEMENTATION.
 
   METHOD create_package_reader.
     " see domain DBSYS_TYPE_SELECTOR for possible values
-    IF sy-dbsys = 'ORACLE'. " OR 'MSSQL' OR 'HDB' -> the major DB's
-      result = NEW lcl_oracle_scope_obj_reader(
-        search_ranges  = search_ranges
-        current_offset = current_offset ).
-    ENDIF.
-  ENDMETHOD.
-
-
-  METHOD is_db_supported.
-    result = xsdbool( sy-dbsys = 'ORACLE' ).
+    CASE sy-dbsys.
+      WHEN 'ORACLE'.
+        result = NEW lcl_oracle_scope_obj_reader(
+          search_ranges  = search_ranges
+          current_offset = current_offset ).
+      WHEN 'HDB'.
+        result = NEW lcl_hdb_scope_obj_reader(
+          search_ranges  = search_ranges
+          current_offset = current_offset ).
+    ENDCASE.
   ENDMETHOD.
 
 ENDCLASS.
@@ -23,10 +23,9 @@ ENDCLASS.
 CLASS lcl_oracle_scope_obj_reader IMPLEMENTATION.
 
   METHOD constructor.
-    super->constructor( ).
-    me->current_offset = current_offset.
-    me->search_ranges = search_ranges.
-    me->package_size = package_size.
+    super->constructor(
+      current_offset = current_offset
+      search_ranges  = search_ranges ).
 
     build_query_clauses( ).
   ENDMETHOD.
@@ -44,14 +43,45 @@ CLASS lcl_oracle_scope_obj_reader IMPLEMENTATION.
 ENDCLASS.
 
 
+CLASS lcl_hdb_scope_obj_reader IMPLEMENTATION.
+
+  METHOD constructor.
+    super->constructor(
+      current_offset = current_offset
+      search_ranges  = search_ranges ).
+  ENDMETHOD.
+
+
+  METHOD combine_clauses.
+    " HANA expects the LIMIT clause before the offset clause
+    result = select_clause && from_clause && where_clause && order_by_clause && limit_clause && offset_clause.
+  ENDMETHOD.
+
+
+  METHOD build_limit_clause.
+    limit_clause = |LIMIT { max_rows } |.
+  ENDMETHOD.
+
+
+  METHOD build_offset_clause.
+    offset_clause = |OFFSET { current_offset }|.
+  ENDMETHOD.
+
+ENDCLASS.
+
+
 CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
 
   METHOD constructor.
+    me->search_ranges = search_ranges.
+    me->current_offset = current_offset.
     adbc_stmnt_cols = VALUE #(
       ( CONV adbc_name( 'TYPE' ) )
       ( CONV adbc_name( 'NAME' ) )
       ( CONV adbc_name( 'OWNER' ) )
       ( CONV adbc_name( 'PACKAGE_NAME' ) ) ).
+
+    build_query_clauses( ).
   ENDMETHOD.
 
 
@@ -129,7 +159,6 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
                                   sql_fieldname = 'obj.created_date'
                         CHANGING  where         = where_clause ).
     add_range_to_where( EXPORTING ranges        = search_ranges-tag_id_range
-                                  data_type     = cl_abap_typedescr=>typekind_hex
                                   sql_fieldname = 'tgobj.tag_id'
                         CHANGING  where         = where_clause ).
     add_range_to_where( EXPORTING ranges        = search_ranges-appl_comp_range
@@ -329,12 +358,7 @@ CLASS lcl_cond_builder IMPLEMENTATION.
 
 
   METHOD to_sql_val.
-** UUID's also need to be quoted... (why ST05 shows then 0x9403493...???)
-*    IF data_type = cl_abap_typedescr=>typekind_hex.
-*      result = |0x{ abap_val }|.
-*    ELSE.
     result = |{ cl_abap_dyn_prg=>quote( abap_val ) }|.
-*    ENDIF.
   ENDMETHOD.
 
 

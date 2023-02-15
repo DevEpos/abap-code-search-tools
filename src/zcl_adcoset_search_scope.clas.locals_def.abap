@@ -63,11 +63,7 @@ CLASS lcl_adbc_scope_reader_fac DEFINITION
           search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
           current_offset TYPE i
         RETURNING
-          VALUE(result)  TYPE REF TO lif_adbc_scope_obj_reader,
-      "! Returns true if the connected database is supported
-      is_db_supported
-        RETURNING
-          VALUE(result) TYPE abap_bool.
+          VALUE(result)  TYPE REF TO lif_adbc_scope_obj_reader.
 ENDCLASS.
 
 CLASS lcl_adbc_scope_obj_reader_base DEFINITION
@@ -76,7 +72,10 @@ CLASS lcl_adbc_scope_obj_reader_base DEFINITION
   PUBLIC SECTION.
     INTERFACES lif_adbc_scope_obj_reader.
     METHODS:
-      constructor.
+      constructor
+        IMPORTING
+          search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
+          current_offset TYPE i.
   PROTECTED SECTION.
     DATA:
       adbc_stmnt_cols          TYPE adbc_column_tab,
@@ -191,6 +190,23 @@ CLASS lcl_oracle_scope_obj_reader DEFINITION
           current_offset TYPE i.
   PROTECTED SECTION.
     METHODS:
+      build_offset_clause REDEFINITION,
+      build_limit_clause REDEFINITION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+CLASS lcl_hdb_scope_obj_reader DEFINITION
+ INHERITING FROM lcl_adbc_scope_obj_reader_base.
+
+  PUBLIC SECTION.
+    METHODS:
+      constructor
+        IMPORTING
+          search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
+          current_offset TYPE i.
+  PROTECTED SECTION.
+    METHODS:
+      combine_clauses REDEFINITION,
       build_offset_clause REDEFINITION,
       build_limit_clause REDEFINITION.
   PRIVATE SECTION.

@@ -185,7 +185,8 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
 
   METHOD init_package_reader.
-    IF NOT lcl_adbc_scope_reader_fac=>is_db_supported( ).
+    " Fail safe if user somehow managed to get to this point
+    IF NOT zcl_adcoset_db_support_util=>is_db_supported( ).
       MESSAGE a000(00) WITH |DB '{ sy-dbsys }' is not supported by ABAP Code Search|.
     ENDIF.
 
