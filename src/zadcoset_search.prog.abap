@@ -30,63 +30,63 @@ DATA: BEGIN OF scope_vars,
       END OF scope_vars.
 
 SELECTION-SCREEN BEGIN OF BLOCK pattern WITH FRAME TITLE TEXT-b01.
-  SELECT-OPTIONS: s_patt FOR pattern_var NO INTERVALS.
-  PARAMETERS:
-    p_ignc  TYPE abap_bool AS CHECKBOX DEFAULT 'X',
-    p_regex TYPE abap_bool AS CHECKBOX USER-COMMAND regex.
+SELECT-OPTIONS: s_patt FOR pattern_var NO INTERVALS.
+PARAMETERS:
+  p_ignc  TYPE abap_bool AS CHECKBOX DEFAULT 'X',
+  p_regex TYPE abap_bool AS CHECKBOX USER-COMMAND regex.
 SELECTION-SCREEN END OF BLOCK pattern.
 
 SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
-  SELECT-OPTIONS:
-    s_objn FOR scope_vars-object_name,
-    s_auth FOR scope_vars-owner,
-    s_crtd FOR scope_vars-created_on,
-    s_pack FOR scope_vars-package,
-    s_appl FOR scope_vars-appl_comp.
-  PARAMETERS:
-    p_typal TYPE abap_bool RADIOBUTTON GROUP rb1 DEFAULT 'X' USER-COMMAND obj_type_sel,
-    p_typsp TYPE abap_bool RADIOBUTTON GROUP rb1.
+SELECT-OPTIONS:
+  s_objn FOR scope_vars-object_name,
+  s_auth FOR scope_vars-owner,
+  s_crtd FOR scope_vars-created_on,
+  s_pack FOR scope_vars-package,
+  s_appl FOR scope_vars-appl_comp.
+PARAMETERS:
+  p_typal TYPE abap_bool RADIOBUTTON GROUP rb1 DEFAULT 'X' USER-COMMAND obj_type_sel,
+  p_typsp TYPE abap_bool RADIOBUTTON GROUP rb1.
 
-  SELECTION-SCREEN BEGIN OF BLOCK types WITH FRAME TITLE TEXT-b05.
-    SELECTION-SCREEN PUSHBUTTON  /1(6) pb_tsela USER-COMMAND all_types MODIF ID tch VISIBLE LENGTH 2.
-    SELECTION-SCREEN PUSHBUTTON  5(6) pb_tseln USER-COMMAND no_types MODIF ID tch VISIBLE LENGTH 2.
-    PARAMETERS:
-      p_class TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_intf  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_xslt  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_prog  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_fugr  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_type  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_ddls  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_dcls  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_ddlx  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_bdef  TYPE abap_bool AS CHECKBOX MODIF ID tch.
-  SELECTION-SCREEN END OF BLOCK types.
+SELECTION-SCREEN BEGIN OF BLOCK types WITH FRAME TITLE TEXT-b05.
+SELECTION-SCREEN PUSHBUTTON  /1(6) pb_tsela USER-COMMAND all_types MODIF ID tch VISIBLE LENGTH 2.
+SELECTION-SCREEN PUSHBUTTON  5(6) pb_tseln USER-COMMAND no_types MODIF ID tch VISIBLE LENGTH 2.
+PARAMETERS:
+  p_class TYPE abap_bool AS CHECKBOX MODIF ID tch,
+  p_intf  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+  p_xslt  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+  p_prog  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+  p_fugr  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+  p_type  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+  p_ddls  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+  p_dcls  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+  p_ddlx  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+  p_bdef  TYPE abap_bool AS CHECKBOX MODIF ID tch.
+SELECTION-SCREEN END OF BLOCK types.
 
 SELECTION-SCREEN END OF BLOCK scope.
 
 SELECTION-SCREEN BEGIN OF BLOCK limitations WITH FRAME TITLE TEXT-b07.
-  PARAMETERS:
-    p_maxo TYPE n LENGTH 6 DEFAULT 5000.
+PARAMETERS:
+  p_maxo TYPE n LENGTH 6 DEFAULT 5000.
 SELECTION-SCREEN END OF BLOCK limitations.
 
 SELECTION-SCREEN BEGIN OF BLOCK settings WITH FRAME TITLE TEXT-b03.
-  PARAMETERS:
-    p_igncom TYPE abap_bool AS CHECKBOX,
-    p_matcha TYPE abap_bool AS CHECKBOX,
-    p_singpm TYPE abap_bool AS CHECKBOX USER-COMMAND single_pattern_mode,
-    p_multil TYPE abap_bool AS CHECKBOX USER-COMMAND multiline,
-    p_seqma  TYPE abap_bool AS CHECKBOX USER-COMMAND sequential_matching.
+PARAMETERS:
+  p_igncom TYPE abap_bool AS CHECKBOX,
+  p_matcha TYPE abap_bool AS CHECKBOX,
+  p_singpm TYPE abap_bool AS CHECKBOX USER-COMMAND single_pattern_mode,
+  p_multil TYPE abap_bool AS CHECKBOX USER-COMMAND multiline,
+  p_seqma  TYPE abap_bool AS CHECKBOX USER-COMMAND sequential_matching.
 SELECTION-SCREEN END OF BLOCK settings.
 
 SELECTION-SCREEN BEGIN OF BLOCK parallel_processing WITH FRAME TITLE TEXT-b04.
-  PARAMETERS:
-    p_parlp TYPE abap_bool AS CHECKBOX,
-    p_servg TYPE rzlli_apcl.
+PARAMETERS:
+  p_parlp TYPE abap_bool AS CHECKBOX,
+  p_servg TYPE rzlli_apcl.
 SELECTION-SCREEN END OF BLOCK parallel_processing.
 
 SELECTION-SCREEN BEGIN OF BLOCK additional_settings WITH FRAME TITLE TEXT-b06.
-  PARAMETERS: p_adtn TYPE abap_bool AS CHECKBOX.
+PARAMETERS: p_adtn TYPE abap_bool AS CHECKBOX.
 SELECTION-SCREEN END OF BLOCK additional_settings.
 
 CLASS lcl_report DEFINITION.
@@ -104,7 +104,7 @@ CLASS lcl_report DEFINITION.
       owner        TYPE responsibl,
       package_name TYPE devclass.
       INCLUDE TYPE zif_adcoset_ty_global=>ty_search_match.
-    TYPES END OF ty_search_match.
+      TYPES END OF ty_search_match.
 
     DATA:
       results         TYPE TABLE OF ty_search_match,
@@ -136,7 +136,7 @@ CLASS lcl_report DEFINITION.
         IMPORTING
           checked TYPE abap_bool,
       on_link_click
-        FOR EVENT link_click OF cl_salv_events_table
+          FOR EVENT link_click OF cl_salv_events_table
         IMPORTING
           column
           row,
@@ -148,6 +148,9 @@ CLASS lcl_report DEFINITION.
 ENDCLASS.
 
 INITIALIZATION.
+  IF NOT zcl_adcoset_db_support_util=>is_db_supported( ).
+    MESSAGE |DB { sy-dbsys } is not supported by the Code Search| TYPE 'A'.
+  ENDIF.
   DATA(report) = NEW lcl_report( ).
 
 START-OF-SELECTION.
