@@ -266,25 +266,29 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
 
   METHOD config_dyn_where_clauses.
+    dyn_from_clause = `ZADCOSET_SRCCOBJ AS obj `.
+
     IF search_ranges-tag_id_range IS NOT INITIAL.
-      tags_dyn_where_cond = `tgobj~tag_id in @search_ranges-tag_id_range`.
-      dyn_from_clause =
-        `ZADCOSET_SRCCOBJ AS obj` &&
-        `  INNER JOIN ZABAPTAGS_TGOBJ AS tgobj` &&
-        `    ON  obj~object_name = tgobj~object_name` &&
-        `    AND obj~object_type = tgobj~object_type`.
-    ELSE.
-      dyn_from_clause = 'ZADCOSET_SRCCOBJ AS obj'.
+      tags_dyn_where_cond = `tgobj~tag_id IN @search_ranges-tag_id_range`.
+
+      " HINT: An object could be tagged twice and then it would appear
+      "       more than once in the result -> this would result in possibly processing
+      "       an object twice
+      "       --> add group by clause if tags are supplied (possibly the only solution)
+      dyn_from_clause = dyn_from_clause &&
+        `INNER JOIN ZABAPTAGS_TGOBJ AS tgobj ` &&
+        `ON  obj~object_name = tgobj~object_name ` &&
+        `AND obj~object_type = tgobj~object_type `.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
-      appl_comp_dyn_where_cond =
-        `obj~devclass IN (` &&
-        `   SELECT devclass` &&
-        `     FROM tdevc` &&
-        `       INNER JOIN df14l` &&
-        `         ON tdevc~component = df14l~fctr_id` &&
-        `     WHERE ps_posid IN @search_ranges-appl_comp_range )`.
+      dyn_from_clause = dyn_from_clause &&
+        `INNER JOIN tdevc AS pack ` &&
+        `ON obj~devclass = pack~devclass ` &&
+        `INNER JOIN df14l AS appl ` &&
+        `ON pack~component = appl~fctr_id `.
+
+      appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
     ENDIF.
   ENDMETHOD.
 
