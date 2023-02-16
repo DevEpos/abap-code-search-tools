@@ -23,6 +23,11 @@ CLASS zcl_adcoset_search_query DEFINITION
       custom_settings   TYPE zif_adcoset_ty_global=>ty_custom_search_settings,
       src_code_searcher TYPE REF TO zif_adcoset_src_code_searcher,
       search_results    TYPE zif_adcoset_ty_global=>ty_search_result_objects.
+    METHODS search_dependent_includes
+      IMPORTING
+        source_code_provider TYPE REF TO zif_adcoset_code_search_prov
+        source_code_reader   TYPE REF TO zif_adcoset_src_code_reader
+        object               TYPE zif_adcoset_ty_global=>ty_tadir_object.
 ENDCLASS.
 
 
@@ -68,6 +73,13 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
                 text_matches = matches
                 match_count  = lines( matches ) ) INTO TABLE search_results.
             ENDIF.
+
+            IF <object>-type = zif_adcoset_c_global=>c_source_code_type-program.
+              search_dependent_includes(
+                source_code_provider = source_code_provider
+                source_code_reader   = source_code_reader
+                object               = <object> ).
+            ENDIF.
           CATCH zcx_adcoset_static_error.
         ENDTRY.
 
@@ -81,6 +93,48 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
 
   METHOD zif_adcoset_search_query~get_results.
     result = search_results.
+  ENDMETHOD.
+
+
+  METHOD search_dependent_includes.
+    DATA: includes      TYPE STANDARD TABLE OF progname,
+          include_infos TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+
+    CALL FUNCTION 'RS_GET_ALL_INCLUDES'
+      EXPORTING
+        program    = object-name
+      TABLES
+        includetab = includes
+      EXCEPTIONS
+        OTHERS     = 1.
+    IF sy-subrc = 0 AND includes IS NOT INITIAL.
+      " select additional information about includes
+      SELECT obj_name AS name,
+             object AS type,
+             devclass AS package_name,
+             author AS owner
+        FROM tadir
+        FOR ALL ENTRIES IN @includes
+        WHERE obj_name = @includes-table_line
+        INTO CORRESPONDING FIELDS OF TABLE @include_infos.
+
+      LOOP AT include_infos ASSIGNING FIELD-SYMBOL(<include_info>).
+        DATA(matches) = source_code_provider->search(
+          object            = <include_info>
+          src_code_searcher = src_code_searcher
+          src_code_reader   = source_code_reader ).
+
+        IF matches IS NOT INITIAL.
+          INSERT VALUE #(
+            object       = <include_info>
+            text_matches = matches
+            match_count  = lines( matches ) ) INTO TABLE search_results.
+        ENDIF.
+
+        zcl_adcoset_search_protocol=>increase_searchd_sources_count( 1 ).
+      ENDLOOP.
+
+    ENDIF.
   ENDMETHOD.
 
 ENDCLASS.
