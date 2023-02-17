@@ -288,24 +288,43 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
 
   METHOD create_match_objects.
+    DATA(l_raw_matches) = raw_matches.
+
+    IF object_info-type = zif_adcoset_c_global=>c_source_code_type-program.
+      " handle direct program matches
+      DATA(direct_program_matches) = VALUE zif_adcoset_ty_global=>ty_search_matches(
+        FOR <prog_raw_match> IN l_raw_matches
+        WHERE ( include = object_info-name )
+        ( <prog_raw_match> ) ).
+      DELETE l_raw_matches WHERE include = object_info-name.
+      create_std_match_objects(
+        search_result_object = search_result_object
+        object_info          = object_info
+        raw_matches          = direct_program_matches ).
+    ENDIF.
 
     IF object_info-type = zif_adcoset_c_global=>c_source_code_type-class OR
-        object_info-type = zif_adcoset_c_global=>c_source_code_type-function_group.
+        object_info-type = zif_adcoset_c_global=>c_source_code_type-function_group OR
+        object_info-type = zif_adcoset_c_global=>c_source_code_type-program.
       DATA(incl_match_objects) = create_incl_match_objects(
         parent_search_result_object = search_result_object->*
         object_info                 = object_info
-        raw_matches                 = raw_matches ).
+        raw_matches                 = l_raw_matches ).
 
       IF incl_match_objects IS NOT INITIAL.
         adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
          ( search_result_object->* )
          ( LINES OF incl_match_objects ) ).
+      ELSEIF object_info-type = zif_adcoset_c_global=>c_source_code_type-program AND
+          search_result_object->matches IS NOT INITIAL.
+        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
+         ( search_result_object->* ) ).
       ENDIF.
     ELSE.
       create_std_match_objects(
         search_result_object = search_result_object
         object_info          = object_info
-        raw_matches          = raw_matches ).
+        raw_matches          = l_raw_matches ).
 
       IF search_result_object->matches IS NOT INITIAL.
         adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
@@ -333,7 +352,6 @@ CLASS lcl_result_converter IMPLEMENTATION.
         FOR ALL ENTRIES IN @packages_to_read
         WHERE devclass = @packages_to_read-package_name
         INTO CORRESPONDING FIELDS OF TABLE @read_packages.
-
 
       CLEAR packages_to_read.
 
@@ -379,8 +397,11 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
 
   METHOD create_incl_match_objects.
+    FIELD-SYMBOLS: <raw_match> TYPE zif_adcoset_ty_global=>ty_search_match.
 
-    LOOP AT raw_matches ASSIGNING FIELD-SYMBOL(<raw_match_group>)
+
+    " Skip matches of program include in result
+    LOOP AT raw_matches ASSIGNING FIELD-SYMBOL(<raw_match_group>) WHERE include <> object_info-name
       GROUP BY <raw_match_group>-include.
 
       TRY.
@@ -401,7 +422,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
               THEN <raw_match_group>-adt_include_type
             ELSE incl_object_ref-type ) ) ).
 
-      LOOP AT GROUP <raw_match_group> ASSIGNING FIELD-SYMBOL(<raw_match>).
+      LOOP AT GROUP <raw_match_group> ASSIGNING <raw_match>.
         add_main_object_ref(
           search_result_object = REF #( incl_search_result_object )
           object_info          = object_info
@@ -455,7 +476,8 @@ CLASS lcl_result_converter IMPLEMENTATION.
     CASE object_info-type.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-class OR
-           zif_adcoset_c_global=>c_source_code_type-function_group.
+           zif_adcoset_c_global=>c_source_code_type-function_group OR
+           zif_adcoset_c_global=>c_source_code_type-program.
 
         result = adt_obj_factory->get_object_ref_for_include(
           main_program      = object_info-name

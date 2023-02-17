@@ -74,12 +74,12 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
                 match_count  = lines( matches ) ) INTO TABLE search_results.
             ENDIF.
 
-            IF <object>-type = zif_adcoset_c_global=>c_source_code_type-program.
-              search_dependent_includes(
-                source_code_provider = source_code_provider
-                source_code_reader   = source_code_reader
-                object               = <object> ).
-            ENDIF.
+**            IF <object>-type = zif_adcoset_c_global=>c_source_code_type-program.
+**              search_dependent_includes(
+**                source_code_provider = source_code_provider
+**                source_code_reader   = source_code_reader
+**                object               = <object> ).
+**            ENDIF.
           CATCH zcx_adcoset_static_error.
         ENDTRY.
 
