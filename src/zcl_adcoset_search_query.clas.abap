@@ -116,9 +116,16 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
         FROM tadir
         FOR ALL ENTRIES IN @includes
         WHERE obj_name = @includes-table_line
+          AND object = @zif_adcoset_c_global=>c_source_code_type-program
         INTO CORRESPONDING FIELDS OF TABLE @include_infos.
 
       LOOP AT include_infos ASSIGNING FIELD-SYMBOL(<include_info>).
+        " only search include if not already searched
+        IF line_exists( search_results[ object-name = <include_info>-name
+                                        object-type = <include_info>-type ] ).
+          CONTINUE.
+        ENDIF.
+
         DATA(matches) = source_code_provider->search(
           object            = <include_info>
           src_code_searcher = src_code_searcher
@@ -131,7 +138,6 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
             match_count  = lines( matches ) ) INTO TABLE search_results.
         ENDIF.
 
-        zcl_adcoset_search_protocol=>increase_searchd_sources_count( 1 ).
       ENDLOOP.
 
     ENDIF.
