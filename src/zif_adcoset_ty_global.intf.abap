@@ -155,6 +155,11 @@ INTERFACE zif_adcoset_ty_global
       END OF include_flags,
     END OF ty_fugr_cs_settings,
 
+    "! Program settings for code search
+    BEGIN OF ty_prog_cs_settings,
+      resolve_includes TYPE abap_bool,
+    END OF ty_prog_cs_settings,
+
     "! <p class="shorttext synchronized" lang="en">Basic search settings</p>
     BEGIN OF ty_search_settings,
       line_feed             TYPE string,
@@ -169,6 +174,7 @@ INTERFACE zif_adcoset_ty_global
     BEGIN OF ty_custom_search_settings,
       class TYPE ty_clas_cs_settings,
       fugr  TYPE ty_fugr_cs_settings,
+      prog  TYPE ty_prog_cs_settings,
     END OF ty_custom_search_settings,
 
     BEGIN OF ty_parl_processing,

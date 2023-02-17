@@ -16,14 +16,7 @@ CLASS zcl_adcoset_csp_repsrc_default DEFINITION
         IMPORTING
           object        TYPE zif_adcoset_ty_global=>ty_tadir_object
         RETURNING
-          VALUE(result) TYPE progname,
-      search_dependent_includes
-        IMPORTING
-          src_code_reader   TYPE REF TO zif_adcoset_src_code_reader
-          src_code_searcher TYPE REF TO zif_adcoset_src_code_searcher
-          object            TYPE zif_adcoset_ty_global=>ty_tadir_object
-        RETURNING
-          VALUE(result)     TYPE zif_adcoset_ty_global=>ty_search_matches.
+          VALUE(result) TYPE progname.
 ENDCLASS.
 
 
@@ -51,14 +44,7 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
           result = VALUE #( BASE result ( <match> ) ).
         ENDLOOP.
 
-        IF object-type = zif_adcoset_c_global=>c_source_code_type-program.
-          result = VALUE #( BASE result ( LINES OF search_dependent_includes( src_code_reader   = src_code_reader
-                                                                              src_code_searcher = src_code_searcher
-                                                                              object            = object  ) ) ).
-        ENDIF.
-
       CATCH zcx_adcoset_src_code_read.
-        "handle exception
     ENDTRY.
 
     zcl_adcoset_search_protocol=>increment_searched_srcs_count( ).
@@ -82,9 +68,6 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
       WHEN zif_adcoset_c_global=>c_source_code_type-type_group.
         result = |%_C{ object-name }|.
 
-      WHEN zif_adcoset_c_global=>c_source_code_type-program.
-        result = object-name.
-
     ENDCASE.
 
     IF result IS INITIAL AND include_suffix IS NOT INITIAL.
@@ -95,47 +78,4 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
 
   ENDMETHOD.
 
-
-  METHOD search_dependent_includes.
-    DATA: includes      TYPE STANDARD TABLE OF progname,
-          include_infos TYPE zif_adcoset_ty_global=>ty_tadir_objects.
-
-    CALL FUNCTION 'RS_GET_ALL_INCLUDES'
-      EXPORTING
-        program    = object-name
-      TABLES
-        includetab = includes
-      EXCEPTIONS
-        OTHERS     = 1.
-    IF sy-subrc = 0 AND includes IS NOT INITIAL.
-      " select additional information about includes
-      SELECT obj_name AS name,
-             object AS type,
-             devclass AS package_name,
-             author AS owner
-        FROM tadir
-        FOR ALL ENTRIES IN @includes
-        WHERE obj_name = @includes-table_line
-          AND object = @zif_adcoset_c_global=>c_source_code_type-program
-        INTO CORRESPONDING FIELDS OF TABLE @include_infos.
-
-      LOOP AT include_infos ASSIGNING FIELD-SYMBOL(<include_info>).
-        TRY.
-            DATA(source) = src_code_reader->get_source_code(
-              name = <include_info>-name
-              type = object-type ).
-
-            LOOP AT src_code_searcher->search( source ) ASSIGNING FIELD-SYMBOL(<match>).
-              <match>-include = <include_info>-name.
-              <match>-display_name = <include_info>-name.
-              <match>-adt_include_type = 'PROG/I'.
-              result = VALUE #( BASE result ( <match> ) ).
-            ENDLOOP.
-          CATCH zcx_adcoset_src_code_read.
-            "handle exception
-        ENDTRY.
-      ENDLOOP.
-
-    ENDIF.
-  ENDMETHOD.
 ENDCLASS.

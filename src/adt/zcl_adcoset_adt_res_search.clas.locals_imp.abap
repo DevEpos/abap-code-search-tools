@@ -85,6 +85,11 @@ CLASS lcl_search_query IMPLEMENTATION.
     get_patterns( ).
     get_class_scope( ).
     get_fugr_scope( ).
+
+    settings-custom_settings-prog-resolve_includes = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
+      param_name = zif_adcoset_c_global=>c_search_params-resolve_prog_includes
+      request    = request ).
+
   ENDMETHOD.
 
 

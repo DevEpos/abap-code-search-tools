@@ -75,6 +75,9 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
       WHEN zif_adcoset_c_global=>c_source_code_type-function_group THEN
         NEW zcl_adcoset_csp_fugr( custom_settings = custom_settings-fugr )
 
+      WHEN zif_adcoset_c_global=>c_source_code_type-program THEN
+        NEW zcl_adcoset_csp_prog( custom_settings = custom_settings-prog )
+
       WHEN c_def_reposrc_provider THEN
         NEW zcl_adcoset_csp_repsrc_default( )
 
@@ -90,11 +93,11 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
     result = SWITCH #( original
 
       WHEN zif_adcoset_c_global=>c_source_code_type-class OR
-           zif_adcoset_c_global=>c_source_code_type-function_group
+           zif_adcoset_c_global=>c_source_code_type-function_group OR
+           zif_adcoset_c_global=>c_source_code_type-program
         THEN original
 
-      WHEN zif_adcoset_c_global=>c_source_code_type-program OR
-           zif_adcoset_c_global=>c_source_code_type-type_group OR
+      WHEN zif_adcoset_c_global=>c_source_code_type-type_group OR
            zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
            zif_adcoset_c_global=>c_source_code_type-interface OR
            zif_adcoset_c_global=>c_source_code_type-behavior_definition
