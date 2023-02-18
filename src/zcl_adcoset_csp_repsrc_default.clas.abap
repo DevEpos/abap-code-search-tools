@@ -45,7 +45,6 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
         ENDLOOP.
 
       CATCH zcx_adcoset_src_code_read.
-        "handle exception
     ENDTRY.
 
     zcl_adcoset_search_protocol=>increment_searched_srcs_count( ).
@@ -68,9 +67,6 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-type_group.
         result = |%_C{ object-name }|.
-
-      WHEN zif_adcoset_c_global=>c_source_code_type-program.
-        result = object-name.
 
     ENDCASE.
 

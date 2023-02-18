@@ -63,6 +63,7 @@ INTERFACE zif_adcoset_c_global
       created_date         TYPE string VALUE 'createdDate',
       class_includes       TYPE string VALUE 'classIncludes',
       fugr_includes        TYPE string VALUE 'fugrIncludes',
+      expand_prog_includes TYPE string VALUE 'expandProgIncl',
       max_objects          TYPE string VALUE 'maxObjects',
       tag_id               TYPE string VALUE 'tagId',
     END OF c_search_params,
