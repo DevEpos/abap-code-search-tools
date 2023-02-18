@@ -104,14 +104,10 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
                      |\{&{ zif_adcoset_c_global=>c_search_params-use_regex }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-class_includes }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-fugr_includes }*\}| &&
-*                     |\{&{ zif_adcoset_c_global=>c_search_params-expand_prog_includes }*\}| &&
+                     |\{&{ zif_adcoset_c_global=>c_search_params-expand_prog_includes }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-ignore_comment_lines }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-ignore_case }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-multi_line }*\}|.
-
-    IF sy-uname = 'DEVELOPER'.
-      template = template && |\{&{ zif_adcoset_c_global=>c_search_params-expand_prog_includes }*\}|.
-    ENDIF.
 
     search_collection->register_disc_res_w_template(
       relation      = c_root_rel_scheme && c_search_uri
