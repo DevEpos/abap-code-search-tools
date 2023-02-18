@@ -1,16 +1,16 @@
 "! <p class="shorttext synchronized" lang="en">Code Search Provider for Programs/Includes</p>
-class ZCL_ADCOSET_CSP_PROG definition
-  public
-  final
-  create public .
+CLASS zcl_adcoset_csp_prog DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
 
-public section.
+  PUBLIC SECTION.
+    INTERFACES zif_adcoset_code_search_prov.
 
-  interfaces ZIF_ADCOSET_CODE_SEARCH_PROV .
-
-  methods CONSTRUCTOR
-    importing
-      !CUSTOM_SETTINGS type ZIF_ADCOSET_TY_GLOBAL=>TY_PROG_CS_SETTINGS .
+    METHODS:
+      constructor
+        IMPORTING
+          !custom_settings TYPE zif_adcoset_ty_global=>ty_prog_cs_settings.
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
@@ -33,11 +33,35 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ADCOSET_CSP_PROG IMPLEMENTATION.
-
+CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
 
   METHOD constructor.
     me->custom_settings = custom_settings.
+  ENDMETHOD.
+
+
+  METHOD zif_adcoset_code_search_prov~search.
+
+    TRY.
+        DATA(source) = src_code_reader->get_source_code(
+          name = object-name
+          type = object-type ).
+
+        LOOP AT src_code_searcher->search( source ) ASSIGNING FIELD-SYMBOL(<match>).
+          <match>-include = object-name.
+          result = VALUE #( BASE result ( <match> ) ).
+        ENDLOOP.
+
+        IF custom_settings-expand_includes = abap_true.
+          result = VALUE #( BASE result
+            ( LINES OF search_dependent_includes( src_code_reader   = src_code_reader
+                                                  src_code_searcher = src_code_searcher
+                                                  object            = object  ) ) ).
+        ENDIF.
+      CATCH zcx_adcoset_src_code_read.
+    ENDTRY.
+
+    zcl_adcoset_search_protocol=>increment_searched_srcs_count( ).
   ENDMETHOD.
 
 
@@ -89,28 +113,4 @@ CLASS ZCL_ADCOSET_CSP_PROG IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-
-  METHOD zif_adcoset_code_search_prov~search.
-
-    TRY.
-        DATA(source) = src_code_reader->get_source_code(
-          name = object-name
-          type = object-type ).
-
-        LOOP AT src_code_searcher->search( source ) ASSIGNING FIELD-SYMBOL(<match>).
-          <match>-include = object-name.
-          result = VALUE #( BASE result ( <match> ) ).
-        ENDLOOP.
-
-        IF custom_settings-resolve_includes = abap_true.
-          result = VALUE #( BASE result
-            ( LINES OF search_dependent_includes( src_code_reader   = src_code_reader
-                                                  src_code_searcher = src_code_searcher
-                                                  object            = object  ) ) ).
-        ENDIF.
-      CATCH zcx_adcoset_src_code_read.
-    ENDTRY.
-
-    zcl_adcoset_search_protocol=>increment_searched_srcs_count( ).
-  ENDMETHOD.
 ENDCLASS.

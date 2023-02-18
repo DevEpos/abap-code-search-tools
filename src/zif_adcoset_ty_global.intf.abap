@@ -157,7 +157,7 @@ INTERFACE zif_adcoset_ty_global
 
     "! Program settings for code search
     BEGIN OF ty_prog_cs_settings,
-      resolve_includes TYPE abap_bool,
+      expand_includes TYPE abap_bool,
     END OF ty_prog_cs_settings,
 
     "! <p class="shorttext synchronized" lang="en">Basic search settings</p>
