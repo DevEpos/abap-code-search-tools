@@ -26,8 +26,6 @@ CLASS lcl_oracle_scope_obj_reader IMPLEMENTATION.
     super->constructor(
       current_offset = current_offset
       search_ranges  = search_ranges ).
-
-    build_query_clauses( ).
   ENDMETHOD.
 
 
