@@ -109,6 +109,8 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
           ENDLOOP.
         CATCH zcx_adcoset_src_code_read.
       ENDTRY.
+
+      zcl_adcoset_search_protocol=>increment_searched_srcs_count( ).
     ENDLOOP.
   ENDMETHOD.
 
