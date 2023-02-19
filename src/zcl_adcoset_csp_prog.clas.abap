@@ -72,7 +72,6 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
 
 
   METHOD get_include_infos.
-    DATA: includes TYPE STANDARD TABLE OF progname.
     CALL FUNCTION 'RS_GET_ALL_INCLUDES'
       EXPORTING
         program    = object-name
