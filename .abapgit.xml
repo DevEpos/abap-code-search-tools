@@ -18,6 +18,7 @@
      <MIN_PATCH>0008</MIN_PATCH>
     </item>
    </REQUIREMENTS>
+   <VERSION_CONSTANT>zif_adcoset_version=&gt;version</VERSION_CONSTANT>
   </DATA>
  </asx:values>
 </asx:abap>
