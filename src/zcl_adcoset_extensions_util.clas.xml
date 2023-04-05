@@ -13,6 +13,11 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
+     <CMPNAME>GET_CURRENT_TGOBJ_TABLE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Retrieves current table with stored tagged objects</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
      <CMPNAME>IS_ABAP_TAGS_AVAILABLE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Checks if ABAP Tags feature is installed</DESCRIPT>
