@@ -271,7 +271,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       "       an object twice
       "       --> add group by clause if tags are supplied (possibly the only solution)
       dyn_from_clause = dyn_from_clause &&
-        `INNER JOIN ZABAPTAGS_TGOBJ AS tgobj ` &&
+        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS tgobj | &&
         `ON  obj~object_name = tgobj~object_name ` &&
         `AND obj~object_type = tgobj~object_type `.
     ENDIF.

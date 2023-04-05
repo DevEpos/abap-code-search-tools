@@ -173,7 +173,7 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     from_clause = `FROM ZADCOSET_SRCCOBJ obj `.
     IF search_ranges-tag_id_range IS NOT INITIAL.
       from_clause = from_clause &&
-        `INNER JOIN ZABAPTAGS_TGOBJ tgobj ` &&
+        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } tgobj | &&
         `ON  obj.object_name = tgobj.object_name ` &&
         `AND obj.object_type = tgobj.object_type `.
     ENDIF.
