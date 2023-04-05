@@ -57,9 +57,6 @@ CLASS zcl_adcoset_extensions_util IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD is_abap_tags_available.
-    DATA: table_def    TYPE dd02v,
-          table_fields TYPE ty_table_fields.
-
     IF abap_tags_available = abap_undefined.
       IF is_tgobj_table_available( c_tgobj_tab_v2 ).
         abap_tags_available = abap_true.
@@ -117,7 +114,5 @@ CLASS zcl_adcoset_extensions_util IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
-
-
 
 ENDCLASS.
