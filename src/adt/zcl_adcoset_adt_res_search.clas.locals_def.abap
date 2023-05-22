@@ -86,10 +86,12 @@ CLASS lcl_result_converter DEFINITION
       END OF ty_package.
 
     DATA:
-      raw_result      TYPE zif_adcoset_ty_global=>ty_search_result,
-      adt_obj_factory TYPE REF TO zif_adcoset_adt_obj_factory,
-      adt_result      TYPE zif_adcoset_ty_adt_types=>ty_code_search_result,
-      packages        TYPE SORTED TABLE OF ty_package WITH UNIQUE KEY package_name.
+      raw_result                   TYPE zif_adcoset_ty_global=>ty_search_result,
+      cds_name_mapper              TYPE REF TO zcl_adcoset_cds_name_mapper,
+      adt_obj_factory              TYPE REF TO zif_adcoset_adt_obj_factory,
+      adt_result                   TYPE zif_adcoset_ty_adt_types=>ty_code_search_result,
+      main_objs_for_name_mapping TYPE TABLE OF REF TO if_adt_tools_core_types=>ty_main_object,
+      packages                     TYPE SORTED TABLE OF ty_package WITH UNIQUE KEY package_name.
 
     METHODS:
       init_result,
@@ -137,5 +139,6 @@ CLASS lcl_result_converter DEFINITION
           package_name  TYPE devclass
         RETURNING
           VALUE(result) TYPE string,
-      add_packages_to_adt_result.
+      add_packages_to_adt_result,
+      adjust_cds_display_names.
 ENDCLASS.
