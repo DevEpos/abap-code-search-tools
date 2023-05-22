@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_ADCOSET_CDS_NAME_MAPPER</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Maps technical to display name of Core Data Services</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CMPNAME>COLLECT_ENTRY</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Collects entry for mapping</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GET_DISPLAY_NAME</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Retrieves display name of a given entry</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>MAP_ENTRIES</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Tries to map all collected entries</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

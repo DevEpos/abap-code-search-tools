@@ -238,6 +238,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
   METHOD constructor.
     me->raw_result = raw_result.
     adt_obj_factory = zcl_adcoset_adt_obj_factory=>get_instance( ).
+    cds_name_mapper = NEW #( ).
   ENDMETHOD.
 
 
@@ -248,6 +249,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
     add_packages_to_adt_result( ).
 
     convert_matches_to_adt_result( ).
+    adjust_cds_display_names( ).
 
     result = adt_result.
   ENDMETHOD.
@@ -332,12 +334,15 @@ CLASS lcl_result_converter IMPLEMENTATION.
         raw_matches          = l_raw_matches ).
 
       IF search_result_object->matches IS NOT INITIAL.
-        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
-         ( search_result_object->* ) ).
+        APPEND search_result_object->* TO adt_result-code_search_objects REFERENCE INTO DATA(added_result_obj).
+
+        IF cds_name_mapper->collect_entry( name = CONV #( search_result_object->adt_main_object-name )
+                                           type = CONV #( search_result_object->adt_main_object-type(4) ) ).
+          main_objs_for_name_mapping = VALUE #( BASE main_objs_for_name_mapping ( REF #( added_result_obj->adt_main_object ) ) ).
+        ENDIF.
+
       ENDIF.
-
     ENDIF.
-
   ENDMETHOD.
 
 
@@ -539,6 +544,22 @@ CLASS lcl_result_converter IMPLEMENTATION.
     CHECK packages IS NOT INITIAL.
 
     result = VALUE #( packages[ package_name = package_name ]-uri OPTIONAL ).
+  ENDMETHOD.
+
+
+  METHOD adjust_cds_display_names.
+    IF cds_name_mapper->map_entries( ) = abap_false.
+      RETURN.
+    ENDIF.
+
+    LOOP AT main_objs_for_name_mapping INTO DATA(main_obj).
+      DATA(entity_name) = cds_name_mapper->get_display_name( name = CONV #( main_obj->name )
+                                                             type = CONV #( main_obj->type(4) ) ).
+      IF entity_name IS NOT INITIAL.
+        main_obj->name = entity_name.
+      ENDIF.
+    ENDLOOP.
+
   ENDMETHOD.
 
 ENDCLASS.
