@@ -9,6 +9,13 @@ Legend
 + : added
 - : removed
 
+2023-05-24 v1.3.0
+-------------------
+
++ DDLS: raw name of entity (STOB) is returned to ADT
++ BDEF: raw name of DDLS (STOB) is returned to ADT
+
+
 2023-04-05 v1.2.1
 -------------------
 
