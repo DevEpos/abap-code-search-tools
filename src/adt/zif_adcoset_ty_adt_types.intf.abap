@@ -7,6 +7,8 @@ INTERFACE zif_adcoset_ty_adt_types
       uri          TYPE string,
       "! Name of the referenced entity - optional
       name         TYPE string,
+      "! Alternative Name of the referenced entity - optional
+      alt_name     TYPE string,
       "! Description of the referenced entity - optional
       description  TYPE string,
       "! ADT Type of the referenced entity - optional
@@ -28,7 +30,7 @@ INTERFACE zif_adcoset_ty_adt_types
     BEGIN OF ty_code_search_object,
       uri             TYPE string,
       parent_uri      TYPE string,
-      adt_main_object TYPE if_adt_tools_core_types=>ty_main_object,
+      adt_main_object TYPE ty_adt_obj_ref,
       matches         TYPE ty_code_search_matches,
     END OF ty_code_search_object,
 
