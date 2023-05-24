@@ -271,8 +271,8 @@ CLASS lcl_result_converter IMPLEMENTATION.
           DATA(search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
             parent_uri      = get_package_uri( <raw_result>-object-package_name )
             adt_main_object = VALUE #(
-              name        = <raw_result>-object-name
-              responsible = <raw_result>-object-owner ) ).
+              name  = <raw_result>-object-name
+              owner = <raw_result>-object-owner ) ).
 
           DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj(
             type = <raw_result>-object-type
@@ -336,7 +336,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
       IF search_result_object->matches IS NOT INITIAL.
         APPEND search_result_object->* TO adt_result-code_search_objects REFERENCE INTO DATA(added_result_obj).
 
-        IF cds_name_mapper->collect_entry( name = CONV #( search_result_object->adt_main_object-name )
+        IF cds_name_mapper->collect_entry( name = search_result_object->adt_main_object-name
                                            type = CONV #( search_result_object->adt_main_object-type(4) ) ).
           main_objs_for_name_mapping = VALUE #( BASE main_objs_for_name_mapping ( REF #( added_result_obj->adt_main_object ) ) ).
         ENDIF.
@@ -553,10 +553,10 @@ CLASS lcl_result_converter IMPLEMENTATION.
     ENDIF.
 
     LOOP AT main_objs_for_name_mapping INTO DATA(main_obj).
-      DATA(entity_name) = cds_name_mapper->get_display_name( name = CONV #( main_obj->name )
+      DATA(entity_name) = cds_name_mapper->get_display_name( name = main_obj->name
                                                              type = CONV #( main_obj->type(4) ) ).
       IF entity_name IS NOT INITIAL.
-        main_obj->name = entity_name.
+        main_obj->alt_name = entity_name.
       ENDIF.
     ENDLOOP.
 
