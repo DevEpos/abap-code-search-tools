@@ -49,7 +49,7 @@ CLASS zcl_adcoset_cds_name_mapper IMPLEMENTATION.
     IF type = zif_adcoset_c_global=>c_source_code_type-data_definition.
       ddlname_range = VALUE #( BASE ddlname_range ( sign = 'I' option = 'EQ' low = name ) ).
     ELSEIF type = zif_adcoset_c_global=>c_source_code_type-behavior_definition.
-      bdefname_range = VALUE #( BASE ddlname_range ( sign = 'I' option = 'EQ' low = name ) ).
+      bdefname_range = VALUE #( BASE bdefname_range ( sign = 'I' option = 'EQ' low = name ) ).
     ELSE.
       RETURN.
     ENDIF.
