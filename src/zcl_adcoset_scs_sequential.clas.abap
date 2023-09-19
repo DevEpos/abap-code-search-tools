@@ -121,14 +121,27 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
 
     IF ignore_comment_lines = abap_true AND
         source_code->comment_regex IS NOT INITIAL AND
-        is_comment_line( source_code->content[ current_match-line ] ).
-      has_more_matches = abap_false.
-      CLEAR match.
+        is_comment_line( source_code->content[ match-line ] ).
+
+      current_line_offset = match-line.
+      current_col_offset = match-offset + match-length.
+
+      " there could still be another match not inside a comment
+      find_next_partial_match( EXPORTING matcher     = matcher
+                               IMPORTING match       = match
+                                         line_offset = line_offset
+                                         col_offset  = col_offset ).
+      IF match IS INITIAL.
+        has_more_matches = abap_false.
+        CLEAR: match,
+               line_offset,
+               col_offset.
+      ENDIF.
       RETURN.
     ENDIF.
 
-    line_offset = current_match-line.
-    col_offset = current_match-offset + current_match-length.
+    line_offset = match-line.
+    col_offset = match-offset + match-length.
   ENDMETHOD.
 
 
