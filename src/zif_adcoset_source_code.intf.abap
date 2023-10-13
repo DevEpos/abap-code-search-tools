@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized" lang="en">Represents the source code of an object/include</p>
+"! <p class="shorttext synchronized">Represents the source code of an object/include</p>
 INTERFACE zif_adcoset_source_code
   PUBLIC.
 
@@ -11,11 +11,10 @@ INTERFACE zif_adcoset_source_code
     ty_line_indexes TYPE TABLE OF ty_line_index WITH KEY number
                                                 WITH UNIQUE HASHED KEY offset COMPONENTS offset.
 
-  DATA:
-    content                TYPE string_table READ-ONLY,
-    line_indexes           TYPE ty_line_indexes READ-ONLY,
-    is_single_line_content TYPE abap_bool READ-ONLY,
-    line_count             TYPE i READ-ONLY,
-    comment_regex          TYPE string READ-ONLY.
+  DATA content TYPE string_table READ-ONLY.
+  DATA line_indexes TYPE ty_line_indexes READ-ONLY.
+  DATA is_single_line_content TYPE abap_bool READ-ONLY.
+  DATA line_count TYPE i READ-ONLY.
+  DATA comment_regex TYPE string READ-ONLY.
 
 ENDINTERFACE.

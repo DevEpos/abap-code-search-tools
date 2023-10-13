@@ -1,62 +1,58 @@
-"! <p class="shorttext synchronized" lang="en">Search scope implementation</p>
+"! <p class="shorttext synchronized">Search scope implementation</p>
 CLASS zcl_adcoset_search_scope DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
+    INTERFACES zif_adcoset_search_scope.
 
-    INTERFACES:
-      zif_adcoset_search_scope.
+    METHODS constructor
+      IMPORTING
+        search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
 
-    METHODS:
-      constructor
-        IMPORTING
-          search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
-  PROTECTED SECTION.
   PRIVATE SECTION.
-    CONSTANTS:
-      c_min_parl_package_size TYPE i VALUE 10,
-      c_max_parl_package_size TYPE i VALUE 2500,
-      c_serial_package_size   TYPE i VALUE 10000.
+    CONSTANTS c_min_parl_package_size TYPE i VALUE 10.
+    CONSTANTS c_max_parl_package_size TYPE i VALUE 2500.
+    CONSTANTS c_serial_package_size TYPE i VALUE 10000.
 
-    DATA:
-      search_ranges                  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges,
-      "! Restricts the maximum number of objects to select for the search
-      max_objects                    TYPE i,
-      "! Holds the object count depending on whether the scope was loaded from the
-      "! database or not
-      obj_count_for_package_building TYPE i,
-      "! This holds the object count for the current scope
-      object_count                   TYPE i,
-      current_offset                 TYPE i,
-      all_packages_read              TYPE abap_bool,
-      package_size                   TYPE i VALUE c_serial_package_size,
-      is_more_objects_available      TYPE abap_bool,
-      dyn_from_clause                TYPE string,
-      tags_dyn_where_cond            TYPE string,
-      appl_comp_dyn_where_cond       TYPE string.
+    DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
 
-    METHODS:
-      determine_count,
-      resolve_packages,
-      init_scope_from_db
-        IMPORTING
-          search_scope TYPE zif_adcoset_ty_global=>ty_search_scope,
-      init_scope
-        IMPORTING
-          search_scope TYPE zif_adcoset_ty_global=>ty_search_scope,
-      increase_scope_expiration
-        IMPORTING
-          scope_id TYPE sysuuid_x16,
-      config_dyn_where_clauses.
+    "! Restricts the maximum number of objects to select for the search
+    DATA max_objects TYPE i.
+    "! Holds the object count depending on whether the scope was loaded from the
+    "! database or not
+    DATA obj_count_for_package_building TYPE i.
+    "! This holds the object count for the current scope
+    DATA object_count TYPE i.
+    DATA current_offset TYPE i.
+    DATA all_packages_read TYPE abap_bool.
+    DATA package_size TYPE i VALUE c_serial_package_size.
+    DATA is_more_objects_available TYPE abap_bool.
+    DATA dyn_from_clause TYPE string.
+    DATA tags_dyn_where_cond TYPE string.
+    DATA appl_comp_dyn_where_cond TYPE string.
+
+    METHODS determine_count.
+    METHODS resolve_packages.
+
+    METHODS init_scope_from_db
+      IMPORTING
+        search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
+
+    METHODS init_scope
+      IMPORTING
+        search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
+
+    METHODS increase_scope_expiration
+      IMPORTING
+        scope_id TYPE sysuuid_x16.
+
+    METHODS config_dyn_where_clauses.
 ENDCLASS.
 
 
-
 CLASS zcl_adcoset_search_scope IMPLEMENTATION.
-
-
   METHOD constructor.
     IF search_scope-scope_id IS NOT INITIAL.
       init_scope_from_db( search_scope ).
@@ -65,21 +61,18 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-
   METHOD zif_adcoset_search_scope~count.
     result = object_count.
   ENDMETHOD.
-
 
   METHOD zif_adcoset_search_scope~has_next_package.
     result = xsdbool( all_packages_read = abap_false AND current_offset < object_count ).
   ENDMETHOD.
 
-
   METHOD zif_adcoset_search_scope~next_package.
     DATA(max_rows) = package_size.
-    IF current_offset IS INITIAL AND
-        ( object_count  < package_size OR package_size = 0 ).
+    IF     current_offset IS INITIAL
+       AND ( object_count < package_size OR package_size = 0 ).
       max_rows = object_count.
     ENDIF.
 
@@ -108,24 +101,22 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-
   METHOD zif_adcoset_search_scope~more_objects_in_scope.
     result = is_more_objects_available.
   ENDMETHOD.
 
-
   METHOD zif_adcoset_search_scope~get_scope_ranges.
     result = search_ranges.
   ENDMETHOD.
-
 
   METHOD zif_adcoset_search_scope~configure_package_size.
     CHECK max_task_count > 0.
 
     IF max_objects IS NOT INITIAL.
       " update max objects number
-      me->max_objects =
-        package_size = max_objects.
+      package_size = max_objects.
+      me->max_objects = max_objects
+        .
       " set fixed object count
       object_count = max_objects + current_offset.
       obj_count_for_package_building = max_objects.
@@ -140,14 +131,13 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ELSE.
       package_size = determined_pack_size.
     ENDIF.
-
   ENDMETHOD.
-
 
   METHOD determine_count.
     DATA(selection_limit) = COND i(
-      WHEN max_objects > 0 THEN max_objects + 1
-                           ELSE 0 ).
+      WHEN max_objects > 0
+      THEN max_objects + 1
+      ELSE 0 ).
 
     SELECT COUNT(*)
       FROM (dyn_from_clause)
@@ -167,12 +157,11 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-
   METHOD resolve_packages.
-    DATA: include_package_range TYPE zif_adcoset_ty_global=>ty_package_name_range,
-          exclude_package_range TYPE zif_adcoset_ty_global=>ty_package_name_range.
+    DATA include_package_range TYPE zif_adcoset_ty_global=>ty_package_name_range.
+    DATA exclude_package_range TYPE zif_adcoset_ty_global=>ty_package_name_range.
 
-    FIELD-SYMBOLS: <package_range> TYPE LINE OF zif_adcoset_ty_global=>ty_package_name_range.
+    FIELD-SYMBOLS <package_range> TYPE LINE OF zif_adcoset_ty_global=>ty_package_name_range.
 
     CHECK search_ranges-package_range IS NOT INITIAL.
 
@@ -187,23 +176,27 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ENDLOOP.
 
     " collect sub packages of packages that should be excluded
-    exclude_package_range = VALUE #( BASE exclude_package_range
-      ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( exclude_package_range ) ) ).
+    exclude_package_range = VALUE #(
+        BASE exclude_package_range
+        ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( exclude_package_range ) ) ).
 
     " convert sign back to 'E' for the excluded packages
     LOOP AT exclude_package_range ASSIGNING <package_range>.
       <package_range>-sign = 'E'.
     ENDLOOP.
 
-    search_ranges-package_range = VALUE #( BASE search_ranges-package_range
-      ( LINES OF include_package_range )
-      ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( include_package_range ) )
-      ( LINES OF exclude_package_range ) ).
+    search_ranges-package_range = VALUE #(
+        BASE search_ranges-package_range
+        ( LINES OF include_package_range )
+        ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( include_package_range ) )
+        ( LINES OF exclude_package_range ) ).
 
-    SORT search_ranges-package_range BY sign option low high.
+    SORT search_ranges-package_range BY sign
+                                        option
+                                        low
+                                        high.
     DELETE ADJACENT DUPLICATES FROM search_ranges-package_range COMPARING sign option low high.
   ENDMETHOD.
-
 
   METHOD init_scope_from_db.
     SELECT SINGLE *
@@ -219,8 +212,9 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     increase_scope_expiration( scope_id = search_scope-scope_id ).
 
     current_offset = search_scope-current_offset.
-    max_objects =
-      package_size = search_scope-max_objects.
+    package_size = search_scope-max_objects.
+    max_objects = search_scope-max_objects
+      .
     " set fixed object count
     object_count = max_objects + current_offset.
 
@@ -228,14 +222,12 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     IF scope_db-ranges_data IS NOT INITIAL.
       CALL TRANSFORMATION id
-        SOURCE XML scope_db-ranges_data
-        RESULT data = search_ranges.
+           SOURCE XML scope_db-ranges_data
+           RESULT data = search_ranges.
     ENDIF.
 
     config_dyn_where_clauses( ).
-
   ENDMETHOD.
-
 
   METHOD init_scope.
     max_objects = search_scope-max_objects.
@@ -248,14 +240,12 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     obj_count_for_package_building = object_count.
   ENDMETHOD.
 
-
   METHOD increase_scope_expiration.
-    DATA: expiration TYPE zadcoset_csscope-expiration_datetime.
+    DATA expiration TYPE zadcoset_csscope-expiration_datetime.
 
     GET TIME STAMP FIELD expiration.
-    expiration = cl_abap_tstmp=>add(
-      tstmp = expiration
-      secs  = zif_adcoset_c_global=>c_default_scope_expiration ).
+    expiration = cl_abap_tstmp=>add( tstmp = expiration
+                                     secs  = zif_adcoset_c_global=>c_default_scope_expiration ).
 
     UPDATE zadcoset_csscope SET expiration_datetime = expiration
                             WHERE id = scope_id.
@@ -263,7 +253,6 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       COMMIT WORK.
     ENDIF.
   ENDMETHOD.
-
 
   METHOD config_dyn_where_clauses.
     dyn_from_clause = `ZADCOSET_SRCCOBJ AS obj `.
@@ -291,5 +280,4 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
     ENDIF.
   ENDMETHOD.
-
 ENDCLASS.

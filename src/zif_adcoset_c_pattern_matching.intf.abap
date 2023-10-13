@@ -1,6 +1,6 @@
-"! <p class="shorttext synchronized" lang="en">Constants for pattern matching</p>
+"! <p class="shorttext synchronized">Constants for pattern matching</p>
 INTERFACE zif_adcoset_c_pattern_matching
-  PUBLIC .
+  PUBLIC.
 
   CONSTANTS:
     "! Control sequences

@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized" lang="en">Global constants for code search tools</p>
+"! <p class="shorttext synchronized">Global constants for code search tools</p>
 INTERFACE zif_adcoset_c_global
   PUBLIC.
 

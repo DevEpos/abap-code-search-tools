@@ -1,32 +1,29 @@
-"! <p class="shorttext synchronized" lang="en">Utility to check PCRE support</p>
+"! <p class="shorttext synchronized">Utility to check PCRE support</p>
 CLASS zcl_adcoset_pcre_util DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.
-    CLASS-METHODS:
-      class_constructor,
-      "! <p class="shorttext synchronized" lang="en">Checks if PCRE is supported in the system</p>
-      is_pcre_supported
-        RETURNING
-          VALUE(result) TYPE abap_bool,
+    CLASS-METHODS class_constructor.
 
-      "! <p class="shorttext synchronized" lang="en">Returns 'X' if the parameter 'DOT_ALL' exists at CREATE_PCRE</p>
-      is_dot_all_param_existing
-        RETURNING
-          VALUE(result) TYPE abap_bool.
-  PROTECTED SECTION.
+    "! <p class="shorttext synchronized">Checks if PCRE is supported in the system</p>
+    CLASS-METHODS is_pcre_supported
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
+    "! <p class="shorttext synchronized">Returns 'X' if the parameter 'DOT_ALL' exists at CREATE_PCRE</p>
+    CLASS-METHODS is_dot_all_param_existing
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
   PRIVATE SECTION.
-    CLASS-DATA:
-      pcre_supported       TYPE abap_bool VALUE abap_undefined,
-      dot_all_param_exists TYPE abap_bool VALUE abap_undefined.
+    CLASS-DATA pcre_supported TYPE abap_bool VALUE abap_undefined.
+    CLASS-DATA dot_all_param_exists TYPE abap_bool VALUE abap_undefined.
 ENDCLASS.
 
 
-
 CLASS zcl_adcoset_pcre_util IMPLEMENTATION.
-
   METHOD class_constructor.
     DATA(abap_regex_descr) = CAST cl_abap_classdescr( cl_abap_typedescr=>describe_by_name( 'CL_ABAP_REGEX' ) ).
 
@@ -40,14 +37,11 @@ CLASS zcl_adcoset_pcre_util IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-
   METHOD is_pcre_supported.
     result = pcre_supported.
   ENDMETHOD.
 
-
   METHOD is_dot_all_param_existing.
     result = dot_all_param_exists.
   ENDMETHOD.
-
 ENDCLASS.
