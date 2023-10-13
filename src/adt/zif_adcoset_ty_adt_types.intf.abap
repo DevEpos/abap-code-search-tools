@@ -84,7 +84,7 @@ INTERFACE zif_adcoset_ty_adt_types
 
   "! Settings for Code Search
   TYPES BEGIN OF ty_code_search_settings.
-  INCLUDE TYPE zadcoset_csset.
+          INCLUDE TYPE zadcoset_csset.
   TYPES END OF ty_code_search_settings.
 
 ENDINTERFACE.

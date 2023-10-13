@@ -1,24 +1,18 @@
-"! <p class="shorttext synchronized" lang="en">Access to search settings stored on the server</p>
+"! <p class="shorttext synchronized">Access to search settings stored on the server</p>
 CLASS zcl_adcoset_search_settings DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
-    CLASS-METHODS:
-      "! <p class="shorttext synchronized" lang="en">Retrieves server side code search settings</p>
-      get_settings
-        RETURNING
-          VALUE(result) TYPE zif_adcoset_ty_adt_types=>ty_code_search_settings.
-  PROTECTED SECTION.
-  PRIVATE SECTION.
+    "! <p class="shorttext synchronized">Retrieves server side code search settings</p>
+    CLASS-METHODS get_settings
+      RETURNING
+        VALUE(result) TYPE zif_adcoset_ty_adt_types=>ty_code_search_settings.
 ENDCLASS.
 
 
-
 CLASS zcl_adcoset_search_settings IMPLEMENTATION.
-
-
   METHOD get_settings.
     " as the default settings correspond to an empty entry sy-subrc <> 0 does
     " have to be handled
@@ -28,13 +22,9 @@ CLASS zcl_adcoset_search_settings IMPLEMENTATION.
       INTO CORRESPONDING FIELDS OF @result.
 
     IF sy-subrc <> 0.
-      result = VALUE #(
-        parallel_proc_pack_size = zif_adcoset_c_global=>c_parl_proc_min_pack_size ).
+      result = VALUE #( parallel_proc_pack_size = zif_adcoset_c_global=>c_parl_proc_min_pack_size ).
     ELSEIF result-parallel_proc_pack_size < zif_adcoset_c_global=>c_parl_proc_min_pack_size.
       result-parallel_proc_pack_size = zif_adcoset_c_global=>c_parl_proc_min_pack_size.
     ENDIF.
-
   ENDMETHOD.
-
-
 ENDCLASS.

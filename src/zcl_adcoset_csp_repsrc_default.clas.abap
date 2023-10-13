@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized" lang="en">Default search provider for repository source code search</p>
+"! <p class="shorttext synchronized">Default search provider for repository source code search</p>
 CLASS zcl_adcoset_csp_repsrc_default DEFINITION
   PUBLIC
   FINAL
@@ -6,26 +6,22 @@ CLASS zcl_adcoset_csp_repsrc_default DEFINITION
 
   PUBLIC SECTION.
     INTERFACES zif_adcoset_code_search_prov.
-    METHODS:
-      "! <p class="shorttext synchronized" lang="en">Creates new instance of a default search provider</p>
-      constructor.
-  PROTECTED SECTION.
+
+    "! <p class="shorttext synchronized">Creates new instance of a default search provider</p>
+    METHODS constructor.
+
   PRIVATE SECTION.
-    METHODS:
-      get_include
-        IMPORTING
-          object        TYPE zif_adcoset_ty_global=>ty_tadir_object
-        RETURNING
-          VALUE(result) TYPE progname.
+    METHODS get_include
+      IMPORTING
+        !object       TYPE zif_adcoset_ty_global=>ty_tadir_object
+      RETURNING
+        VALUE(result) TYPE progname.
 ENDCLASS.
 
 
-
 CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
-
   METHOD constructor.
   ENDMETHOD.
-
 
   METHOD zif_adcoset_code_search_prov~search.
     DATA(include_name) = get_include( object ).
@@ -35,9 +31,8 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
     ENDIF.
 
     TRY.
-        DATA(source) = src_code_reader->get_source_code(
-          name = include_name
-          type = object-type ).
+        DATA(source) = src_code_reader->get_source_code( name = include_name
+                                                         type = object-type ).
 
         LOOP AT src_code_searcher->search( source ) ASSIGNING FIELD-SYMBOL(<match>).
           <match>-include = include_name.
@@ -50,9 +45,8 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
     zcl_adcoset_search_protocol=>increment_searched_srcs_count( ).
   ENDMETHOD.
 
-
   METHOD get_include.
-    DATA: include_suffix  TYPE string.
+    DATA include_suffix TYPE string.
 
     CASE object-type.
 
@@ -75,7 +69,5 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
       TRANSLATE result(30) USING ' ='.
       result+30 = include_suffix.
     ENDIF.
-
   ENDMETHOD.
-
 ENDCLASS.

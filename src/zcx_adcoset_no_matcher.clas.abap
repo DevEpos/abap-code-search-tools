@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized" lang="en">No valid pattern matcher found</p>
+"! <p class="shorttext synchronized">No valid pattern matcher found</p>
 CLASS zcx_adcoset_no_matcher DEFINITION
   PUBLIC
   INHERITING FROM zcx_adcoset_static_error
@@ -6,10 +6,11 @@ CLASS zcx_adcoset_no_matcher DEFINITION
   CREATE PUBLIC.
 
   PUBLIC SECTION.
+
   PROTECTED SECTION.
+
   PRIVATE SECTION.
 ENDCLASS.
-
 
 
 CLASS zcx_adcoset_no_matcher IMPLEMENTATION.

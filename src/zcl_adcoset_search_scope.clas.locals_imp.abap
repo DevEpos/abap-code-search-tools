@@ -3,90 +3,73 @@
 *"* declarations
 
 CLASS lcl_adbc_scope_reader_fac IMPLEMENTATION.
-
   METHOD create_package_reader.
     " see domain DBSYS_TYPE_SELECTOR for possible values
     CASE sy-dbsys.
       WHEN 'ORACLE'.
-        result = NEW lcl_oracle_scope_obj_reader(
-          search_ranges  = search_ranges
-          current_offset = current_offset ).
+        result = NEW lcl_oracle_scope_obj_reader( search_ranges  = search_ranges
+                                                  current_offset = current_offset ).
       WHEN 'HDB'.
-        result = NEW lcl_hdb_scope_obj_reader(
-          search_ranges  = search_ranges
-          current_offset = current_offset ).
+        result = NEW lcl_hdb_scope_obj_reader( search_ranges  = search_ranges
+                                               current_offset = current_offset ).
     ENDCASE.
   ENDMETHOD.
-
 ENDCLASS.
 
+
 CLASS lcl_oracle_scope_obj_reader IMPLEMENTATION.
-
   METHOD constructor.
-    super->constructor(
-      current_offset = current_offset
-      search_ranges  = search_ranges ).
+    super->constructor( current_offset = current_offset
+                        search_ranges  = search_ranges ).
   ENDMETHOD.
-
 
   METHOD build_limit_clause.
     limit_clause = |FETCH FIRST { max_rows } ROWS ONLY|.
   ENDMETHOD.
 
-
   METHOD build_offset_clause.
     offset_clause = |OFFSET { current_offset } ROWS |.
   ENDMETHOD.
-
 ENDCLASS.
 
 
 CLASS lcl_hdb_scope_obj_reader IMPLEMENTATION.
-
   METHOD constructor.
-    super->constructor(
-      current_offset = current_offset
-      search_ranges  = search_ranges ).
+    super->constructor( current_offset = current_offset
+                        search_ranges  = search_ranges ).
   ENDMETHOD.
-
 
   METHOD combine_clauses.
     " HANA expects the LIMIT clause before the offset clause
     result = select_clause && from_clause && where_clause && order_by_clause && limit_clause && offset_clause.
   ENDMETHOD.
 
-
   METHOD build_limit_clause.
     limit_clause = |LIMIT { max_rows } |.
   ENDMETHOD.
 
-
   METHOD build_offset_clause.
     offset_clause = |OFFSET { current_offset }|.
   ENDMETHOD.
-
 ENDCLASS.
 
 
 CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
-
   METHOD constructor.
-    me->search_ranges = search_ranges.
+    me->search_ranges  = search_ranges.
     me->current_offset = current_offset.
-    adbc_stmnt_cols = VALUE #(
-      ( CONV adbc_name( 'TYPE' ) )
-      ( CONV adbc_name( 'NAME' ) )
-      ( CONV adbc_name( 'OWNER' ) )
-      ( CONV adbc_name( 'PACKAGE_NAME' ) ) ).
+    adbc_stmnt_cols = VALUE #( ( CONV adbc_name( 'TYPE' ) )
+                               ( CONV adbc_name( 'NAME' ) )
+                               ( CONV adbc_name( 'OWNER' ) )
+                               ( CONV adbc_name( 'PACKAGE_NAME' ) ) ).
 
     build_query_clauses( ).
   ENDMETHOD.
 
-
   METHOD lif_adbc_scope_obj_reader~read_next_package.
     max_rows = package_size.
-    IF current_offset IS INITIAL AND
-        ( object_count  < package_size OR package_size = 0 ).
+    IF     current_offset IS INITIAL
+       AND ( object_count < package_size OR package_size = 0 ).
       max_rows = object_count.
     ENDIF.
 
@@ -98,7 +81,7 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     TRY.
         DATA(result_set) = NEW cl_sql_statement( )->execute_query( query ).
 
-        result_set->set_param_table( itab_ref = REF #( result )
+        result_set->set_param_table( itab_ref             = REF #( result )
                                      corresponding_fields = adbc_stmnt_cols ).
         IF result_set->next_package( ) > 0.
         ENDIF.
@@ -109,27 +92,22 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
         IF package_result_count < max_rows.
           all_packages_read = abap_true.
         ENDIF.
-      CATCH cx_sql_exception INTO DATA(err).
+      CATCH cx_sql_exception INTO DATA(err). " TODO: variable is assigned but never used (ABAP cleaner)
         all_packages_read = abap_true.
     ENDTRY.
-
   ENDMETHOD.
-
 
   METHOD lif_adbc_scope_obj_reader~set_object_count.
     object_count = value.
   ENDMETHOD.
 
-
   METHOD lif_adbc_scope_obj_reader~set_package_size.
     me->package_size = value.
   ENDMETHOD.
 
-
   METHOD lif_adbc_scope_obj_reader~has_more_packages.
     result = xsdbool( all_packages_read = abap_false AND current_offset < object_count ).
   ENDMETHOD.
-
 
   METHOD build_query_clauses.
     build_select_clause( ).
@@ -138,9 +116,7 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     build_order_by_clause( ).
   ENDMETHOD.
 
-
   METHOD build_where_clause.
-
     add_range_to_where( EXPORTING ranges        = search_ranges-object_type_range
                                   sql_fieldname = 'obj.object_type'
                         CHANGING  where         = where_clause ).
@@ -168,7 +144,6 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-
   METHOD build_from_clause.
     from_clause = `FROM ZADCOSET_SRCCOBJ obj `.
     IF search_ranges-tag_id_range IS NOT INITIAL.
@@ -185,11 +160,9 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-
   METHOD build_order_by_clause.
     order_by_clause = `ORDER BY obj.pgmid `.
   ENDMETHOD.
-
 
   METHOD build_select_clause.
     select_clause = `SELECT obj.object_type type, ` &&
@@ -198,14 +171,11 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
                     `obj.devclass package_name `.
   ENDMETHOD.
 
-
   METHOD combine_clauses.
     result = select_clause && from_clause && where_clause && order_by_clause && offset_clause && limit_clause.
   ENDMETHOD.
 
-
   METHOD add_range_to_where.
-
     DATA(ranges_as_where) = conv_range_to_where( ranges        = ranges
                                                  data_type     = data_type
                                                  sql_fieldname = sql_fieldname ).
@@ -220,7 +190,6 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
       where = |{ where }{ c_sql_and }{ ranges_as_where }|.
     ENDIF.
   ENDMETHOD.
-
 
   METHOD conv_range_to_where.
     CHECK ranges IS NOT INITIAL.
@@ -243,12 +212,9 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     ELSEIF excl_conditions IS NOT INITIAL.
       result = |{ result }{ c_sql_and }{ excl_conditions }|.
     ENDIF.
-
   ENDMETHOD.
 
-
   METHOD split_including_excluding.
-
     LOOP AT ranges ASSIGNING FIELD-SYMBOL(<range_entry>).
       IF <range_entry>-sign = 'I'.
         including = VALUE #( BASE including ( <range_entry> ) ).
@@ -256,12 +222,10 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
         excluding = VALUE #( BASE excluding ( <range_entry> ) ).
       ENDIF.
     ENDLOOP.
-
   ENDMETHOD.
 
-
   METHOD conv_conditions.
-    DATA: new_cond TYPE string.
+    DATA new_cond TYPE string.
 
     CHECK conditions IS NOT INITIAL.
 
@@ -284,15 +248,14 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
       result = |({ result })|.
     ENDIF.
   ENDMETHOD.
-
 ENDCLASS.
 
-CLASS lcl_cond_builder IMPLEMENTATION.
 
+CLASS lcl_cond_builder IMPLEMENTATION.
   METHOD constructor.
     me->fieldname = fieldname.
     me->data_type = data_type.
-    me->negate = negate.
+    me->negate    = negate.
     me->abap_cond = abap_cond.
   ENDMETHOD.
 
@@ -301,8 +264,8 @@ CLASS lcl_cond_builder IMPLEMENTATION.
       negate_selopt_option( ).
     ENDIF.
 
-    IF abap_cond-option = c_selopt_option-not_contains_pattern OR
-        abap_cond-option = c_selopt_option-not_between.
+    IF    abap_cond-option = c_selopt_option-not_contains_pattern
+       OR abap_cond-option = c_selopt_option-not_between.
       not = c_sql_not.
     ENDIF.
 
@@ -328,37 +291,33 @@ CLASS lcl_cond_builder IMPLEMENTATION.
     result = |{ not }{ fieldname } { operator1 }{ val1 } { operator2 }{ val2 }|.
   ENDMETHOD.
 
-
   METHOD negate_selopt_option.
     abap_cond-option = SWITCH #( abap_cond-option
-      WHEN c_selopt_option-between              THEN c_selopt_option-not_between
-      WHEN c_selopt_option-not_between          THEN c_selopt_option-between
-      WHEN c_selopt_option-equals               THEN c_selopt_option-not_equals
-      WHEN c_selopt_option-not_equals           THEN c_selopt_option-equals
-      WHEN c_selopt_option-lesser_than          THEN c_selopt_option-greater_equal
-      WHEN c_selopt_option-lesser_equal         THEN c_selopt_option-greater_than
-      WHEN c_selopt_option-greater_equal        THEN c_selopt_option-lesser_than
-      WHEN c_selopt_option-greater_than         THEN c_selopt_option-lesser_equal
-      WHEN c_selopt_option-contains_pattern     THEN c_selopt_option-not_contains_pattern
-      WHEN c_selopt_option-not_contains_pattern THEN c_selopt_option-contains_pattern ).
+                                 WHEN c_selopt_option-between              THEN c_selopt_option-not_between
+                                 WHEN c_selopt_option-not_between          THEN c_selopt_option-between
+                                 WHEN c_selopt_option-equals               THEN c_selopt_option-not_equals
+                                 WHEN c_selopt_option-not_equals           THEN c_selopt_option-equals
+                                 WHEN c_selopt_option-lesser_than          THEN c_selopt_option-greater_equal
+                                 WHEN c_selopt_option-lesser_equal         THEN c_selopt_option-greater_than
+                                 WHEN c_selopt_option-greater_equal        THEN c_selopt_option-lesser_than
+                                 WHEN c_selopt_option-greater_than         THEN c_selopt_option-lesser_equal
+                                 WHEN c_selopt_option-contains_pattern     THEN c_selopt_option-not_contains_pattern
+                                 WHEN c_selopt_option-not_contains_pattern THEN c_selopt_option-contains_pattern ).
   ENDMETHOD.
-
 
   METHOD option_to_sql_operator.
     result = SWITCH #( abap_cond-option
-      WHEN c_selopt_option-equals        THEN c_sql_comparator-equals
-      WHEN c_selopt_option-not_equals    THEN c_sql_comparator-not_equals
-      WHEN c_selopt_option-lesser_than   THEN c_sql_comparator-lesser_than
-      WHEN c_selopt_option-lesser_equal  THEN c_sql_comparator-lesser_equal
-      WHEN c_selopt_option-greater_equal THEN c_sql_comparator-greater_equal
-      WHEN c_selopt_option-greater_than  THEN c_sql_comparator-greater_than ).
+                       WHEN c_selopt_option-equals        THEN c_sql_comparator-equals
+                       WHEN c_selopt_option-not_equals    THEN c_sql_comparator-not_equals
+                       WHEN c_selopt_option-lesser_than   THEN c_sql_comparator-lesser_than
+                       WHEN c_selopt_option-lesser_equal  THEN c_sql_comparator-lesser_equal
+                       WHEN c_selopt_option-greater_equal THEN c_sql_comparator-greater_equal
+                       WHEN c_selopt_option-greater_than  THEN c_sql_comparator-greater_than ).
   ENDMETHOD.
-
 
   METHOD to_sql_val.
     result = |{ cl_abap_dyn_prg=>quote( abap_val ) }|.
   ENDMETHOD.
-
 
   METHOD conv_like_pattern_to_sql.
     IF value CA '%_#'.
@@ -376,5 +335,4 @@ CLASS lcl_cond_builder IMPLEMENTATION.
     " 5) escape all '+' with '_'
     result = replace( val = result sub = '+' with = '_' occ = 0 ).
   ENDMETHOD.
-
 ENDCLASS.

@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized" lang="en">Search Provider for Classes</p>
+"! <p class="shorttext synchronized">Search Provider for Classes</p>
 CLASS zcl_adcoset_csp_clas DEFINITION
   PUBLIC
   FINAL
@@ -7,16 +7,15 @@ CLASS zcl_adcoset_csp_clas DEFINITION
   PUBLIC SECTION.
     INTERFACES zif_adcoset_code_search_prov.
 
-    METHODS:
-      "! <p class="shorttext synchronized" lang="en">Creates new instance of a class search provider</p>
-      constructor
-        IMPORTING
-          custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings.
-  PROTECTED SECTION.
+    "! <p class="shorttext synchronized">Creates new instance of a class search provider</p>
+    METHODS constructor
+      IMPORTING
+        custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings.
+
   PRIVATE SECTION.
     CONSTANTS:
       BEGIN OF c_include_types,
-        method  TYPE string VALUE 'CLAS/OM',
+        method TYPE string VALUE 'CLAS/OM',
         include TYPE string VALUE 'CLAS/I',
       END OF c_include_types,
 
@@ -40,36 +39,30 @@ CLASS zcl_adcoset_csp_clas DEFINITION
       END OF ty_class_incl,
       ty_class_includes TYPE STANDARD TABLE OF ty_class_incl WITH KEY name.
 
-    DATA:
-      custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings.
+    DATA custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings.
 
-    METHODS:
-      get_class_includes
-        IMPORTING
-          name          TYPE sobj_name
-        RETURNING
-          VALUE(result) TYPE ty_class_includes,
-      assign_objects_to_matches
-        IMPORTING
-          unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
-          object             TYPE zif_adcoset_ty_global=>ty_tadir_object
-          include            TYPE ty_class_incl
-        CHANGING
-          all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
+    METHODS get_class_includes
+      IMPORTING
+        !name         TYPE sobj_name
+      RETURNING
+        VALUE(result) TYPE ty_class_includes.
+
+    METHODS assign_objects_to_matches
+      IMPORTING
+        unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
+        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object
+        !include           TYPE ty_class_incl
+      CHANGING
+        all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
 ENDCLASS.
 
 
-
 CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
-
-
   METHOD constructor.
     me->custom_settings = custom_settings.
   ENDMETHOD.
 
-
   METHOD zif_adcoset_code_search_prov~search.
-
     DATA(class_includes) = get_class_includes( name = object-name ).
     IF class_includes IS INITIAL.
       RETURN.
@@ -81,25 +74,19 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
           DATA(matches) = src_code_searcher->search( source_code = source_code ).
 
           IF matches IS NOT INITIAL.
-            assign_objects_to_matches(
-              EXPORTING
-                unassigned_matches = matches
-                object             = object
-                include            = <include>
-              CHANGING
-                all_matches        = result ).
+            assign_objects_to_matches( EXPORTING unassigned_matches = matches
+                                                 object             = object
+                                                 include            = <include>
+                                       CHANGING  all_matches        = result ).
           ENDIF.
         CATCH zcx_adcoset_src_code_read.
       ENDTRY.
     ENDLOOP.
 
     zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( class_includes ) ).
-
   ENDMETHOD.
 
-
   METHOD get_class_includes.
-
     DATA(class_name) = CONV classname( name ).
 
     IF custom_settings-include_flags-public_section = abap_true.
@@ -115,22 +102,17 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     ENDIF.
 
     IF custom_settings-include_flags-methods = abap_true.
-      cl_oo_classname_service=>get_all_method_includes(
-        EXPORTING
-          clsname            = class_name
-        RECEIVING
-          result             = DATA(method_includes)
-        EXCEPTIONS
-          class_not_existing = 1 ).
+      cl_oo_classname_service=>get_all_method_includes( EXPORTING  clsname            = class_name
+                                                        RECEIVING  result             = DATA(method_includes)
+                                                        EXCEPTIONS class_not_existing = 1 ).
 
       SORT method_includes BY cpdkey-cpdname.
       result = VALUE #( BASE result
-        FOR method IN method_includes
-        ( name        = method-incname
-          method_name = method-cpdkey-cpdname
-          adt_type    = c_include_types-method ) ).
+                        FOR method IN method_includes
+                        ( name        = method-incname
+                          method_name = method-cpdkey-cpdname
+                          adt_type    = c_include_types-method ) ).
     ENDIF.
-
 
     IF custom_settings-include_flags-local_def = abap_true.
       result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) ) ).
@@ -147,16 +129,13 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     IF custom_settings-include_flags-macro = abap_true.
       result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) ) ).
     ENDIF.
-
   ENDMETHOD.
 
-
   METHOD assign_objects_to_matches.
-
     LOOP AT unassigned_matches ASSIGNING FIELD-SYMBOL(<unassigned_match>).
       APPEND <unassigned_match> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
-      <match>-include = include-name.
+      <match>-include          = include-name.
       <match>-adt_include_type = COND #(
         WHEN include-adt_type IS INITIAL THEN c_include_types-include ELSE include-adt_type ).
 
@@ -180,7 +159,5 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
-
   ENDMETHOD.
-
 ENDCLASS.

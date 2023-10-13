@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized" lang="en">Sequential Source Code Searcher</p>
+"! <p class="shorttext synchronized">Sequential Source Code Searcher</p>
 CLASS zcl_adcoset_scs_sequential DEFINITION
   PUBLIC
   INHERITING FROM zcl_adcoset_scs_base
@@ -7,52 +7,46 @@ CLASS zcl_adcoset_scs_sequential DEFINITION
   PUBLIC SECTION.
     INTERFACES zif_adcoset_src_code_searcher.
 
-    METHODS:
-      constructor
-        IMPORTING
-          ignore_comment_lines TYPE abap_bool
-          line_feed            TYPE string
-          matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+    METHODS constructor
+      IMPORTING
+        ignore_comment_lines TYPE abap_bool
+        line_feed            TYPE string
+        matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+
   PROTECTED SECTION.
-    DATA:
-      has_more_matches    TYPE abap_bool,
-      line_feed           TYPE string,
-      current_line_offset TYPE i,
-      current_col_offset  TYPE i,
-      current_match       TYPE match_result,
-      match_start         TYPE match_result,
-      match_end           TYPE match_result.
+    DATA has_more_matches TYPE abap_bool.
+    DATA line_feed TYPE string.
+    DATA current_line_offset TYPE i.
+    DATA current_col_offset TYPE i.
+    DATA current_match TYPE match_result.
+    DATA match_start TYPE match_result.
+    DATA match_end TYPE match_result.
 
-    METHODS:
-      find_next_partial_match
-        IMPORTING
-          matcher            TYPE REF TO zif_adcoset_pattern_matcher
-        EXPORTING
-          match              TYPE match_result
-          VALUE(line_offset) TYPE i
-          VALUE(col_offset)  TYPE i,
-      collect_sequential_match
-        CHANGING
-          matches TYPE zif_adcoset_ty_global=>ty_search_matches.
+    METHODS find_next_partial_match
+      IMPORTING
+        matcher            TYPE REF TO zif_adcoset_pattern_matcher
+      EXPORTING
+        !match             TYPE match_result
+        VALUE(line_offset) TYPE i
+        VALUE(col_offset)  TYPE i.
+
+    METHODS collect_sequential_match
+      CHANGING
+        matches TYPE zif_adcoset_ty_global=>ty_search_matches.
+
   PRIVATE SECTION.
-
-    METHODS:
-      find_next_full_match
-        CHANGING
-          matches TYPE zif_adcoset_ty_global=>ty_search_matches.
+    METHODS find_next_full_match
+      CHANGING
+        matches TYPE zif_adcoset_ty_global=>ty_search_matches.
 ENDCLASS.
 
 
-
 CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
-
   METHOD constructor.
-    super->constructor(
-      ignore_comment_lines = ignore_comment_lines
-      matchers             = matchers ).
+    super->constructor( ignore_comment_lines = ignore_comment_lines
+                        matchers             = matchers ).
     me->line_feed = line_feed.
   ENDMETHOD.
-
 
   METHOD zif_adcoset_src_code_searcher~search.
     " set the source code attribute for this search call
@@ -68,21 +62,15 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
 
       find_next_full_match( CHANGING matches = result ).
     ENDWHILE.
-
   ENDMETHOD.
 
-
   METHOD find_next_full_match.
-
     LOOP AT matchers ASSIGNING FIELD-SYMBOL(<matcher>).
       DATA(i) = sy-tabix.
-      find_next_partial_match(
-        EXPORTING
-          matcher     = <matcher>
-        IMPORTING
-          match       = current_match
-          line_offset = current_line_offset
-          col_offset  = current_col_offset ).
+      find_next_partial_match( EXPORTING matcher     = <matcher>
+                               IMPORTING match       = current_match
+                                         line_offset = current_line_offset
+                                         col_offset  = current_col_offset ).
 
       IF has_more_matches = abap_false.
         RETURN.
@@ -96,19 +84,16 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
     match_end = current_match.
 
     collect_sequential_match( CHANGING matches = matches ).
-
   ENDMETHOD.
-
 
   METHOD find_next_partial_match.
     CLEAR: match,
            line_offset,
            col_offset.
     TRY.
-        match = matcher->find_next_match(
-          source     = source_code->content
-          start_line = current_line_offset
-          offset     = current_col_offset ).
+        match = matcher->find_next_match( source     = source_code->content
+                                          start_line = current_line_offset
+                                          offset     = current_col_offset ).
       CATCH zcx_adcoset_pattern_sh_error.
         has_more_matches = abap_false.
         RETURN.
@@ -119,9 +104,9 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    IF ignore_comment_lines = abap_true AND
-        source_code->comment_regex IS NOT INITIAL AND
-        is_comment_line( source_code->content[ match-line ] ).
+    IF     ignore_comment_lines        = abap_true
+       AND source_code->comment_regex IS NOT INITIAL
+       AND is_comment_line( source_code->content[ match-line ] ).
 
       current_line_offset = match-line.
       current_col_offset = match-offset + match-length.
@@ -144,20 +129,18 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
     col_offset = match-offset + match-length.
   ENDMETHOD.
 
-
   METHOD collect_sequential_match.
-
-    IF match_start IS INITIAL OR
-        match_end IS INITIAL.
+    IF    match_start IS INITIAL
+       OR match_end   IS INITIAL.
       RETURN.
     ENDIF.
 
     DATA(seq_match) = VALUE zif_adcoset_ty_global=>ty_search_match(
-      start_line   = match_start-line
-      start_column = match_start-offset
-      end_line     = match_end-line
-      end_column   = match_end-offset + match_end-length
-      snippet      = source_code->content[ match_start-line ] ).
+                                start_line   = match_start-line
+                                start_column = match_start-offset
+                                end_line     = match_end-line
+                                end_column   = match_end-offset + match_end-length
+                                snippet      = source_code->content[ match_start-line ] ).
 
     IF seq_match-end_line > seq_match-start_line.
       DATA(index) = seq_match-start_line + 1.
@@ -176,7 +159,5 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
     ENDIF.
 
     matches = VALUE #( BASE matches ( seq_match ) ).
-
   ENDMETHOD.
-
 ENDCLASS.

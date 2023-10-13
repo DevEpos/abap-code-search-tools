@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized" lang="en">Standard Source Code Searcher</p>
+"! <p class="shorttext synchronized">Standard Source Code Searcher</p>
 CLASS zcl_adcoset_scs_standard DEFINITION
   PUBLIC
   INHERITING FROM zcl_adcoset_scs_base
@@ -8,29 +8,25 @@ CLASS zcl_adcoset_scs_standard DEFINITION
   PUBLIC SECTION.
     INTERFACES zif_adcoset_src_code_searcher.
 
-    METHODS:
-      constructor
-        IMPORTING
-          match_all            TYPE abap_bool
-          ignore_comment_lines TYPE abap_bool
-          matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+    METHODS constructor
+      IMPORTING
+        match_all            TYPE abap_bool
+        ignore_comment_lines TYPE abap_bool
+        matchers             TYPE zif_adcoset_pattern_matcher=>ty_ref_tab.
+
   PROTECTED SECTION.
+
   PRIVATE SECTION.
-    DATA:
-      match_all TYPE abap_bool.
+    DATA match_all TYPE abap_bool.
 ENDCLASS.
 
 
-
 CLASS zcl_adcoset_scs_standard IMPLEMENTATION.
-
   METHOD constructor.
-    super->constructor(
-      ignore_comment_lines = ignore_comment_lines
-      matchers             = matchers ).
+    super->constructor( ignore_comment_lines = ignore_comment_lines
+                        matchers             = matchers ).
     me->match_all = match_all.
   ENDMETHOD.
-
 
   METHOD zif_adcoset_src_code_searcher~search.
     " set the source code attribute for this search call
@@ -47,9 +43,8 @@ CLASS zcl_adcoset_scs_standard IMPLEMENTATION.
           ENDIF.
       ENDTRY.
       IF raw_matches IS NOT INITIAL.
-        DATA(enhanced_matches) = enhance_matches(
-          raw_matches          = raw_matches
-          ignore_comment_lines = ignore_comment_lines ).
+        DATA(enhanced_matches) = enhance_matches( raw_matches          = raw_matches
+                                                  ignore_comment_lines = ignore_comment_lines ).
       ENDIF.
 
       " not all matchers found a match so quit further searching
@@ -65,5 +60,4 @@ CLASS zcl_adcoset_scs_standard IMPLEMENTATION.
         enhanced_matches.
     ENDLOOP.
   ENDMETHOD.
-
 ENDCLASS.

@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized" lang="en">Global types for advanced code search</p>
+"! <p class="shorttext synchronized">Global types for advanced code search</p>
 INTERFACE zif_adcoset_ty_global
   PUBLIC.
 
@@ -73,15 +73,13 @@ INTERFACE zif_adcoset_ty_global
       tag_id_range      TYPE RANGE OF sysuuid_x16,
     END OF ty_search_scope_ranges.
 
-  "! <p class="shorttext synchronized" lang="en">Ranges / data to define an object scope</p>
-  TYPES BEGIN OF ty_search_scope.
-  TYPES:
-    scope_id       TYPE sysuuid_x16,
-    current_offset TYPE i.
-    INCLUDE        TYPE ty_search_scope_ranges AS ranges.
-  TYPES:
-      max_objects    TYPE i.
-  TYPES END OF ty_search_scope.
+  "! <p class="shorttext synchronized">Ranges / data to define an object scope</p>
+  TYPES  BEGIN OF ty_search_scope.
+  TYPES:   scope_id       TYPE sysuuid_x16,
+           current_offset TYPE i.
+           INCLUDE        TYPE ty_search_scope_ranges AS ranges.
+  TYPES:   max_objects    TYPE i.
+  TYPES  END OF ty_search_scope.
 
   TYPES:
     "! <p class="shorttext synchronized" lang="en">Uniquely identifies a match</p>
@@ -98,16 +96,15 @@ INTERFACE zif_adcoset_ty_global
       adt_include_type TYPE string,
     END OF ty_match_identifier.
 
-  TYPES BEGIN OF ty_search_match.
-  INCLUDE TYPE ty_match_identifier.
-  TYPES:
-    start_line   TYPE i,
-    start_column TYPE i,
-    end_line     TYPE i,
-    end_column   TYPE i,
-    snippet      TYPE string,
-    long_snippet TYPE string.
-  TYPES END OF ty_search_match.
+  TYPES  BEGIN OF ty_search_match.
+           INCLUDE TYPE ty_match_identifier.
+  TYPES:   start_line   TYPE i,
+           start_column TYPE i,
+           end_line     TYPE i,
+           end_column   TYPE i,
+           snippet      TYPE string,
+           long_snippet TYPE string.
+  TYPES  END OF ty_search_match.
 
   TYPES ty_search_matches TYPE STANDARD TABLE OF ty_search_match WITH EMPTY KEY.
 
@@ -208,30 +205,26 @@ INTERFACE zif_adcoset_ty_global
       pcre_settings TYPE ty_pcre_regex_settings,
     END OF ty_pattern_config.
 
-  "! <p class="shorttext synchronized" lang="en">Internal code search settings</p>
-  TYPES BEGIN OF ty_search_settings_int.
-  INCLUDE TYPE ty_search_settings AS basic_settings.
-  INCLUDE TYPE ty_pattern_config AS pattern_config.
-  TYPES:
-    custom_settings TYPE ty_custom_search_settings,
-    is_adt          TYPE abap_bool.
-  TYPES END OF ty_search_settings_int.
+  "! <p class="shorttext synchronized">Internal code search settings</p>
+  TYPES  BEGIN OF ty_search_settings_int.
+           INCLUDE TYPE ty_search_settings AS basic_settings.
+           INCLUDE TYPE ty_pattern_config AS pattern_config.
+  TYPES:   custom_settings TYPE ty_custom_search_settings,
+           is_adt          TYPE abap_bool.
+  TYPES  END OF ty_search_settings_int.
 
-  "! <p class="shorttext synchronized" lang="en">External settings for code search API</p>
-  TYPES BEGIN OF ty_search_settings_external.
-  INCLUDE TYPE ty_search_settings_int AS internal_settings.
-  TYPES:
-    parallel_processing TYPE ty_parl_processing,
-    search_scope        TYPE ty_search_scope.
-  TYPES END OF ty_search_settings_external.
+  "! <p class="shorttext synchronized">External settings for code search API</p>
+  TYPES  BEGIN OF ty_search_settings_external.
+           INCLUDE TYPE ty_search_settings_int AS internal_settings.
+  TYPES:   parallel_processing TYPE ty_parl_processing,
+           search_scope        TYPE ty_search_scope.
+  TYPES  END OF ty_search_settings_external.
 
-
-  "! <p class="shorttext synchronized" lang="en">Defines search package for parallel search</p>
-  TYPES BEGIN OF ty_search_package.
-  INCLUDE TYPE ty_search_settings_int AS settings.
-  TYPES:
-    objects TYPE ty_tadir_objects.
-  TYPES END OF ty_search_package.
+  "! <p class="shorttext synchronized">Defines search package for parallel search</p>
+  TYPES  BEGIN OF ty_search_package.
+           INCLUDE TYPE ty_search_settings_int AS settings.
+  TYPES:   objects TYPE ty_tadir_objects.
+  TYPES  END OF ty_search_package.
 
   TYPES:
     BEGIN OF ty_search_package_result,
