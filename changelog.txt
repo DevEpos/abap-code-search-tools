@@ -9,6 +9,12 @@ Legend
 + : added
 - : removed
 
+2023-09-19 v1.3.1
+-------------------
+
+* Fixes error in sequential search
+
+
 2023-05-24 v1.3.0
 -------------------
 
