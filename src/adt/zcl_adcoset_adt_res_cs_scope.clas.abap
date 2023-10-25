@@ -72,6 +72,12 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
       IMPORTING
         param_value TYPE string.
 
+    METHODS extract_tr_requests
+      IMPORTING
+        param_value TYPE string
+      RAISING
+        cx_adt_rest.
+
     METHODS split_into_range
       IMPORTING
         filter_name TYPE string
@@ -148,6 +154,10 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
         WHEN zif_adcoset_c_global=>c_search_params-tag_id.
           extract_tag_ids( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-tr_request.
+          extract_tr_requests( <param>-value ).
+
       ENDCASE.
 
     ENDLOOP.
@@ -176,7 +186,8 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
           scope_ext-id.
       CATCH cx_uuid_error INTO DATA(uuid_error).
         RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-          EXPORTING previous = uuid_error.
+          EXPORTING
+            previous = uuid_error.
     ENDTRY.
 
     GET TIME STAMP FIELD scope_db-expiration_datetime.
@@ -275,6 +286,15 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD extract_tr_requests.
+    DATA(tr_request) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-tr_request
+                                input       = tr_request
+                                flags       = VALUE #( negation = abap_true )
+                      IMPORTING range_table = scope_ranges-tr_request_range ).
+  ENDMETHOD.
+
   METHOD split_into_range.
     DATA tokens TYPE string_table.
     DATA new_range TYPE REF TO data.
@@ -301,7 +321,8 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
       IF token CA '*?'.
         IF flags-patterns = abap_false.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING text = |Parameter '{ filter_name }' does not support patterns|.
+            EXPORTING
+              text = |Parameter '{ filter_name }' does not support patterns|.
         ENDIF.
         token = replace( val = token sub = '?' occ = 0  with = '+' ).
         <option> = 'CP'.
@@ -315,11 +336,13 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
       IF token(1) = '!'.
         IF flags-negation = abap_false.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING text = |Parameter '{ filter_name }' does not support negation!|.
+            EXPORTING
+              text = |Parameter '{ filter_name }' does not support negation!|.
         ENDIF.
         IF length = 1.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING text = |No value provided after negation character '!' for Parameter '{ filter_name }'!|.
+            EXPORTING
+              text = |No value provided after negation character '!' for Parameter '{ filter_name }'!|.
         ENDIF.
         <sign> = 'E'.
         token = token+1.

@@ -66,6 +66,7 @@ INTERFACE zif_adcoset_c_global
       expand_prog_includes TYPE string VALUE 'expandProgIncl',
       max_objects          TYPE string VALUE 'maxObjects',
       tag_id               TYPE string VALUE 'tagId',
+      tr_request           TYPE string VALUE 'trRequest',
     END OF c_search_params,
 
     BEGIN OF c_prog_include_mode,

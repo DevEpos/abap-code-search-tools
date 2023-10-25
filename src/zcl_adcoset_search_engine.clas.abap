@@ -54,7 +54,8 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
 
     TRY.
         DATA(query) = zcl_adcoset_search_query_fac=>create_query(
-                          scope    = zcl_adcoset_search_scope_fac=>create_final_scope( objects = input-objects )
+*                          scope    = zcl_adcoset_search_scope_fac=>create_final_scope( objects = input-objects )
+                          scope    = zcl_adcoset_search_scope_fac=>create_final_scope( objects_new = input-objects_new )
                           settings = input-settings ).
       CATCH zcx_adcoset_static_error.
     ENDTRY.

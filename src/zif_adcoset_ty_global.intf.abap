@@ -55,6 +55,16 @@ INTERFACE zif_adcoset_ty_global
 
     ty_tadir_objects TYPE STANDARD TABLE OF ty_tadir_object WITH EMPTY KEY,
 
+    BEGIN OF ty_tadir_object_new,
+      name         TYPE sobj_name,
+      type         TYPE trobjtype,
+      owner        TYPE responsibl,
+      package_name TYPE devclass,
+      subobjects   TYPE ty_tadir_objects,
+    END OF ty_tadir_object_new,
+
+    ty_tadir_objects_new TYPE STANDARD TABLE OF ty_tadir_object_new WITH EMPTY KEY,
+
     BEGIN OF ty_object,
       name TYPE sobj_name,
       type TYPE wbobjtype,
@@ -71,6 +81,7 @@ INTERFACE zif_adcoset_ty_global
       created_on_range  TYPE RANGE OF tadir-created_on,
       appl_comp_range   TYPE RANGE OF df14l-ps_posid,
       tag_id_range      TYPE RANGE OF sysuuid_x16,
+      tr_request_range  TYPE RANGE OF trkorr,
     END OF ty_search_scope_ranges.
 
   "! <p class="shorttext synchronized">Ranges / data to define an object scope</p>
@@ -78,7 +89,7 @@ INTERFACE zif_adcoset_ty_global
   TYPES:   scope_id       TYPE sysuuid_x16,
            current_offset TYPE i.
            INCLUDE        TYPE ty_search_scope_ranges AS ranges.
-  TYPES:   max_objects    TYPE i.
+  TYPES: max_objects    TYPE i.
   TYPES  END OF ty_search_scope.
 
   TYPES:
@@ -97,20 +108,20 @@ INTERFACE zif_adcoset_ty_global
     END OF ty_match_identifier.
 
   TYPES  BEGIN OF ty_search_match.
-           INCLUDE TYPE ty_match_identifier.
-  TYPES:   start_line   TYPE i,
-           start_column TYPE i,
-           end_line     TYPE i,
-           end_column   TYPE i,
-           snippet      TYPE string,
-           long_snippet TYPE string.
+  INCLUDE TYPE ty_match_identifier.
+  TYPES: start_line   TYPE i,
+         start_column TYPE i,
+         end_line     TYPE i,
+         end_column   TYPE i,
+         snippet      TYPE string,
+         long_snippet TYPE string.
   TYPES  END OF ty_search_match.
 
   TYPES ty_search_matches TYPE STANDARD TABLE OF ty_search_match WITH EMPTY KEY.
 
   TYPES:
     BEGIN OF ty_search_result_object,
-      object       TYPE ty_tadir_object,
+      object       TYPE ty_tadir_object_new,
       text_matches TYPE ty_search_matches,
       match_count  TYPE i,
     END OF ty_search_result_object,
@@ -207,23 +218,24 @@ INTERFACE zif_adcoset_ty_global
 
   "! <p class="shorttext synchronized">Internal code search settings</p>
   TYPES  BEGIN OF ty_search_settings_int.
-           INCLUDE TYPE ty_search_settings AS basic_settings.
-           INCLUDE TYPE ty_pattern_config AS pattern_config.
-  TYPES:   custom_settings TYPE ty_custom_search_settings,
-           is_adt          TYPE abap_bool.
+  INCLUDE TYPE ty_search_settings AS basic_settings.
+  INCLUDE TYPE ty_pattern_config AS pattern_config.
+  TYPES: custom_settings TYPE ty_custom_search_settings,
+         is_adt          TYPE abap_bool.
   TYPES  END OF ty_search_settings_int.
 
   "! <p class="shorttext synchronized">External settings for code search API</p>
   TYPES  BEGIN OF ty_search_settings_external.
-           INCLUDE TYPE ty_search_settings_int AS internal_settings.
-  TYPES:   parallel_processing TYPE ty_parl_processing,
-           search_scope        TYPE ty_search_scope.
+  INCLUDE TYPE ty_search_settings_int AS internal_settings.
+  TYPES: parallel_processing TYPE ty_parl_processing,
+         search_scope        TYPE ty_search_scope.
   TYPES  END OF ty_search_settings_external.
 
   "! <p class="shorttext synchronized">Defines search package for parallel search</p>
   TYPES  BEGIN OF ty_search_package.
-           INCLUDE TYPE ty_search_settings_int AS settings.
+  INCLUDE TYPE ty_search_settings_int AS settings.
   TYPES:   objects TYPE ty_tadir_objects.
+  TYPES:   objects_new TYPE ty_tadir_objects_new.
   TYPES  END OF ty_search_package.
 
   TYPES:

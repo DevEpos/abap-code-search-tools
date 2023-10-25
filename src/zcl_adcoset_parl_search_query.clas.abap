@@ -51,11 +51,12 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
 
   METHOD zif_adcoset_search_query~run.
     WHILE scope->has_next_package( ).
-      DATA(package) = scope->next_package( ).
+      DATA(package_new) = scope->next_package( ).
 
       " process new package asynchronously
       task_runner->run( input = VALUE zif_adcoset_ty_global=>ty_search_package( settings = settings
-                                                                                objects  = package ) ).
+*                                                                                objects  = package ) ).
+                                                                                objects_new  = package_new ) ).
     ENDWHILE.
 
     task_runner->wait_until_finished( ).
