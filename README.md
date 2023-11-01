@@ -1,5 +1,5 @@
 ![](https://img.shields.io/badge/ABAP-v7.40+-green)
-[![abap package version](https://img.shields.io/endpoint?url=https://shield.abap.space/version-shield-json/github/DevEpos/abap-code-search-tools/src/zif_adcoset_version.intf.abap/version&label=version)](https://github/DevEpos/abap-code-search-tools/src/zif_adcoset_version.intf.abap)
+[![abap package version](https://img.shields.io/endpoint?url=https://shield.abap.space/version-shield-json/github/DevEpos/abap-code-search-tools/src/zif_adcoset_version.intf.abap/version&label=version)](https://github.com/DevEpos/abap-code-search-tools/blob/main/src/zif_adcoset_version.intf.abap)
 
 # abap-code-search
 
