@@ -33,7 +33,7 @@ Search can be done via normal String search or with Regular Expressions. If supp
 
 ### UI
 
-You can execute the search via report `ZADCOSET_SEARCH`, where most of the options are available as well, but the main focus of the UI will be ADT (see [abap-code-search-ui](http://github.com/DevEpos/abap-code-search-ui)).
+You can execute the search via report `ZADCOSET_SEARCH`, where most of the options are available as well, but the main focus of the UI will be ADT (see [ABAP Code Search](https://github.com/DevEpos/eclipse-adt-plugins/tree/main/features/code-search)).
 
 ### Package overview
 
