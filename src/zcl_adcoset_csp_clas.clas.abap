@@ -15,7 +15,7 @@ CLASS zcl_adcoset_csp_clas DEFINITION
   PRIVATE SECTION.
     CONSTANTS:
       BEGIN OF c_include_types,
-        method  TYPE string VALUE 'CLAS/OM',
+        method TYPE string VALUE 'CLAS/OM',
         include TYPE string VALUE 'CLAS/I',
       END OF c_include_types,
 
@@ -70,8 +70,9 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
 
     LOOP AT class_includes ASSIGNING FIELD-SYMBOL(<include>).
 
-      IF object-subobjects IS NOT INITIAL.
-        CHECK line_exists( object-subobjects[ name = <include>-method_name ] ).
+      IF NOT (    object-subobjects IS INITIAL
+               OR line_exists( object-subobjects[ name = <include>-method_name ] ) ).
+        CONTINUE.
       ENDIF.
 
       TRY.
@@ -80,7 +81,7 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
 
           IF matches IS NOT INITIAL.
             assign_objects_to_matches( EXPORTING unassigned_matches = matches
-                                                 object             = CORRESPONDING #( object )
+                                                 object             = object-info
                                                  include            = <include>
                                        CHANGING  all_matches        = result ).
           ENDIF.

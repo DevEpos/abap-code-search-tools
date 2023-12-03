@@ -95,9 +95,10 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include>).
 
-      IF object-subobjects IS NOT INITIAL.
-        CHECK line_exists( object-subobjects[ name = <include>-func_name ] )
-        OR line_exists( object-subobjects[ name = <include>-name ] ).
+      IF NOT (    object-subobjects IS INITIAL
+               OR line_exists( object-subobjects[ name = <include>-func_name ] )
+               OR line_exists( object-subobjects[ name = <include>-name ] ) ).
+        CONTINUE.
       ENDIF.
 
       TRY.
@@ -105,19 +106,12 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
           DATA(matches) = src_code_searcher->search( source_code ).
           CHECK matches IS NOT INITIAL.
 
-*          IF <include>-is_function_include = abap_true AND function_names_loaded = abap_false.
-*            mixin_function_names( EXPORTING fugr_program_name = fugr_include
-*                                  CHANGING  includes          = includes ).
-*            function_names_loaded = abap_true.
-*          ENDIF.
-
           assign_objects_to_matches( EXPORTING unassigned_matches = matches
-                                               object             = CORRESPONDING #( object )
+                                               object             = object-info
                                                include            = <include>
                                      CHANGING  all_matches        = result ).
         CATCH zcx_adcoset_src_code_read ##NO_HANDLER.
       ENDTRY.
-
     ENDLOOP.
 
     zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( includes ) ).
@@ -144,19 +138,16 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include_key>).
       DATA(include_name) = <include_key>-name.
       CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
-        IMPORTING
-          no_function_include = is_no_func_include
-          no_function_module  = is_no_func_module
-          reserved_name       = is_reserved_name
-          suffix              = include_suffix
-        CHANGING
-          include             = include_name
-        EXCEPTIONS
-          OTHERS              = 1.
+        IMPORTING  no_function_include = is_no_func_include
+                   no_function_module  = is_no_func_module
+                   reserved_name       = is_reserved_name
+                   suffix              = include_suffix
+        CHANGING   include             = include_name
+        EXCEPTIONS OTHERS              = 1.
       IF sy-subrc <> 0.
         CONTINUE.
-*      ELSEIF is_reserved_name = abap_true AND ( is_no_func_module = abap_true ).
-*        CONTINUE.
+      ELSEIF is_reserved_name = abap_true AND ( is_no_func_module = abap_true ).
+        CONTINUE.
       ENDIF.
 
       DATA(new_include) = VALUE ty_fugr_incl( name = <include_key>-name ).
@@ -179,15 +170,11 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     DATA namespace TYPE namespace.
 
     CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
-      EXPORTING
-        complete_area = fugr_name
-      IMPORTING
-        namespace     = namespace
-        group         = group_wo_namespace
-      CHANGING
-        include       = fugr_main_prog
-      EXCEPTIONS
-        OTHERS        = 1.
+      EXPORTING  complete_area = fugr_name
+      IMPORTING  namespace     = namespace
+                 group         = group_wo_namespace
+      CHANGING   include       = fugr_main_prog
+      EXCEPTIONS OTHERS        = 1.
 
     IF sy-subrc <> 0.
       RETURN.
@@ -224,13 +211,10 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
       INTO TABLE @DATA(function_includes).
 
     CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
-      EXPORTING
-        program   = fugr_program_name
-      IMPORTING
-        namespace = namespace
-        group     = fugr_name
-      EXCEPTIONS
-        OTHERS    = 1.
+      EXPORTING  program   = fugr_program_name
+      IMPORTING  namespace = namespace
+                 group     = fugr_name
+      EXCEPTIONS OTHERS    = 1.
 
     LOOP AT function_includes ASSIGNING FIELD-SYMBOL(<function_include>).
       INSERT VALUE #( name      = |{ namespace }L{ fugr_name }U{ <function_include>-include }|

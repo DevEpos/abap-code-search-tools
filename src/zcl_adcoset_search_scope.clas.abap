@@ -1,7 +1,7 @@
 "! <p class="shorttext synchronized">Search scope implementation</p>
 CLASS zcl_adcoset_search_scope DEFINITION
   PUBLIC
-  FINAL
+*  FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -49,6 +49,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
         scope_id TYPE sysuuid_x16.
 
     METHODS config_dyn_where_clauses.
+
 ENDCLASS.
 
 
@@ -76,158 +77,28 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       max_rows = object_count.
     ENDIF.
 
-    IF sy-uname = 'REICHR'.
+    SELECT obj~objecttype AS type,
+           obj~objectname AS name,
+           obj~owner,
+           obj~developmentpackage AS package_name
+      FROM (dyn_from_clause)
+      WHERE (tags_dyn_where_cond)
+        AND obj~objecttype IN @search_ranges-object_type_range
+        AND obj~objectname IN @search_ranges-object_name_range
+        AND obj~developmentpackage IN @search_ranges-package_range
+        AND obj~owner IN @search_ranges-owner_range
+        AND obj~createddate IN @search_ranges-created_on_range
+        AND (appl_comp_dyn_where_cond)
+      ORDER BY obj~programid
+      INTO CORRESPONDING FIELDS OF TABLE @result
+      UP TO @max_rows ROWS
+      OFFSET @current_offset.
 
-      DATA func_group TYPE rs38l_area.
-      DATA result_main TYPE zif_adcoset_ty_global=>ty_tadir_objects_new.
-      SELECT *
-        FROM e071
-          WHERE trkorr IN @search_ranges-tr_request_range
-            INTO TABLE @DATA(tr_objects).
+    DATA(package_result_count) = lines( result ).
+    current_offset = current_offset + package_result_count.
 
-      LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_object>).
-        "todo - handle scenario main object + subobjects in the scope
-
-        CASE <tr_object>-pgmid.
-          WHEN 'R3TR'.
-            " in case we need the whole object but also subobjects they will be merged at the end
-            " unless the subobjects will be attached here and the scope will be incomplete
-            result_main = VALUE #( BASE result_main ( type = <tr_object>-object
-                                                      name = <tr_object>-obj_name ) ).
-
-          WHEN 'LIMU'.
-            CASE <tr_object>-object.
-              WHEN 'FUNC'.
-
-                DATA(funcname) = CONV rs38l_fnam( <tr_object>-obj_name ).
-                CALL FUNCTION 'FUNCTION_INCLUDE_INFO'
-                  CHANGING
-                    funcname = funcname
-                    group    = func_group.
-
-
-*                TRY.
-                ASSIGN result[ type = 'FUGR' name = func_group ] TO FIELD-SYMBOL(<main_object>).
-                IF sy-subrc = 0.
-                  <main_object>-subobjects = VALUE zif_adcoset_ty_global=>ty_tadir_objects(
-                                             BASE <main_object>-subobjects (
-                                             type = <tr_object>-pgmid
-                                             name = <tr_object>-obj_name ) ).
-                ELSE.
-                  DATA(subobject) = VALUE zif_adcoset_ty_global=>ty_tadir_objects( (
-                                               type = <tr_object>-pgmid
-                                               name = <tr_object>-obj_name ) ).
-
-                  result = VALUE #( BASE result ( type = 'FUGR'
-                                                  name = func_group
-                                                  subobjects = subobject ) ).
-*                ENDTRY.
-                ENDIF.
-                UNASSIGN <main_object>.
-
-              WHEN 'REPS'.
-                DATA(include) = CONV progname( <tr_object>-obj_name ).
-
-                CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
-                  IMPORTING
-                    group   = func_group
-                  CHANGING
-                    include = include.
-
-                IF func_group IS NOT INITIAL.
-*                TRY.
-                  ASSIGN result[ type = 'FUGR' name = func_group ] TO FIELD-SYMBOL(<main_object2>).
-                  IF sy-subrc = 0.
-                    <main_object2>-subobjects = VALUE zif_adcoset_ty_global=>ty_tadir_objects(
-                                               BASE <main_object2>-subobjects (
-                                               type = <tr_object>-pgmid
-                                               name = <tr_object>-obj_name ) ).
-
-*                  CATCH cx_sy_itab_line_not_found.
-                  ELSE.
-                    subobject = VALUE zif_adcoset_ty_global=>ty_tadir_objects( (
-                                                 type = <tr_object>-pgmid
-                                                 name = <tr_object>-obj_name ) ).
-
-                    result = VALUE #( BASE result ( type = 'FUGR'
-                                                    name = func_group
-                                                    subobjects = subobject ) ).
-                  ENDIF.
-*            ENDTRY.
-                ELSE.
-
-                  DATA mainprograms TYPE TABLE OF string.
-                  CALL FUNCTION 'RS_GET_MAINPROGRAMS'
-                    EXPORTING
-                      name         = <tr_object>-obj_name
-                    TABLES
-                      mainprograms = mainprograms.
-
-
-                  subobject = VALUE zif_adcoset_ty_global=>ty_tadir_objects( (
-                                                                 type = <tr_object>-pgmid
-                                                                 name = <tr_object>-obj_name ) ).
-
-                  result = VALUE #( BASE result ( type = 'PROG'
-                                                  name = mainprograms[ 1 ]
-                                                  subobjects = subobject ) ).
-                ENDIF.
-                UNASSIGN <main_object2>.
-
-              WHEN 'METH'.
-
-                DATA(class_name) = <tr_object>-obj_name(30).
-
-                ASSIGN result[ type = 'CLAS' name = class_name ] TO FIELD-SYMBOL(<main_object3>).
-                IF sy-subrc = 0.
-                  <main_object3>-subobjects = VALUE zif_adcoset_ty_global=>ty_tadir_objects(
-                                                 BASE <main_object3>-subobjects (
-                                                 type = <tr_object>-pgmid
-                                                 name = <tr_object>-obj_name+30(30) ) ).
-                ELSE.
-                  subobject = VALUE zif_adcoset_ty_global=>ty_tadir_objects( (
-                                                                            type = <tr_object>-pgmid
-                                                                            name = <tr_object>-obj_name+30(30)  ) ).
-
-                  result = VALUE #( BASE result ( type = 'CLAS'
-                                                  name = class_name
-                                                  subobjects = subobject ) ).
-                ENDIF.
-                UNASSIGN <main_object3>.
-
-            ENDCASE.
-        ENDCASE.
-
-      ENDLOOP.
+    IF package_result_count < max_rows.
       all_packages_read = abap_true.
-      result = VALUE #( BASE result ( LINES OF result_main ) ).
-
-    ELSE.
-
-      SELECT obj~object_type AS type,
-             obj~object_name AS name,
-             obj~owner,
-             obj~devclass AS package_name
-        FROM (dyn_from_clause)
-        WHERE (tags_dyn_where_cond)
-          AND obj~object_type IN @search_ranges-object_type_range
-          AND obj~object_name IN @search_ranges-object_name_range
-          AND obj~devclass IN @search_ranges-package_range
-          AND obj~owner IN @search_ranges-owner_range
-          AND obj~created_date IN @search_ranges-created_on_range
-          AND (appl_comp_dyn_where_cond)
-        ORDER BY obj~pgmid
-        INTO CORRESPONDING FIELDS OF TABLE @result
-        UP TO @max_rows ROWS
-        OFFSET @current_offset.
-
-      DATA(package_result_count) = lines( result ).
-      current_offset = current_offset + package_result_count.
-
-      IF package_result_count < max_rows.
-        all_packages_read = abap_true.
-      ENDIF.
-
     ENDIF.
   ENDMETHOD.
 
@@ -245,8 +116,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     IF max_objects IS NOT INITIAL.
       " update max objects number
       package_size = max_objects.
-      me->max_objects = max_objects
-        .
+      me->max_objects = max_objects.
       " set fixed object count
       object_count = max_objects + current_offset.
       obj_count_for_package_building = max_objects.
@@ -272,11 +142,11 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     SELECT COUNT(*)
       FROM (dyn_from_clause)
       WHERE (tags_dyn_where_cond)
-        AND obj~object_type IN @search_ranges-object_type_range
-        AND obj~object_name IN @search_ranges-object_name_range
-        AND obj~devclass IN @search_ranges-package_range
-        AND obj~owner IN @search_ranges-owner_range
-        AND obj~created_date IN @search_ranges-created_on_range
+        AND obj~objecttype IN @search_ranges-object_type_range
+        AND obj~objectname IN @search_ranges-object_name_range
+        AND obj~developmentpackage IN @search_ranges-package_range
+        AND obj~owner       IN @search_ranges-owner_range
+        AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
       INTO @object_count
       UP TO @selection_limit ROWS.
@@ -343,8 +213,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     current_offset = search_scope-current_offset.
     package_size = search_scope-max_objects.
-    max_objects = search_scope-max_objects
-      .
+    max_objects = search_scope-max_objects.
     " set fixed object count
     object_count = max_objects + current_offset.
 
@@ -385,7 +254,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD config_dyn_where_clauses.
-    dyn_from_clause = `ZADCOSET_SRCCOBJ AS obj `.
+    dyn_from_clause = `ZADCOSET_SourceCodeObject AS obj `.
 
     IF search_ranges-tag_id_range IS NOT INITIAL.
       tags_dyn_where_cond = `tgobj~tag_id IN @search_ranges-tag_id_range`.
@@ -396,14 +265,14 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       "       --> add group by clause if tags are supplied (possibly the only solution)
       dyn_from_clause = dyn_from_clause &&
         |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS tgobj | &&
-        `ON  obj~object_name = tgobj~object_name ` &&
-        `AND obj~object_type = tgobj~object_type `.
+        `ON  obj~ObjectName = tgobj~object_name ` &&
+        `AND obj~ObjectType = tgobj~object_type `.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
       dyn_from_clause = dyn_from_clause &&
         `INNER JOIN tdevc AS pack ` &&
-        `ON obj~devclass = pack~devclass ` &&
+        `ON obj~DevelopmentPackage = pack~devclass ` &&
         `INNER JOIN df14l AS appl ` &&
         `ON pack~component = appl~fctr_id `.
 

@@ -110,6 +110,26 @@ INTERFACE zif_adcoset_c_global
       behavior_definition   TYPE trobjtype VALUE 'BDEF',
       simple_transformation TYPE trobjtype VALUE 'XSLT',
       function_group        TYPE trobjtype VALUE 'FUGR',
-      function_module       TYPE trobjtype VALUE 'FUNC',
-    END OF c_source_code_type.
+    END OF c_source_code_type,
+
+    BEGIN OF c_source_code_limu_type,
+      function_module         TYPE trobjtype VALUE 'FUNC',
+      method                  TYPE trobjtype VALUE 'METH',
+      report_source_code      TYPE trobjtype VALUE 'REPS',
+      class_definition        TYPE trobjtype VALUE 'CLSD',
+      class_public_section    TYPE trobjtype VALUE 'CPUB',
+      class_protected_section TYPE trobjtype VALUE 'CPRO',
+      class_private_section   TYPE trobjtype VALUE 'CPRI',
+      class_include           TYPE trobjtype VALUE 'CINC',
+    END OF c_source_code_limu_type,
+
+    BEGIN OF c_scope_type,
+      universal_scope   TYPE zadcoset_scope_type VALUE 'US',
+      transport_request TYPE zadcoset_scope_type VALUE 'TR',
+    END OF c_scope_type,
+
+    BEGIN OF c_program_id,
+      r3tr TYPE pgmid VALUE 'R3TR',
+      limu TYPE pgmid VALUE 'LIMU',
+    END OF c_program_id.
 ENDINTERFACE.

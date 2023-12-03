@@ -106,7 +106,6 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     request->get_body_data( EXPORTING content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_params_ch( )
                             IMPORTING data            = scope_params ).
-
     parse_parameters( scope_params ).
     determine_scope( ).
 
@@ -176,6 +175,10 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
   METHOD persist_scope.
     DATA(scope_db) = VALUE zadcoset_csscope( created_by = sy-uname ).
 
+    scope_db-scope_type = COND #( WHEN scope_ranges-tr_request_range IS NOT INITIAL
+                                  THEN zif_adcoset_c_global=>c_scope_type-transport_request
+                                  ELSE zif_adcoset_c_global=>c_scope_type-universal_scope ).
+
     CALL TRANSFORMATION id
          SOURCE data = scope_ranges
          RESULT XML scope_db-ranges_data.
@@ -186,8 +189,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
           scope_ext-id.
       CATCH cx_uuid_error INTO DATA(uuid_error).
         RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-          EXPORTING
-            previous = uuid_error.
+          EXPORTING previous = uuid_error.
     ENDTRY.
 
     GET TIME STAMP FIELD scope_db-expiration_datetime.
@@ -321,8 +323,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
       IF token CA '*?'.
         IF flags-patterns = abap_false.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              text = |Parameter '{ filter_name }' does not support patterns|.
+            EXPORTING text = |Parameter '{ filter_name }' does not support patterns|.
         ENDIF.
         token = replace( val = token sub = '?' occ = 0  with = '+' ).
         <option> = 'CP'.
@@ -336,13 +337,11 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
       IF token(1) = '!'.
         IF flags-negation = abap_false.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              text = |Parameter '{ filter_name }' does not support negation!|.
+            EXPORTING text = |Parameter '{ filter_name }' does not support negation!|.
         ENDIF.
         IF length = 1.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              text = |No value provided after negation character '!' for Parameter '{ filter_name }'!|.
+            EXPORTING text = |No value provided after negation character '!' for Parameter '{ filter_name }'!|.
         ENDIF.
         <sign> = 'E'.
         token = token+1.
