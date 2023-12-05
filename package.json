@@ -1,6 +1,6 @@
 {
   "name": "abap-code-search-tools",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "ABAP Code Search",
   "scripts": {
     "format": "abap-cleanerc.exe --sourcedir src --recursive --overwrite --release 740 --profile abapcleaner.cfj"
