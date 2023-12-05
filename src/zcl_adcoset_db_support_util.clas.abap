@@ -14,6 +14,6 @@ ENDCLASS.
 
 CLASS zcl_adcoset_db_support_util IMPLEMENTATION.
   METHOD is_db_supported.
-    result = xsdbool( sy-dbsys = 'ORACLE' OR sy-dbsys = 'HDB' ).
+    result = xsdbool( sy-dbsys = 'ORACLE' OR sy-dbsys = 'HDB' OR sy-dbsys = 'MSSQL' ).
   ENDMETHOD.
 ENDCLASS.

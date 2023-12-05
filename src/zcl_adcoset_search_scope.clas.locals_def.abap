@@ -218,3 +218,19 @@ CLASS lcl_hdb_scope_obj_reader DEFINITION
     METHODS build_offset_clause REDEFINITION.
     METHODS build_limit_clause  REDEFINITION.
 ENDCLASS.
+
+
+CLASS lcl_mssql_scope_obj_reader DEFINITION
+ INHERITING FROM lcl_adbc_scope_obj_reader_base.
+
+  PUBLIC SECTION.
+    METHODS constructor
+      IMPORTING
+        search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
+        current_offset TYPE i.
+
+  PROTECTED SECTION.
+    METHODS combine_clauses     REDEFINITION.
+    METHODS build_offset_clause REDEFINITION.
+    METHODS build_limit_clause  REDEFINITION.
+ENDCLASS.
