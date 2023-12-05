@@ -12,6 +12,9 @@ CLASS lcl_adbc_scope_reader_fac IMPLEMENTATION.
       WHEN 'HDB'.
         result = NEW lcl_hdb_scope_obj_reader( search_ranges  = search_ranges
                                                current_offset = current_offset ).
+      WHEN 'MSSQL'.
+        result = NEW lcl_mssql_scope_obj_reader( search_ranges  = search_ranges
+                                                 current_offset = current_offset ).
     ENDCASE.
   ENDMETHOD.
 ENDCLASS.
@@ -53,6 +56,25 @@ CLASS lcl_hdb_scope_obj_reader IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+CLASS lcl_mssql_scope_obj_reader IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( current_offset = current_offset
+                        search_ranges  = search_ranges ).
+  ENDMETHOD.
+
+  METHOD combine_clauses.
+    " columns are case sensitive, so uppercase everything
+    result = to_upper( select_clause && from_clause && where_clause && order_by_clause && offset_clause && limit_clause ).
+  ENDMETHOD.
+
+  METHOD build_limit_clause.
+    limit_clause = |FETCH NEXT { max_rows } ROWS ONLY|.
+  ENDMETHOD.
+
+  METHOD build_offset_clause.
+    offset_clause = |OFFSET { current_offset } ROWS |.
+  ENDMETHOD.
+ENDCLASS.
 
 CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   METHOD constructor.

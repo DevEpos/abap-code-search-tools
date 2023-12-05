@@ -72,6 +72,7 @@ Only the following databases are supported at the moment:
 
 - Oracle
 - HANA
+- MSSQL
 
 ## Necessary Authorizations
 
