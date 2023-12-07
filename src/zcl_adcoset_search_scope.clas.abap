@@ -12,11 +12,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
         search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
 
   PRIVATE SECTION.
-    CONSTANTS c_min_parl_package_size TYPE i VALUE 10.
-    CONSTANTS c_max_parl_package_size TYPE i VALUE 2500.
-    CONSTANTS c_serial_package_size TYPE i VALUE 10000.
-
-    DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
+     DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
 
     "! Restricts the maximum number of objects to select for the search
     DATA max_objects TYPE i.
@@ -27,7 +23,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
     DATA object_count TYPE i.
     DATA current_offset TYPE i.
     DATA all_packages_read TYPE abap_bool.
-    DATA package_size TYPE i VALUE c_serial_package_size.
+    DATA package_size TYPE i VALUE zif_adcoset_search_scope=>c_serial_package_size.
     DATA is_more_objects_available TYPE abap_bool.
     DATA dyn_from_clause TYPE string.
     DATA tags_dyn_where_cond TYPE string.
@@ -49,6 +45,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
         scope_id TYPE sysuuid_x16.
 
     METHODS config_dyn_where_clauses.
+
 ENDCLASS.
 
 
@@ -76,19 +73,19 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       max_rows = object_count.
     ENDIF.
 
-    SELECT obj~object_type AS type,
-           obj~object_name AS name,
+    SELECT obj~objecttype AS type,
+           obj~objectname AS name,
            obj~owner,
-           obj~devclass AS package_name
+           obj~developmentpackage AS package_name
       FROM (dyn_from_clause)
       WHERE (tags_dyn_where_cond)
-        AND obj~object_type IN @search_ranges-object_type_range
-        AND obj~object_name IN @search_ranges-object_name_range
-        AND obj~devclass IN @search_ranges-package_range
+        AND obj~objecttype IN @search_ranges-object_type_range
+        AND obj~objectname IN @search_ranges-object_name_range
+        AND obj~developmentpackage IN @search_ranges-package_range
         AND obj~owner IN @search_ranges-owner_range
-        AND obj~created_date IN @search_ranges-created_on_range
+        AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
-      ORDER BY obj~pgmid
+      ORDER BY obj~programid
       INTO CORRESPONDING FIELDS OF TABLE @result
       UP TO @max_rows ROWS
       OFFSET @current_offset.
@@ -115,8 +112,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     IF max_objects IS NOT INITIAL.
       " update max objects number
       package_size = max_objects.
-      me->max_objects = max_objects
-        .
+      me->max_objects = max_objects.
       " set fixed object count
       object_count = max_objects + current_offset.
       obj_count_for_package_building = max_objects.
@@ -124,10 +120,10 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     DATA(determined_pack_size) = obj_count_for_package_building / max_task_count.
 
-    IF determined_pack_size < c_min_parl_package_size.
-      package_size = c_min_parl_package_size.
-    ELSEIF determined_pack_size > c_max_parl_package_size.
-      package_size = c_max_parl_package_size.
+    IF determined_pack_size < zif_adcoset_search_scope=>c_min_parl_package_size.
+      package_size = zif_adcoset_search_scope=>c_min_parl_package_size.
+    ELSEIF determined_pack_size > zif_adcoset_search_scope=>c_max_parl_package_size.
+      package_size = zif_adcoset_search_scope=>c_max_parl_package_size.
     ELSE.
       package_size = determined_pack_size.
     ENDIF.
@@ -142,11 +138,11 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     SELECT COUNT(*)
       FROM (dyn_from_clause)
       WHERE (tags_dyn_where_cond)
-        AND obj~object_type IN @search_ranges-object_type_range
-        AND obj~object_name IN @search_ranges-object_name_range
-        AND obj~devclass IN @search_ranges-package_range
-        AND obj~owner IN @search_ranges-owner_range
-        AND obj~created_date IN @search_ranges-created_on_range
+        AND obj~objecttype IN @search_ranges-object_type_range
+        AND obj~objectname IN @search_ranges-object_name_range
+        AND obj~developmentpackage IN @search_ranges-package_range
+        AND obj~owner       IN @search_ranges-owner_range
+        AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
       INTO @object_count
       UP TO @selection_limit ROWS.
@@ -213,8 +209,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     current_offset = search_scope-current_offset.
     package_size = search_scope-max_objects.
-    max_objects = search_scope-max_objects
-      .
+    max_objects = search_scope-max_objects.
     " set fixed object count
     object_count = max_objects + current_offset.
 
@@ -255,7 +250,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD config_dyn_where_clauses.
-    dyn_from_clause = `ZADCOSET_SRCCOBJ AS obj `.
+    dyn_from_clause = `ZADCOSET_SourceCodeObject AS obj `.
 
     IF search_ranges-tag_id_range IS NOT INITIAL.
       tags_dyn_where_cond = `tgobj~tag_id IN @search_ranges-tag_id_range`.
@@ -266,14 +261,14 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       "       --> add group by clause if tags are supplied (possibly the only solution)
       dyn_from_clause = dyn_from_clause &&
         |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS tgobj | &&
-        `ON  obj~object_name = tgobj~object_name ` &&
-        `AND obj~object_type = tgobj~object_type `.
+        `ON  obj~ObjectName = tgobj~object_name ` &&
+        `AND obj~ObjectType = tgobj~object_type `.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
       dyn_from_clause = dyn_from_clause &&
         `INNER JOIN tdevc AS pack ` &&
-        `ON obj~devclass = pack~devclass ` &&
+        `ON obj~DevelopmentPackage = pack~devclass ` &&
         `INNER JOIN df14l AS appl ` &&
         `ON pack~component = appl~fctr_id `.
 

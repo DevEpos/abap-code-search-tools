@@ -14,7 +14,10 @@ CLASS zcl_adcoset_search_protocol DEFINITION
         loc TYPE f.
 
     "! <p class="shorttext synchronized">Increments the count of searched objects</p>
-    CLASS-METHODS increment_searched_objs_count.
+    CLASS-METHODS increment_searched_objs_count
+      IMPORTING
+        searched_objs_count TYPE i OPTIONAL.
+
     "! <p class="shorttext synchronized">Increments the count of searched sources</p>
     CLASS-METHODS increment_searched_srcs_count.
 
@@ -56,7 +59,11 @@ CLASS zcl_adcoset_search_protocol IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD increment_searched_objs_count.
-    searched_objects_count = searched_objects_count + 1.
+    IF searched_objs_count IS NOT INITIAL.
+      searched_objects_count = searched_objects_count + searched_objs_count.
+    ELSE.
+      searched_objects_count = searched_objects_count + 1.
+    ENDIF.
   ENDMETHOD.
 
   METHOD increment_searched_srcs_count.

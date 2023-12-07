@@ -32,13 +32,14 @@ CLASS zcl_adcoset_adt_disc_app DEFINITION
 
       "! REST handler constants
       BEGIN OF c_handlers,
-        search            TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_SEARCH',
-        search_settings   TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_CONFIG',
-        search_scope      TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_SCOPE',
-        appl_comp_vh      TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_APPLC_VH',
-        server_group_vh   TYPE string VALUE 'ZCL_ADCOSET_RES_SERVER_GRP_VH',
-        plugin_features   TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_FEATURES',
-        pattern_validator TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_PATTRNVAL',
+        search               TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_SEARCH',
+        search_settings      TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_CONFIG',
+        search_scope         TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_SCOPE',
+        appl_comp_vh         TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_APPLC_VH',
+        server_group_vh      TYPE string VALUE 'ZCL_ADCOSET_RES_SERVER_GRP_VH',
+        plugin_features      TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_FEATURES',
+        pattern_validator    TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_PATTRNVAL',
+        transport_request_vh TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_TRREQ_VH',
       END OF c_handlers.
 
     METHODS register_search_value_helps
@@ -152,5 +153,10 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
                                               description     = 'Application Component value help'
                                               category_scheme = c_root_scheme
                                               category_term   = 'applcomp' ).
+    registry->register_discoverable_resource( url             = '/transportRequest'
+                                              handler_class   = c_handlers-transport_request_vh
+                                              description     = 'Transport Request value help'
+                                              category_scheme = c_root_scheme
+                                              category_term   = 'transportRequest' ).
   ENDMETHOD.
 ENDCLASS.

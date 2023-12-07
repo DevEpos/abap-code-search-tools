@@ -69,13 +69,19 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     ENDIF.
 
     LOOP AT class_includes ASSIGNING FIELD-SYMBOL(<include>).
+
+      IF NOT (    object-subobjects IS INITIAL
+               OR line_exists( object-subobjects[ name = <include>-method_name ] ) ).
+        CONTINUE.
+      ENDIF.
+
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
           DATA(matches) = src_code_searcher->search( source_code = source_code ).
 
           IF matches IS NOT INITIAL.
             assign_objects_to_matches( EXPORTING unassigned_matches = matches
-                                                 object             = object
+                                                 object             = object-info
                                                  include            = <include>
                                        CHANGING  all_matches        = result ).
           ENDIF.

@@ -83,29 +83,35 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     ENDIF.
 
     DATA(includes) = get_fugr_includes( fugr_include_prefix ).
+    IF line_exists( includes[ is_function_include = abap_true ] ) AND function_names_loaded = abap_false.
+      mixin_function_names( EXPORTING fugr_program_name = fugr_include
+                            CHANGING  includes          = includes ).
+      function_names_loaded = abap_true.
+    ENDIF.
+
     IF includes IS INITIAL.
       RETURN.
     ENDIF.
 
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include>).
+
+      IF NOT (    object-subobjects IS INITIAL
+               OR line_exists( object-subobjects[ name = <include>-func_name ] )
+               OR line_exists( object-subobjects[ name = <include>-name ] ) ).
+        CONTINUE.
+      ENDIF.
+
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
           DATA(matches) = src_code_searcher->search( source_code ).
           CHECK matches IS NOT INITIAL.
 
-          IF <include>-is_function_include = abap_true AND function_names_loaded = abap_false.
-            mixin_function_names( EXPORTING fugr_program_name = fugr_include
-                                  CHANGING  includes          = includes ).
-            function_names_loaded = abap_true.
-          ENDIF.
-
           assign_objects_to_matches( EXPORTING unassigned_matches = matches
-                                               object             = object
+                                               object             = object-info
                                                include            = <include>
                                      CHANGING  all_matches        = result ).
         CATCH zcx_adcoset_src_code_read ##NO_HANDLER.
       ENDTRY.
-
     ENDLOOP.
 
     zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( includes ) ).
@@ -113,8 +119,6 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
   METHOD get_fugr_includes.
     DATA is_reserved_name TYPE abap_bool.
-    " TODO: variable is assigned but never used (ABAP cleaner)
-    DATA is_no_func_include TYPE abap_bool.
     DATA is_no_func_module TYPE abap_bool.
     DATA include_suffix TYPE c LENGTH 3.
 
@@ -132,12 +136,11 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include_key>).
       DATA(include_name) = <include_key>-name.
       CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
-        IMPORTING  no_function_include = is_no_func_include
-                   no_function_module  = is_no_func_module
-                   reserved_name       = is_reserved_name
-                   suffix              = include_suffix
-        CHANGING   include             = include_name
-        EXCEPTIONS OTHERS              = 1.
+        IMPORTING  no_function_module = is_no_func_module
+                   reserved_name      = is_reserved_name
+                   suffix             = include_suffix
+        CHANGING   include            = include_name
+        EXCEPTIONS OTHERS             = 1.
       IF sy-subrc <> 0.
         CONTINUE.
       ELSEIF is_reserved_name = abap_true AND ( is_no_func_module = abap_true ).
