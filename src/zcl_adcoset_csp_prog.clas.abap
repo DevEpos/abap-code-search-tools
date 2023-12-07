@@ -111,3 +111,4 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
     result = COND #( WHEN sy-subrc = 0 AND is_fugr_include = abap_true THEN 'FUGR/I' ELSE 'PROG/I' ).
   ENDMETHOD.
 ENDCLASS.
+

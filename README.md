@@ -1,5 +1,6 @@
 ![](https://img.shields.io/badge/ABAP-v7.40+-green)
-[![abap package version](https://img.shields.io/endpoint?url=https://shield.abap.space/version-shield-json/github/DevEpos/abap-code-search-tools/src/zif_adcoset_version.intf.abap/version&label=version)](https://github.com/DevEpos/abap-code-search-tools/blob/main/src/zif_adcoset_version.intf.abap)
+
+[![abap package version](https://img.shields.io/endpoint?url=https://shield.abap.space/version-shield-json/github/DevEpos/abap-code-search-tools/src/zif_adcoset_version.intf.abap/version&label=version)](https://github/DevEpos/abap-code-search-tools/src/zif_adcoset_version.intf.abap)
 
 # abap-code-search
 
@@ -14,7 +15,8 @@ Due to the necessary usage of `OFFSET` in an Open SQL statement you have to swit
 
 Searches Code in ABAP sources like
 
-- [X] Classes (CLAS) 
+
+- [X] Classes (CLAS)
 - [X] Interfaces (INTF)
 - [X] Programs (PROG)
 - [X] Type Groups (TYPE)
@@ -33,7 +35,7 @@ Search can be done via normal String search or with Regular Expressions. If supp
 
 ### UI
 
-You can execute the search via report `ZADCOSET_SEARCH`, where most of the options are available as well, but the main focus of the UI will be ADT (see [ABAP Code Search](https://github.com/DevEpos/eclipse-adt-plugins/tree/main/features/code-search)).
+You can execute the search via report `ZADCOSET_SEARCH`, where most of the options are available as well, but the main focus of the UI will be ADT (see [abap-code-search-ui](http://github.com/DevEpos/abap-code-search-ui)).
 
 ### Package overview
 
@@ -72,6 +74,7 @@ Only the following databases are supported at the moment:
 
 - Oracle
 - HANA
+- MSSQL
 
 ## Necessary Authorizations
 

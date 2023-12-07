@@ -97,7 +97,6 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
     METHODS determine_scope.
 ENDCLASS.
 
-
 CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
   METHOD post.
     DATA scope_params TYPE zif_adcoset_ty_adt_types=>ty_search_scope_params.

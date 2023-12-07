@@ -18,8 +18,7 @@ CLASS lcl_search_query IMPLEMENTATION.
         result-messages = search_result-messages.
       CATCH zcx_adcoset_static_error INTO DATA(search_error).
         RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-          EXPORTING
-            previous = search_error.
+          EXPORTING previous = search_error.
     ENDTRY.
   ENDMETHOD.
 
@@ -101,8 +100,7 @@ CLASS lcl_search_query IMPLEMENTATION.
         CATCH zcx_adcoset_static_error INTO DATA(parse_error).
           " Safety precausion. If called from ADT the sequence is already validated
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              previous = parse_error.
+            EXPORTING previous = parse_error.
       ENDTRY.
     ENDIF.
   ENDMETHOD.

@@ -156,6 +156,9 @@ CLASS lcl_report DEFINITION.
 ENDCLASS.
 
 INITIALIZATION.
+  IF NOT zcl_adcoset_db_support_util=>is_db_supported( ).
+    MESSAGE |DB { sy-dbsys } is not supported by the Code Search| TYPE 'A'.
+  ENDIF.
   DATA(report) = NEW lcl_report( ).
 
 START-OF-SELECTION.
@@ -477,14 +480,11 @@ CLASS lcl_report IMPLEMENTATION.
 
   METHOD set_icon.
     CALL FUNCTION 'ICON_CREATE'
-      EXPORTING
-        name       = icon_name
-        text       = ''
-        add_stdinf = space
-      IMPORTING
-        result     = target
-      EXCEPTIONS
-        OTHERS     = 1 ##FM_SUBRC_OK.
+      EXPORTING  name       = icon_name
+                 text       = ''
+                 add_stdinf = space
+      IMPORTING  result     = target
+      EXCEPTIONS OTHERS     = 1 ##FM_SUBRC_OK.
   ENDMETHOD.
 
   METHOD set_type_check_state.
@@ -514,14 +514,12 @@ CLASS lcl_report IMPLEMENTATION.
            zif_adcoset_c_global=>c_source_code_type-type_group.
 
         CALL FUNCTION 'EDITOR_PROGRAM'
-          EXPORTING
-            appid   = 'PG'
-            display = abap_true
-            program = <selected_row>-include
-            line    = <selected_row>-start_line
-            topline = <selected_row>-start_line
-          EXCEPTIONS
-            OTHERS  = 0.
+          EXPORTING  appid   = 'PG'
+                     display = abap_true
+                     program = <selected_row>-include
+                     line    = <selected_row>-start_line
+                     topline = <selected_row>-start_line
+          EXCEPTIONS OTHERS  = 0.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-data_definition OR
            zif_adcoset_c_global=>c_source_code_type-access_control OR
@@ -529,16 +527,14 @@ CLASS lcl_report IMPLEMENTATION.
            zif_adcoset_c_global=>c_source_code_type-behavior_definition.
 
         CALL FUNCTION 'RS_TOOL_ACCESS'
-          EXPORTING
-            operation           = 'SHOW'
-            object_name         = <selected_row>-object_name
-            object_type         = <selected_row>-object_type
-            include             = <selected_row>-include
-            position            = <selected_row>-start_line
-          EXCEPTIONS
-            not_executed        = 1
-            invalid_object_type = 2
-            OTHERS              = 3.
+          EXPORTING  operation           = 'SHOW'
+                     object_name         = <selected_row>-object_name
+                     object_type         = <selected_row>-object_type
+                     include             = <selected_row>-include
+                     position            = <selected_row>-start_line
+          EXCEPTIONS not_executed        = 1
+                     invalid_object_type = 2
+                     OTHERS              = 3.
 
     ENDCASE.
   ENDMETHOD.
@@ -597,8 +593,7 @@ CLASS lcl_report IMPLEMENTATION.
     IF s_patt-low IS INITIAL.
       SET CURSOR FIELD s_patt-low.
       RAISE EXCEPTION TYPE zcx_adcoset_static_error
-        EXPORTING
-          text = 'You have to provide at least 1 pattern'.
+        EXPORTING text = 'You have to provide at least 1 pattern'.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.
