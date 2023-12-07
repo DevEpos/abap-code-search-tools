@@ -12,11 +12,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
         search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
 
   PRIVATE SECTION.
-    CONSTANTS c_min_parl_package_size TYPE i VALUE 10.
-    CONSTANTS c_max_parl_package_size TYPE i VALUE 2500.
-    CONSTANTS c_serial_package_size TYPE i VALUE 10000.
-
-    DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
+     DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
 
     "! Restricts the maximum number of objects to select for the search
     DATA max_objects TYPE i.
@@ -27,7 +23,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
     DATA object_count TYPE i.
     DATA current_offset TYPE i.
     DATA all_packages_read TYPE abap_bool.
-    DATA package_size TYPE i VALUE c_serial_package_size.
+    DATA package_size TYPE i VALUE zif_adcoset_search_scope=>c_serial_package_size.
     DATA is_more_objects_available TYPE abap_bool.
     DATA dyn_from_clause TYPE string.
     DATA tags_dyn_where_cond TYPE string.
@@ -124,10 +120,10 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     DATA(determined_pack_size) = obj_count_for_package_building / max_task_count.
 
-    IF determined_pack_size < c_min_parl_package_size.
-      package_size = c_min_parl_package_size.
-    ELSEIF determined_pack_size > c_max_parl_package_size.
-      package_size = c_max_parl_package_size.
+    IF determined_pack_size < zif_adcoset_search_scope=>c_min_parl_package_size.
+      package_size = zif_adcoset_search_scope=>c_min_parl_package_size.
+    ELSEIF determined_pack_size > zif_adcoset_search_scope=>c_max_parl_package_size.
+      package_size = zif_adcoset_search_scope=>c_max_parl_package_size.
     ELSE.
       package_size = determined_pack_size.
     ENDIF.
