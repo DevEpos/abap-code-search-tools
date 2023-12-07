@@ -153,33 +153,25 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     THEN max_objects + 1
     ELSE 0 ).
 
-    " ToDo Ludwig
-*    SELECT COUNT(*)
-*      FROM zadcoset_transportsourcecodobj
-*         WHERE objecttype IN @search_ranges-object_type_range
-*           AND objectname IN @search_ranges-object_name_range
-*           AND request    IN @search_ranges-tr_request_range
-*         INTO @object_count
-*         UP TO @selection_limit ROWS.
     IF     search_ranges-object_type_range IS INITIAL
        AND search_ranges-object_name_range IS INITIAL
        AND search_ranges-tr_request_range  IS INITIAL.
       RETURN.
     ENDIF.
 
-    SELECT DISTINCT
-        programid AS pgmid,
-        objecttype AS obj_type,
-        objectname AS obj_name
-      FROM zadcoset_transportsourcecodobj
-      WHERE objecttype IN @search_ranges-object_type_range
-        AND objectname IN @search_ranges-object_name_range
-        AND request    IN @search_ranges-tr_request_range
-      ORDER BY obj_name, pgmid, obj_type
-      INTO TABLE @DATA(objects)
-      UP TO @selection_limit ROWS.
+    WITH +e071_aggr AS (
+       SELECT DISTINCT programid AS pgmid,
+           objecttype AS obj_type,
+           objectname AS obj_name
+         FROM zadcoset_transportsourcecodobj
+         WHERE objecttype IN @search_ranges-object_type_range
+           AND objectname IN @search_ranges-object_name_range
+           AND request    IN @search_ranges-tr_request_range )
 
-    object_count = lines( objects ).
+    SELECT COUNT(*)
+      FROM +e071_aggr
+        INTO @object_count
+        UP TO @selection_limit ROWS.
 
     IF object_count = selection_limit.
       object_count = max_objects.

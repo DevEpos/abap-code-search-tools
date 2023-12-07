@@ -1,6 +1,6 @@
 *"* use this source file for any type of declarations (class
 *"* definitions, interfaces or type declarations) you need for
-*"* components in the private sectionhttp://vhcala4hci:50000/sap/public/bc/abap/docu?input=RAISE&format=eclipse&object=ABAPRAISE_EXCEPTION&anchor=@@RAISE@@!ABAP_STATEMENT!@@&sap-language=EN&sap-client=001&version=X
+*"* components in the private section
 CLASS lcl_limu_processor DEFINITION.
 
   PUBLIC SECTION.

@@ -106,6 +106,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     request->get_body_data( EXPORTING content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_params_ch( )
                             IMPORTING data            = scope_params ).
+
     parse_parameters( scope_params ).
     determine_scope( ).
 

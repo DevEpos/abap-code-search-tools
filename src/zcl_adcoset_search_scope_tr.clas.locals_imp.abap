@@ -76,7 +76,7 @@ CLASS lcl_limu_processor IMPLEMENTATION.
         ENDLOOP.
         <main_object>-has_deleted_subobjects = has_deleted_subobjects.
       ENDIF.
-      " the object count has to be increased to reach the scope even though the object is not included in the search
+      " the object count has to be increased to reach the scope even though the object is not explicitly included in the search
       <main_object>-searched_objs_count = <main_object>-searched_objs_count + 1.
     ELSE.
       RAISE EXCEPTION TYPE cx_sy_itab_line_not_found.
@@ -84,43 +84,6 @@ CLASS lcl_limu_processor IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD handle_report_source_code.
-*    DATA func_group_name TYPE rs38l_area.
-*    DATA main_object_name TYPE sobj_name.
-*    DATA main_object_type TYPE trobjtype.
-*    " TODO: variable is assigned but never used (ABAP cleaner)
-*    DATA subobject_name TYPE sobj_name.
-*    DATA has_deleted_subobjects TYPE abap_bool.
-*    DATA mainprograms TYPE TABLE OF string.
-*
-*    DATA(include) = CONV progname( tr_object-obj_name ).
-*
-*    CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
-*      IMPORTING  group              = func_group_name
-*      CHANGING   include            = include
-*      EXCEPTIONS include_not_exists = 1.
-*
-*    DATA(include_exists) = xsdbool( sy-subrc = 0 ).
-*
-*    IF include_exists = abap_false.
-*      main_object_type = zif_adcoset_c_global=>c_source_code_type-program.
-*      main_object_name = ''.
-*      has_deleted_subobjects = abap_true.
-*    ELSEIF func_group_name IS NOT INITIAL.
-*      main_object_type = zif_adcoset_c_global=>c_source_code_type-function_group.
-*      main_object_name = func_group_name.
-*      subobject_name = tr_object-obj_name.
-*    ELSE.
-*      CALL FUNCTION 'RS_GET_MAINPROGRAMS'
-*        EXPORTING name         = tr_object-obj_name
-*        TABLES    mainprograms = mainprograms.
-*
-*      IF lines( mainprograms ) > 0.
-*        main_object_type = zif_adcoset_c_global=>c_source_code_type-program.
-*        main_object_name = VALUE #( mainprograms[ 1 ] OPTIONAL ).
-*        subobject_name = tr_object-obj_name.
-*      ENDIF.
-*    ENDIF.
-
     DATA main_obj TYPE tadir.
 
     CALL FUNCTION 'TR_CHECK_TYPE'
@@ -129,19 +92,6 @@ CLASS lcl_limu_processor IMPLEMENTATION.
                                        object   = tr_object-obj_type
                                        obj_name = tr_object-obj_name )
       IMPORTING we_tadir = main_obj.
-
-*    TRY.
-*        add_subobject( main_object_name       = main_object_name
-*                       main_object_type       = main_object_type
-*                       has_deleted_subobjects = xsdbool( include_exists = abap_false )
-*                       subobjects             = VALUE #( ( name = tr_object-obj_name type = tr_object-obj_type ) ) ).
-*
-*      CATCH cx_sy_itab_line_not_found.
-*        add_result( tr_object              = tr_object
-*                    main_object_name       = COND #( WHEN include_exists = abap_true THEN main_object_name )
-*                    main_object_type       = main_object_type
-*                    has_deleted_subobjects = xsdbool( include_exists = abap_false ) ).
-*    ENDTRY.
     TRY.
         add_subobject( main_object_name       = main_obj-obj_name
                        main_object_type       = main_obj-object

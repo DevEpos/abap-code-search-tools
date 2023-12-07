@@ -119,8 +119,6 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
   METHOD get_fugr_includes.
     DATA is_reserved_name TYPE abap_bool.
-    " TODO: variable is assigned but never used (ABAP cleaner)
-    DATA is_no_func_include TYPE abap_bool.
     DATA is_no_func_module TYPE abap_bool.
     DATA include_suffix TYPE c LENGTH 3.
 
@@ -138,12 +136,11 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include_key>).
       DATA(include_name) = <include_key>-name.
       CALL FUNCTION 'FUNCTION_INCLUDE_SPLIT'
-        IMPORTING  no_function_include = is_no_func_include
-                   no_function_module  = is_no_func_module
-                   reserved_name       = is_reserved_name
-                   suffix              = include_suffix
-        CHANGING   include             = include_name
-        EXCEPTIONS OTHERS              = 1.
+        IMPORTING  no_function_module = is_no_func_module
+                   reserved_name      = is_reserved_name
+                   suffix             = include_suffix
+        CHANGING   include            = include_name
+        EXCEPTIONS OTHERS             = 1.
       IF sy-subrc <> 0.
         CONTINUE.
       ELSEIF is_reserved_name = abap_true AND ( is_no_func_module = abap_true ).

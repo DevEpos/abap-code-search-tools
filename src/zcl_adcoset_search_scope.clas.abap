@@ -1,7 +1,7 @@
 "! <p class="shorttext synchronized">Search scope implementation</p>
 CLASS zcl_adcoset_search_scope DEFINITION
   PUBLIC
-*  FINAL
+  FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
