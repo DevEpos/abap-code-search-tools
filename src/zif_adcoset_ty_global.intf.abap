@@ -249,7 +249,6 @@ INTERFACE zif_adcoset_ty_global
   TYPES   objects TYPE ty_tadir_objects_deep.
   TYPES END OF ty_search_package.
 
-
   TYPES:
     BEGIN OF ty_search_package_result,
       result_objects         TYPE ty_search_result_objects,

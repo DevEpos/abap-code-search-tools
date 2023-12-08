@@ -106,15 +106,8 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
           DATA(matches) = src_code_searcher->search( source_code ).
           CHECK matches IS NOT INITIAL.
 
-          IF <include>-is_function_include = abap_true AND function_names_loaded = abap_false.
-            mixin_function_names( EXPORTING fugr_program_name = fugr_include
-                                  CHANGING  includes          = includes ).
-            function_names_loaded = abap_true.
-          ENDIF.
-
           assign_objects_to_matches( EXPORTING unassigned_matches = matches
-                                               object             = object
-
+                                               object             = object-info
                                                include            = <include>
                                      CHANGING  all_matches        = result ).
         CATCH zcx_adcoset_src_code_read ##NO_HANDLER.
@@ -148,7 +141,6 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
                    suffix             = include_suffix
         CHANGING   include            = include_name
         EXCEPTIONS OTHERS             = 1.
-
       IF sy-subrc <> 0.
         CONTINUE.
       ELSEIF is_reserved_name = abap_true AND ( is_no_func_module = abap_true ).

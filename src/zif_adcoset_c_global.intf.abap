@@ -69,6 +69,10 @@ INTERFACE zif_adcoset_c_global
       tr_request           TYPE string VALUE 'transportRequest',
     END OF c_search_params,
 
+    BEGIN OF c_prog_include_mode,
+      resolve TYPE string VALUE 'resolve',
+    END OF c_prog_include_mode,
+
     "! <p class="shorttext synchronized" lang="en">Include id's for class</p>
     BEGIN OF c_class_include_id,
       all                  TYPE string VALUE 'all',

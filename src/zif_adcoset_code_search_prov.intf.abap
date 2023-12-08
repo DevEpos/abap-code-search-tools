@@ -9,5 +9,4 @@ INTERFACE zif_adcoset_code_search_prov
               src_code_searcher TYPE REF TO zif_adcoset_src_code_searcher
     RETURNING VALUE(result)     TYPE zif_adcoset_ty_global=>ty_search_matches.
 
-
 ENDINTERFACE.

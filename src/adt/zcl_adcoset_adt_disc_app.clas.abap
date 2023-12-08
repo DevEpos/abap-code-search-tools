@@ -141,8 +141,6 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD register_resources.
-    CHECK zcl_adcoset_db_support_util=>is_db_supported( ).
-
     register_code_search( registry ).
     register_plugin_features( registry ).
     register_search_value_helps( registry ).
