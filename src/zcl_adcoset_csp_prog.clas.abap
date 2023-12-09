@@ -57,7 +57,7 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
           result = VALUE #( BASE result
                             ( LINES OF search_dependent_includes( src_code_reader   = src_code_reader
                                                                   src_code_searcher = src_code_searcher
-                                                                  object            = object ) ) ).
+                                                                  object            = object-info ) ) ).
         ENDIF.
       CATCH zcx_adcoset_src_code_read.
     ENDTRY.
@@ -111,4 +111,3 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
     result = COND #( WHEN sy-subrc = 0 AND is_fugr_include = abap_true THEN 'FUGR/I' ELSE 'PROG/I' ).
   ENDMETHOD.
 ENDCLASS.
-
