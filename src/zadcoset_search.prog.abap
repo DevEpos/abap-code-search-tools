@@ -27,6 +27,7 @@ DATA: BEGIN OF scope_vars,
         appl_comp   TYPE df14l-ps_posid,
         created_on  TYPE tadir-created_on,
         owner       TYPE tadir-author,
+        tr_request  TYPE trkorr,
       END OF scope_vars.
 
 SELECTION-SCREEN BEGIN OF BLOCK pattern WITH FRAME TITLE TEXT-b01.
@@ -42,7 +43,8 @@ SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
     s_auth FOR scope_vars-owner,
     s_crtd FOR scope_vars-created_on,
     s_pack FOR scope_vars-package,
-    s_appl FOR scope_vars-appl_comp.
+    s_appl FOR scope_vars-appl_comp,
+    s_trrq for scope_vars-tr_request.
   PARAMETERS:
     p_typal TYPE abap_bool RADIOBUTTON GROUP rb1 DEFAULT 'X' USER-COMMAND obj_type_sel,
     p_typsp TYPE abap_bool RADIOBUTTON GROUP rb1.
@@ -361,6 +363,7 @@ CLASS lcl_report IMPLEMENTATION.
                                         created_on_range  = s_crtd[]
                                         owner_range       = s_auth[]
                                         package_range     = s_pack[]
+                                        tr_request_range  = s_trrq[]
                                         max_objects       = p_maxo ) ).
 
     IF p_regex = abap_true.
@@ -477,11 +480,14 @@ CLASS lcl_report IMPLEMENTATION.
 
   METHOD set_icon.
     CALL FUNCTION 'ICON_CREATE'
-      EXPORTING  name       = icon_name
-                 text       = ''
-                 add_stdinf = space
-      IMPORTING  result     = target
-      EXCEPTIONS OTHERS     = 1 ##FM_SUBRC_OK.
+      EXPORTING
+        name       = icon_name
+        text       = ''
+        add_stdinf = space
+      IMPORTING
+        result     = target
+      EXCEPTIONS
+        OTHERS     = 1 ##FM_SUBRC_OK.
   ENDMETHOD.
 
   METHOD set_type_check_state.
@@ -511,12 +517,14 @@ CLASS lcl_report IMPLEMENTATION.
            zif_adcoset_c_global=>c_source_code_type-type_group.
 
         CALL FUNCTION 'EDITOR_PROGRAM'
-          EXPORTING  appid   = 'PG'
-                     display = abap_true
-                     program = <selected_row>-include
-                     line    = <selected_row>-start_line
-                     topline = <selected_row>-start_line
-          EXCEPTIONS OTHERS  = 0.
+          EXPORTING
+            appid   = 'PG'
+            display = abap_true
+            program = <selected_row>-include
+            line    = <selected_row>-start_line
+            topline = <selected_row>-start_line
+          EXCEPTIONS
+            OTHERS  = 0.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-data_definition OR
            zif_adcoset_c_global=>c_source_code_type-access_control OR
@@ -524,14 +532,16 @@ CLASS lcl_report IMPLEMENTATION.
            zif_adcoset_c_global=>c_source_code_type-behavior_definition.
 
         CALL FUNCTION 'RS_TOOL_ACCESS'
-          EXPORTING  operation           = 'SHOW'
-                     object_name         = <selected_row>-object_name
-                     object_type         = <selected_row>-object_type
-                     include             = <selected_row>-include
-                     position            = <selected_row>-start_line
-          EXCEPTIONS not_executed        = 1
-                     invalid_object_type = 2
-                     OTHERS              = 3.
+          EXPORTING
+            operation           = 'SHOW'
+            object_name         = <selected_row>-object_name
+            object_type         = <selected_row>-object_type
+            include             = <selected_row>-include
+            position            = <selected_row>-start_line
+          EXCEPTIONS
+            not_executed        = 1
+            invalid_object_type = 2
+            OTHERS              = 3.
 
     ENDCASE.
   ENDMETHOD.
@@ -590,7 +600,8 @@ CLASS lcl_report IMPLEMENTATION.
     IF s_patt-low IS INITIAL.
       SET CURSOR FIELD s_patt-low.
       RAISE EXCEPTION TYPE zcx_adcoset_static_error
-        EXPORTING text = 'You have to provide at least 1 pattern'.
+        EXPORTING
+          text = 'You have to provide at least 1 pattern'.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.
