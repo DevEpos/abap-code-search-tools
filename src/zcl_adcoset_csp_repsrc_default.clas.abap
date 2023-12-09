@@ -24,7 +24,7 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_code_search_prov~search.
-    DATA(include_name) = get_include( object ).
+    DATA(include_name) = get_include( object-info ).
 
     IF include_name IS INITIAL.
       RETURN.
