@@ -55,6 +55,16 @@ INTERFACE zif_adcoset_ty_global
 
     ty_tadir_objects TYPE STANDARD TABLE OF ty_tadir_object WITH EMPTY KEY,
 
+    BEGIN OF ty_tr_request_object,
+      trkorr   TYPE trkorr,
+      pgmid    TYPE pgmid,
+      obj_type TYPE trobjtype,
+      obj_name TYPE trobj_name,
+
+    END OF ty_tr_request_object,
+
+    ty_tr_request_objects TYPE SORTED TABLE OF ty_tr_request_object WITH UNIQUE KEY obj_name pgmid obj_type,
+
     BEGIN OF ty_object,
       name TYPE sobj_name,
       type TYPE wbobjtype,
@@ -71,15 +81,28 @@ INTERFACE zif_adcoset_ty_global
       created_on_range  TYPE RANGE OF tadir-created_on,
       appl_comp_range   TYPE RANGE OF df14l-ps_posid,
       tag_id_range      TYPE RANGE OF sysuuid_x16,
+      tr_request_range  TYPE RANGE OF trkorr,
     END OF ty_search_scope_ranges.
 
+  "! <p class="shorttext synchronized">Tadir object with corresponding subobjects</p>
+  TYPES BEGIN OF ty_tadir_object_deep.
+          INCLUDE TYPE ty_tadir_object AS info.
+  TYPES   searched_objs_count    TYPE i.
+  TYPES   complete_main_object   TYPE abap_bool.
+  TYPES   has_deleted_subobjects TYPE abap_bool.
+  TYPES   subobjects             TYPE ty_tadir_objects.
+  TYPES END OF ty_tadir_object_deep.
+
+  "! <p class="shorttext synchronized">Table of tadir object with corresponding subobjects</p>
+  TYPES ty_tadir_objects_deep TYPE STANDARD TABLE OF ty_tadir_object_deep WITH EMPTY KEY.
+
   "! <p class="shorttext synchronized">Ranges / data to define an object scope</p>
-  TYPES  BEGIN OF ty_search_scope.
-  TYPES:   scope_id       TYPE sysuuid_x16,
-           current_offset TYPE i.
-           INCLUDE        TYPE ty_search_scope_ranges AS ranges.
-  TYPES:   max_objects    TYPE i.
-  TYPES  END OF ty_search_scope.
+  TYPES BEGIN OF ty_search_scope.
+  TYPES   scope_id       TYPE sysuuid_x16.
+  TYPES   current_offset TYPE i.
+          INCLUDE        TYPE ty_search_scope_ranges AS ranges.
+  TYPES   max_objects    TYPE i.
+  TYPES END OF ty_search_scope.
 
   TYPES:
     "! <p class="shorttext synchronized" lang="en">Uniquely identifies a match</p>
@@ -96,21 +119,21 @@ INTERFACE zif_adcoset_ty_global
       adt_include_type TYPE string,
     END OF ty_match_identifier.
 
-  TYPES  BEGIN OF ty_search_match.
-           INCLUDE TYPE ty_match_identifier.
-  TYPES:   start_line   TYPE i,
-           start_column TYPE i,
-           end_line     TYPE i,
-           end_column   TYPE i,
-           snippet      TYPE string,
-           long_snippet TYPE string.
-  TYPES  END OF ty_search_match.
+  TYPES BEGIN OF ty_search_match.
+          INCLUDE TYPE ty_match_identifier.
+  TYPES   start_line   TYPE i.
+  TYPES   start_column TYPE i.
+  TYPES   end_line     TYPE i.
+  TYPES   end_column   TYPE i.
+  TYPES   snippet      TYPE string.
+  TYPES   long_snippet TYPE string.
+  TYPES END OF ty_search_match.
 
   TYPES ty_search_matches TYPE STANDARD TABLE OF ty_search_match WITH EMPTY KEY.
 
   TYPES:
     BEGIN OF ty_search_result_object,
-      object       TYPE ty_tadir_object,
+      object       TYPE ty_tadir_object_deep,
       text_matches TYPE ty_search_matches,
       match_count  TYPE i,
     END OF ty_search_result_object,
@@ -206,25 +229,25 @@ INTERFACE zif_adcoset_ty_global
     END OF ty_pattern_config.
 
   "! <p class="shorttext synchronized">Internal code search settings</p>
-  TYPES  BEGIN OF ty_search_settings_int.
-           INCLUDE TYPE ty_search_settings AS basic_settings.
-           INCLUDE TYPE ty_pattern_config AS pattern_config.
-  TYPES:   custom_settings TYPE ty_custom_search_settings,
-           is_adt          TYPE abap_bool.
-  TYPES  END OF ty_search_settings_int.
+  TYPES BEGIN OF ty_search_settings_int.
+          INCLUDE TYPE ty_search_settings AS basic_settings.
+          INCLUDE TYPE ty_pattern_config AS pattern_config.
+  TYPES   custom_settings TYPE ty_custom_search_settings.
+  TYPES   is_adt          TYPE abap_bool.
+  TYPES END OF ty_search_settings_int.
 
   "! <p class="shorttext synchronized">External settings for code search API</p>
-  TYPES  BEGIN OF ty_search_settings_external.
-           INCLUDE TYPE ty_search_settings_int AS internal_settings.
-  TYPES:   parallel_processing TYPE ty_parl_processing,
-           search_scope        TYPE ty_search_scope.
-  TYPES  END OF ty_search_settings_external.
+  TYPES BEGIN OF ty_search_settings_external.
+          INCLUDE TYPE ty_search_settings_int AS internal_settings.
+  TYPES   parallel_processing TYPE ty_parl_processing.
+  TYPES   search_scope        TYPE ty_search_scope.
+  TYPES END OF ty_search_settings_external.
 
   "! <p class="shorttext synchronized">Defines search package for parallel search</p>
-  TYPES  BEGIN OF ty_search_package.
-           INCLUDE TYPE ty_search_settings_int AS settings.
-  TYPES:   objects TYPE ty_tadir_objects.
-  TYPES  END OF ty_search_package.
+  TYPES BEGIN OF ty_search_package.
+          INCLUDE TYPE ty_search_settings_int AS settings.
+  TYPES   objects TYPE ty_tadir_objects_deep.
+  TYPES END OF ty_search_package.
 
   TYPES:
     BEGIN OF ty_search_package_result,
