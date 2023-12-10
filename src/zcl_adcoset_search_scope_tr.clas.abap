@@ -1,5 +1,5 @@
 "! <p class="shorttext synchronized">Search scope implementation</p>
-CLASS zcl_adcoset_search_scope DEFINITION
+CLASS ZCL_ADCOSET_SEARCH_SCOPE_TR DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC.
@@ -51,7 +51,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
 ENDCLASS.
 
 
-CLASS zcl_adcoset_search_scope IMPLEMENTATION.
+CLASS ZCL_ADCOSET_SEARCH_SCOPE_TR IMPLEMENTATION.
   METHOD constructor.
     IF search_scope-scope_id IS NOT INITIAL.
       init_scope_from_db( search_scope ).

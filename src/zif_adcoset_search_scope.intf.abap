@@ -2,6 +2,10 @@
 INTERFACE zif_adcoset_search_scope
   PUBLIC.
 
+  CONSTANTS c_min_parl_package_size TYPE i VALUE 10.
+  CONSTANTS c_max_parl_package_size TYPE i VALUE 2500.
+  CONSTANTS c_serial_package_size TYPE i VALUE 10000.
+
   "! <p class="shorttext synchronized">Retrieves number of objects in scope</p>
   METHODS count
     RETURNING
