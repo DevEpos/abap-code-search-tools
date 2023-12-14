@@ -155,7 +155,8 @@ CLASS lcl_limu_processor IMPLEMENTATION.
 
       CATCH cx_sy_itab_line_not_found.
         add_result(
-            tr_object              = tr_object
+            tr_object              = VALUE #( obj_name = section_include
+                                              obj_type = tr_object-obj_type )
             main_object_name       = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
             main_object_type       = zif_adcoset_c_global=>c_source_code_type-class
             has_deleted_subobjects = abap_false ).
