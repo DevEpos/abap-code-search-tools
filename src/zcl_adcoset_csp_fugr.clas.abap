@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Search provider for Function Groups</p>
 CLASS zcl_adcoset_csp_fugr DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -47,7 +46,7 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
     METHODS assign_objects_to_matches
       IMPORTING
         unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
-        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object
+        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         !include           TYPE ty_fugr_incl
       CHANGING
         all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
@@ -73,6 +72,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
   METHOD zif_adcoset_code_search_prov~search.
     DATA function_names_loaded TYPE abap_bool.
+    DATA searched_sources_count TYPE i.
 
     DATA(fugr_name) = CONV rs38l_area( object-name ).
     get_fugr_include_info( EXPORTING fugr_name           = fugr_name
@@ -83,7 +83,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     ENDIF.
 
     DATA(includes) = get_fugr_includes( fugr_include_prefix ).
-    IF line_exists( includes[ is_function_include = abap_true ] ) AND function_names_loaded = abap_false.
+    IF object-subobjects IS NOT INITIAL.
       mixin_function_names( EXPORTING fugr_program_name = fugr_include
                             CHANGING  includes          = includes ).
       function_names_loaded = abap_true.
@@ -101,10 +101,17 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
+      searched_sources_count = searched_sources_count + 1.
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
           DATA(matches) = src_code_searcher->search( source_code ).
           CHECK matches IS NOT INITIAL.
+
+          IF <include>-is_function_include = abap_true AND function_names_loaded = abap_false.
+            mixin_function_names( EXPORTING fugr_program_name = fugr_include
+                                  CHANGING  includes          = includes ).
+            function_names_loaded = abap_true.
+          ENDIF.
 
           assign_objects_to_matches( EXPORTING unassigned_matches = matches
                                                object             = object-info
@@ -114,7 +121,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
       ENDTRY.
     ENDLOOP.
 
-    zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( includes ) ).
+    zcl_adcoset_search_protocol=>increase_searchd_sources_count( searched_sources_count ).
   ENDMETHOD.
 
   METHOD get_fugr_includes.
@@ -124,8 +131,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
     DATA(include_pattern) = CONV progname( |{ include_prefix }___| ).
 
-    SELECT name
-      FROM trdir
+    SELECT name FROM trdir
       WHERE name LIKE @include_pattern
       INTO TABLE @DATA(includes).
 
@@ -158,7 +164,8 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         new_include-adt_type = c_include_types-include.
       ENDIF.
 
-      result = VALUE #( BASE result ( new_include ) ).
+      result = VALUE #( BASE result
+                        ( new_include ) ).
     ENDLOOP.
   ENDMETHOD.
 

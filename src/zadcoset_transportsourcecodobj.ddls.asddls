@@ -4,7 +4,6 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Rep. obj. of Tr. Request for Code Search'
 
-
 define view ZADCOSET_TransportSourceCodObj
   as select from e071                      as TransportObject
     inner join   ZADCOSET_SourceCodeObject as SourceCodeObject on  TransportObject.pgmid    = SourceCodeObject.ProgramId

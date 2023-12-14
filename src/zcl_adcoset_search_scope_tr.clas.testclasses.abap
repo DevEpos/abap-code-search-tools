@@ -20,7 +20,7 @@ CLASS ltcl_limu_processor IMPLEMENTATION.
     mr_cut->handle_class_method(
         tr_object = VALUE #( obj_name = 'CLS1                          METH1' obj_type = 'METH' ) ).
     cl_abap_unit_assert=>assert_table_contains(
-        line  = VALUE zif_adcoset_ty_global=>ty_tadir_object_deep(
+        line  = VALUE zif_adcoset_ty_global=>ty_tadir_object(
                           name                = 'CLS1'
                           type                = 'CLAS'
                           searched_objs_count = 1

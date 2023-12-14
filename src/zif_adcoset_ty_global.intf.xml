@@ -72,14 +72,19 @@
      <DESCRIPT>Internal code search settings</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CMPNAME>TY_TADIR_OBJECTS_DEEP</CMPNAME>
+     <CMPNAME>TY_TADIR_OBJECT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Tadir object with corresponding subobjects</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>TY_TADIR_OBJECTS</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Table of tadir object with corresponding subobjects</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CMPNAME>TY_TADIR_OBJECT_DEEP</CMPNAME>
+     <CMPNAME>TY_TADIR_OBJECT_INFOS</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Tadir object with corresponding subobjects</DESCRIPT>
+     <DESCRIPT>Table of tadir object with corresponding subobjects</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Search Provider for Classes</p>
 CLASS zcl_adcoset_csp_clas DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -13,23 +12,22 @@ CLASS zcl_adcoset_csp_clas DEFINITION
         custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings.
 
   PRIVATE SECTION.
-    CONSTANTS:
-      BEGIN OF c_include_types,
-        method TYPE string VALUE 'CLAS/OM',
-        include TYPE string VALUE 'CLAS/I',
-      END OF c_include_types,
+    CONSTANTS: BEGIN OF c_include_types,
+                 method TYPE string VALUE 'CLAS/OM',
+                 include TYPE string VALUE 'CLAS/I',
+               END OF c_include_types.
 
-      BEGIN OF c_section_texts,
-        main_source       TYPE string VALUE `Main Source`,
-        locals_def        TYPE string VALUE `Local Type Definitions`,
-        local_impl        TYPE string VALUE `Local Class Implementation`,
-        macros            TYPE string VALUE `Macros`,
-        test_cls          TYPE string VALUE `Local Test Classes`,
-        public_section    TYPE string VALUE 'Public Section',
-        protected_section TYPE string VALUE 'Protected Section',
-        private_section   TYPE string VALUE 'Private Section',
-        method            TYPE string VALUE `Method `,
-      END OF c_section_texts.
+    CONSTANTS: BEGIN OF c_section_texts,
+                 main_source       TYPE string VALUE `Main Source`,
+                 locals_def        TYPE string VALUE `Local Type Definitions`,
+                 local_impl        TYPE string VALUE `Local Class Implementation`,
+                 macros            TYPE string VALUE `Macros`,
+                 test_cls          TYPE string VALUE `Local Test Classes`,
+                 public_section    TYPE string VALUE 'Public Section',
+                 protected_section TYPE string VALUE 'Protected Section',
+                 private_section   TYPE string VALUE 'Private Section',
+                 method            TYPE string VALUE `Method `,
+               END OF c_section_texts.
 
     TYPES:
       BEGIN OF ty_class_incl,
@@ -50,7 +48,7 @@ CLASS zcl_adcoset_csp_clas DEFINITION
     METHODS assign_objects_to_matches
       IMPORTING
         unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
-        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object
+        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         !include           TYPE ty_class_incl
       CHANGING
         all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
@@ -63,6 +61,8 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_code_search_prov~search.
+    DATA searched_sources_count TYPE i.
+
     DATA(class_includes) = get_class_includes( name = object-name ).
     IF class_includes IS INITIAL.
       RETURN.
@@ -71,10 +71,12 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     LOOP AT class_includes ASSIGNING FIELD-SYMBOL(<include>).
 
       IF NOT (    object-subobjects IS INITIAL
-               OR line_exists( object-subobjects[ name = <include>-method_name ] ) ).
+               OR line_exists( object-subobjects[ name = <include>-method_name ] )
+               OR line_exists( object-subobjects[ name = <include>-name ] ) ).
         CONTINUE.
       ENDIF.
 
+      searched_sources_count = searched_sources_count + 1.
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
           DATA(matches) = src_code_searcher->search( source_code = source_code ).
@@ -89,22 +91,25 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       ENDTRY.
     ENDLOOP.
 
-    zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( class_includes ) ).
+    zcl_adcoset_search_protocol=>increase_searchd_sources_count( searched_sources_count ).
   ENDMETHOD.
 
   METHOD get_class_includes.
     DATA(class_name) = CONV classname( name ).
 
     IF custom_settings-include_flags-public_section = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_pubsec_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_pubsec_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-protected_section = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_prosec_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_prosec_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-private_section = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_prisec_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_prisec_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-methods = abap_true.
@@ -121,19 +126,23 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     ENDIF.
 
     IF custom_settings-include_flags-local_def = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-local_impl = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccimp_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_ccimp_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-test = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccau_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_ccau_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-macro = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) ) ).
     ENDIF.
   ENDMETHOD.
 

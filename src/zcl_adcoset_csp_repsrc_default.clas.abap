@@ -13,7 +13,7 @@ CLASS zcl_adcoset_csp_repsrc_default DEFINITION
   PRIVATE SECTION.
     METHODS get_include
       IMPORTING
-        !object       TYPE zif_adcoset_ty_global=>ty_tadir_object
+        !object       TYPE zif_adcoset_ty_global=>ty_tadir_object_info
       RETURNING
         VALUE(result) TYPE progname.
 ENDCLASS.

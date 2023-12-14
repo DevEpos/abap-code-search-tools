@@ -15,7 +15,7 @@ CLASS zcl_adcoset_search_scope_fac DEFINITION
     "! <p class="shorttext synchronized">Creates scope with a given list of objects</p>
     CLASS-METHODS create_final_scope
       IMPORTING
-        !objects      TYPE zif_adcoset_ty_global=>ty_tadir_objects_deep
+        !objects      TYPE zif_adcoset_ty_global=>ty_tadir_objects
       RETURNING
         VALUE(result) TYPE REF TO zif_adcoset_search_scope.
 

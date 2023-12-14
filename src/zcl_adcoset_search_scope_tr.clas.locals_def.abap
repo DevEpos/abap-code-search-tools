@@ -4,11 +4,11 @@
 CLASS lcl_limu_processor DEFINITION.
 
   PUBLIC SECTION.
-    DATA result TYPE zif_adcoset_ty_global=>ty_tadir_objects_deep.
+    DATA result TYPE zif_adcoset_ty_global=>ty_tadir_objects.
 
     METHODS constructor
       IMPORTING
-        !result TYPE zif_adcoset_ty_global=>ty_tadir_objects_deep.
+        !result TYPE zif_adcoset_ty_global=>ty_tadir_objects.
 
     METHODS handle_function_module
       IMPORTING
@@ -25,6 +25,11 @@ CLASS lcl_limu_processor DEFINITION.
     METHODS handle_class_include
       IMPORTING
         tr_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS handle_class_section
+      IMPORTING
+        tr_object       TYPE zif_adcoset_ty_global=>ty_tr_request_object
+        section_include TYPE program.
 
     METHODS handle_class_private_section
       IMPORTING
@@ -48,7 +53,7 @@ CLASS lcl_limu_processor DEFINITION.
         main_object_name       TYPE sobj_name
         main_object_type       TYPE trobjtype
         has_deleted_subobjects TYPE abap_bool
-        subobjects             TYPE zif_adcoset_ty_global=>ty_tadir_objects
+        subobjects             TYPE zif_adcoset_ty_global=>ty_tadir_object_infos
       RAISING
         cx_sy_itab_line_not_found.
 

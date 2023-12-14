@@ -14,7 +14,7 @@ INTERFACE zif_adcoset_search_scope
   "! <p class="shorttext synchronized">Retrieves the next package of objects in scope</p>
   METHODS next_package
     RETURNING
-      VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects_deep.
+      VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
 
   "! <p class="shorttext synchronized">Returns 'X' if another package exists</p>
   METHODS has_next_package

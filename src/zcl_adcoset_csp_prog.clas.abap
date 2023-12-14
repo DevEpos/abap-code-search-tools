@@ -20,13 +20,13 @@ CLASS zcl_adcoset_csp_prog DEFINITION
       IMPORTING
         src_code_reader   TYPE REF TO zif_adcoset_src_code_reader
         src_code_searcher TYPE REF TO zif_adcoset_src_code_searcher
-        !object           TYPE zif_adcoset_ty_global=>ty_tadir_object
+        !object           TYPE zif_adcoset_ty_global=>ty_tadir_object_info
       RETURNING
         VALUE(result)     TYPE zif_adcoset_ty_global=>ty_search_matches.
 
     METHODS get_include_infos
       IMPORTING
-        !object       TYPE zif_adcoset_ty_global=>ty_tadir_object
+        !object       TYPE zif_adcoset_ty_global=>ty_tadir_object_info
       RETURNING
         VALUE(result) TYPE ty_prognames.
 

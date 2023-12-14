@@ -37,7 +37,7 @@ CLASS lcl_limu_processor IMPLEMENTATION.
                         searched_objs_count    = 1
                         has_deleted_subobjects = has_deleted_subobjects
                         subobjects             = COND #( WHEN tr_object-obj_name IS NOT INITIAL
-                                                         THEN VALUE zif_adcoset_ty_global=>ty_tadir_objects(
+                                                         THEN VALUE zif_adcoset_ty_global=>ty_tadir_object_infos(
                                                                         ( type = tr_object-obj_type
                                                                           name = tr_object-obj_name ) ) ) ) ).
   ENDMETHOD.
@@ -70,8 +70,10 @@ CLASS lcl_limu_processor IMPLEMENTATION.
         " is already part of the transport request, subobjects are not needed anymore because the whole object will be
         " used for the search
         LOOP AT subobjects ASSIGNING FIELD-SYMBOL(<subobject>).
-          IF NOT line_exists( <main_object>-subobjects[ type = <subobject>-type name = <subobject>-name ] ).
-            <main_object>-subobjects = VALUE #( BASE <main_object>-subobjects ( <subobject> ) ).
+          IF NOT line_exists( <main_object>-subobjects[ type = <subobject>-type
+                                                        name = <subobject>-name ] ).
+            <main_object>-subobjects = VALUE #( BASE <main_object>-subobjects
+                                                ( <subobject> ) ).
           ENDIF.
         ENDLOOP.
         <main_object>-has_deleted_subobjects = has_deleted_subobjects.
@@ -142,64 +144,43 @@ CLASS lcl_limu_processor IMPLEMENTATION.
     ENDTRY.
   ENDMETHOD.
 
-  METHOD handle_class_private_section.
+  METHOD handle_class_section.
     TRY.
         add_subobject(
             main_object_name       = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
             main_object_type       = zif_adcoset_c_global=>c_source_code_type-class
             has_deleted_subobjects = abap_false
-            subobjects             = VALUE #(
-                ( name = cl_oo_classname_service=>get_prisec_name(
-                             CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) )
-                  type = tr_object-obj_type ) ) ).
+            subobjects             = VALUE #( ( name = section_include
+                                                type = tr_object-obj_type ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object              = tr_object
-                    main_object_name       = cl_oo_classname_service=>get_clsname_by_include(
-                        CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) )
-                    main_object_type       = zif_adcoset_c_global=>c_source_code_type-class
-                    has_deleted_subobjects = abap_false ).
+        add_result(
+            tr_object              = tr_object
+            main_object_name       = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
+            main_object_type       = zif_adcoset_c_global=>c_source_code_type-class
+            has_deleted_subobjects = abap_false ).
     ENDTRY.
+  ENDMETHOD.
+
+  METHOD handle_class_private_section.
+    handle_class_section(
+        tr_object       = tr_object
+        section_include = cl_oo_classname_service=>get_prisec_name(
+                              CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) ).
   ENDMETHOD.
 
   METHOD handle_class_protected_section.
-    TRY.
-        add_subobject(
-            main_object_name       = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
-            main_object_type       = zif_adcoset_c_global=>c_source_code_type-class
-            has_deleted_subobjects = abap_false
-            subobjects             = VALUE #(
-                ( name = cl_oo_classname_service=>get_prosec_name(
-                             CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) )
-                  type = tr_object-obj_type ) ) ).
-
-      CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object              = tr_object
-                    main_object_name       = cl_oo_classname_service=>get_clsname_by_include(
-                        CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) )
-                    main_object_type       = zif_adcoset_c_global=>c_source_code_type-class
-                    has_deleted_subobjects = abap_false ).
-    ENDTRY.
+    handle_class_section(
+        tr_object       = tr_object
+        section_include = cl_oo_classname_service=>get_prosec_name(
+                              CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) ).
   ENDMETHOD.
 
   METHOD handle_class_public_section.
-    TRY.
-        add_subobject(
-            main_object_name       = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
-            main_object_type       = zif_adcoset_c_global=>c_source_code_type-class
-            has_deleted_subobjects = abap_false
-            subobjects             = VALUE #(
-                ( name = cl_oo_classname_service=>get_pubsec_name(
-                             CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) )
-                  type = tr_object-obj_type ) ) ).
-
-      CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object              = tr_object
-                    main_object_name       = cl_oo_classname_service=>get_clsname_by_include(
-                        CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) )
-                    main_object_type       = zif_adcoset_c_global=>c_source_code_type-class
-                    has_deleted_subobjects = abap_false ).
-    ENDTRY.
+    handle_class_section(
+        tr_object       = tr_object
+        section_include = cl_oo_classname_service=>get_pubsec_name(
+                              CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) ).
   ENDMETHOD.
 
   METHOD handle_class_definition.
@@ -222,8 +203,7 @@ CLASS lcl_limu_processor IMPLEMENTATION.
       CATCH cx_sy_itab_line_not_found.
         add_result_cl_definition(
             tr_object              = tr_object
-            main_object_name       = cl_oo_classname_service=>get_clsname_by_include(
-                CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) )
+            main_object_name       = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
             main_object_type       = zif_adcoset_c_global=>c_source_code_type-class
             has_deleted_subobjects = abap_false ).
     ENDTRY.
