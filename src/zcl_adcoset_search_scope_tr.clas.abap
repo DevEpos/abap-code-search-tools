@@ -10,6 +10,7 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
         search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
 
     METHODS zif_adcoset_search_scope~next_package REDEFINITION.
+    METHODS zif_adcoset_search_scope~skip_search  REDEFINITION.
 
   PROTECTED SECTION.
     METHODS determine_count REDEFINITION.
@@ -17,24 +18,24 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
   PRIVATE SECTION.
     DATA limu_processor TYPE REF TO lcl_limu_processor.
 
-    "! <p class="shorttext synchronized" lang="en">Read Source Code Objects from Transport Requests</p>
+    "! <p class="shorttext synchronized">Read Source Code Objects from Transport Requests</p>
     "!
-    "! @parameter max_rows | <p class="shorttext synchronized" lang="en">Maximum number of rows to be read</p>
-    "! @parameter tr_objects | <p class="shorttext synchronized" lang="en">Source Code Objects from Transport Requests</p>
+    "! @parameter max_rows   | <p class="shorttext synchronized">Maximum number of rows to be read</p>
+    "! @parameter tr_objects | <p class="shorttext synchronized">Source Code Objects from Transport Requests</p>
     METHODS get_tr_objects
       IMPORTING
         max_rows          TYPE i
       RETURNING
         VALUE(tr_objects) TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
 
-    "! <p class="shorttext synchronized" lang="en">Determine the maan </p>
+    "! <p class="shorttext synchronized">Determine the maan </p>
     "!
-    "! @parameter tr_object | <p class="shorttext synchronized" lang="en"></p>
+    "! @parameter tr_object | <p class="shorttext synchronized"></p>
     METHODS determine_tadir_obj_for_limu
       IMPORTING
         tr_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
 
-    "! <p class="shorttext synchronized" lang="en">Enhance the type filter with corresponding LIMU types</p>
+    "! <p class="shorttext synchronized">Enhance the type filter with corresponding LIMU types</p>
     METHODS add_subobj_type_to_filter.
 
 ENDCLASS.
@@ -183,7 +184,23 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
           BASE search_ranges-object_type_range
           sign   = 'I'
           option = 'EQ'
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
+          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module )
+          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+    ENDIF.
+
+    IF line_exists( search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-program ] ).
+      search_ranges-object_type_range = VALUE #(
+          BASE search_ranges-object_type_range
+          ( sign   = 'I'
+            option = 'EQ'
+            low    = zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD zif_adcoset_search_scope~skip_search.
+    IF        object-has_deleted_subobjects IS NOT INITIAL
+       OR NOT line_exists( search_ranges-object_type_range[ low = object-type ] ).
+      skip_search = abap_true.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

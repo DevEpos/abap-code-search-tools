@@ -37,4 +37,11 @@ INTERFACE zif_adcoset_search_scope
   METHODS get_scope_ranges DEFAULT IGNORE
     RETURNING
       VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
+
+  "! <p class="shorttext synchronized">Checks if object is relevant for search</p>
+  METHODS skip_search DEFAULT IGNORE
+    IMPORTING
+      !object            TYPE zif_adcoset_ty_global=>ty_tadir_object
+    RETURNING
+      VALUE(skip_search) TYPE abap_bool.
 ENDINTERFACE.

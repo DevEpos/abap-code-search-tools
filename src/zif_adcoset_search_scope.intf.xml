@@ -41,6 +41,11 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Retrieves the next package of objects in scope</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>SKIP_SEARCH</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Checks if object is relevant for search</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

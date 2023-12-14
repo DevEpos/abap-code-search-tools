@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Search query for code search</p>
 CLASS zcl_adcoset_search_query DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -41,7 +40,7 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
 
       LOOP AT scope->next_package( ) ASSIGNING FIELD-SYMBOL(<object>).
 
-        IF <object>-has_deleted_subobjects = abap_false.
+        IF NOT scope->skip_search( <object> ).
           TRY.
               DATA(source_code_provider) = zcl_adcoset_csp_factory=>get_search_provider(
                                                type            = <object>-type
