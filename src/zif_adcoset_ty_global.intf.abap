@@ -84,17 +84,20 @@ INTERFACE zif_adcoset_ty_global
       tr_request_range  TYPE RANGE OF trkorr,
     END OF ty_search_scope_ranges.
 
-  "! <p class="shorttext synchronized">Tadir object with corresponding subobjects</p>
+  "! <p class="shorttext synchronized">tadir object with corresponding subobjects</p>
   TYPES BEGIN OF ty_tadir_object.
           INCLUDE TYPE ty_tadir_object_info AS info.
-  TYPES   searched_objs_count    TYPE i.
-  TYPES   complete_main_object   TYPE abap_bool.
-  TYPES   has_deleted_subobjects TYPE abap_bool.
-  TYPES   subobjects             TYPE ty_tadir_object_infos.
+  TYPES   subobjects           TYPE ty_tadir_object_infos.
   TYPES END OF ty_tadir_object.
 
   "! <p class="shorttext synchronized">Table of tadir object with corresponding subobjects</p>
   TYPES ty_tadir_objects TYPE STANDARD TABLE OF ty_tadir_object WITH EMPTY KEY.
+
+  TYPES:
+    BEGIN OF ty_scope_package,
+      count  TYPE i,
+      object TYPE zif_adcoset_ty_global=>ty_tadir_objects,
+    END OF ty_scope_package.
 
   "! <p class="shorttext synchronized">Ranges / data to define an object scope</p>
   TYPES BEGIN OF ty_search_scope.
@@ -253,7 +256,7 @@ INTERFACE zif_adcoset_ty_global
   "! <p class="shorttext synchronized">Defines search package for parallel search</p>
   TYPES BEGIN OF ty_search_package.
           INCLUDE TYPE ty_search_settings_int AS settings.
-  TYPES   objects TYPE ty_tadir_objects.
+  TYPES   scope_package TYPE ty_scope_package.
   TYPES END OF ty_search_package.
 
   TYPES: BEGIN OF ty_search_package_result,

@@ -52,14 +52,14 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
       ORDER BY obj~programid
-      INTO CORRESPONDING FIELDS OF TABLE @result
+      INTO CORRESPONDING FIELDS OF TABLE @result-object
       UP TO @max_rows ROWS
       OFFSET @current_offset.
 
-    DATA(package_result_count) = lines( result ).
-    current_offset = current_offset + package_result_count.
+    result-count = lines( result-object ).
+    current_offset = current_offset + result-count.
 
-    IF package_result_count < max_rows.
+    IF result-count < max_rows.
       all_packages_read = abap_true.
     ENDIF.
   ENDMETHOD.

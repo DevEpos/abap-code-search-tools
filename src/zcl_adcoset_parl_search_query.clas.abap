@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Query for code search (with parallel processing)</p>
 CLASS zcl_adcoset_parl_search_query DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -54,8 +53,8 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
       DATA(package) = scope->next_package( ).
 
       " process new package asynchronously
-      task_runner->run( input = VALUE zif_adcoset_ty_global=>ty_search_package( settings = settings
-                                                                                objects  = package ) ).
+      task_runner->run( input = VALUE zif_adcoset_ty_global=>ty_search_package( settings      = settings
+                                                                                scope_package = package ) ).
     ENDWHILE.
 
     task_runner->wait_until_finished( ).

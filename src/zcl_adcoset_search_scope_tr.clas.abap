@@ -10,7 +10,6 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
         search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
 
     METHODS zif_adcoset_search_scope~next_package REDEFINITION.
-    METHODS zif_adcoset_search_scope~skip_search  REDEFINITION.
 
   PROTECTED SECTION.
     METHODS determine_count REDEFINITION.
@@ -48,7 +47,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
-    DATA result_main_objects TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+    DATA result_extended TYPE ty_scope_package_ext.
 
     DATA(max_rows) = package_size.
     IF     current_offset IS INITIAL
@@ -60,30 +59,23 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
     LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_r3tr_object>)
          WHERE pgmid = zif_adcoset_c_global=>c_program_id-r3tr.
-      result_main_objects = VALUE #( BASE result_main_objects
-                                     ( type                 = <tr_r3tr_object>-obj_type
-                                       name                 = <tr_r3tr_object>-obj_name
-                                       searched_objs_count  = 1
-                                       complete_main_object = abap_true ) ).
+      result_extended-object = VALUE #( BASE result_extended-object
+                                        ( type                 = <tr_r3tr_object>-obj_type
+                                          name                 = <tr_r3tr_object>-obj_name
+                                          complete_main_object = abap_true ) ).
+      result_extended-count = result_extended-count + 1.
     ENDLOOP.
 
-    limu_processor = NEW lcl_limu_processor( result_main_objects ).
+    limu_processor = NEW lcl_limu_processor( result_extended ).
     LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_limu_object>)
          WHERE pgmid = zif_adcoset_c_global=>c_program_id-limu.
       determine_tadir_obj_for_limu( tr_object = <tr_limu_object> ).
     ENDLOOP.
 
-    result = VALUE #( BASE result
-                      ( LINES OF limu_processor->result ) ).
+    result = CORRESPONDING #( DEEP limu_processor->result_extended ).
+    current_offset = current_offset + result-count.
 
-    DATA(package_result_count) = 0.
-    LOOP AT result ASSIGNING FIELD-SYMBOL(<result_line>).
-      package_result_count = package_result_count + <result_line>-searched_objs_count.
-    ENDLOOP.
-
-    current_offset = current_offset + package_result_count.
-
-    IF package_result_count < max_rows.
+    IF current_offset < max_rows.
       all_packages_read = abap_true.
     ENDIF.
   ENDMETHOD.
@@ -194,13 +186,6 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
           ( sign   = 'I'
             option = 'EQ'
             low    = zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD zif_adcoset_search_scope~skip_search.
-    IF        object-has_deleted_subobjects IS NOT INITIAL
-       OR NOT line_exists( search_ranges-object_type_range[ low = object-type ] ).
-      skip_search = abap_true.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

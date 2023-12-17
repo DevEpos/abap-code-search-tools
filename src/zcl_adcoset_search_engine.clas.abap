@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Code Search Engine</p>
 CLASS zcl_adcoset_search_engine DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -54,7 +53,7 @@ CLASS zcl_adcoset_search_engine IMPLEMENTATION.
 
     TRY.
         DATA(query) = zcl_adcoset_search_query_fac=>create_query(
-                          scope    = zcl_adcoset_search_scope_fac=>create_final_scope( objects = input-objects )
+                          scope    = zcl_adcoset_search_scope_fac=>create_final_scope( package = input-scope_package )
                           settings = input-settings ).
       CATCH zcx_adcoset_static_error.
     ENDTRY.

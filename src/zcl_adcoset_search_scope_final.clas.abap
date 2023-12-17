@@ -8,28 +8,28 @@ CLASS zcl_adcoset_search_scope_final DEFINITION
 
     METHODS constructor
       IMPORTING
-        !objects TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+        !package TYPE zif_adcoset_ty_global=>ty_scope_package.
 
   PRIVATE SECTION.
-    DATA objects TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+    DATA package TYPE zif_adcoset_ty_global=>ty_scope_package.
 ENDCLASS.
 
 
 CLASS zcl_adcoset_search_scope_final IMPLEMENTATION.
   METHOD constructor.
-    me->objects = objects.
+    me->package = package.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~count.
-    result = lines( objects ).
+    result = package-count.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~has_next_package.
-    result = xsdbool( objects IS NOT INITIAL ).
+    result = xsdbool( package IS NOT INITIAL ).
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
-    result = objects.
-    CLEAR objects.
+    result = package.
+    CLEAR package.
   ENDMETHOD.
 ENDCLASS.

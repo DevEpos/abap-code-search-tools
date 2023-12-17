@@ -14,7 +14,7 @@ INTERFACE zif_adcoset_search_scope
   "! <p class="shorttext synchronized">Retrieves the next package of objects in scope</p>
   METHODS next_package
     RETURNING
-      VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+      VALUE(result) TYPE zif_adcoset_ty_global=>ty_scope_package.
 
   "! <p class="shorttext synchronized">Returns 'X' if another package exists</p>
   METHODS has_next_package
@@ -38,10 +38,4 @@ INTERFACE zif_adcoset_search_scope
     RETURNING
       VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
 
-  "! <p class="shorttext synchronized">Checks if object is relevant for search</p>
-  METHODS skip_search DEFAULT IGNORE
-    IMPORTING
-      !object            TYPE zif_adcoset_ty_global=>ty_tadir_object
-    RETURNING
-      VALUE(skip_search) TYPE abap_bool.
 ENDINTERFACE.

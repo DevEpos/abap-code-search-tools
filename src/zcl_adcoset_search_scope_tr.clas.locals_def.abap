@@ -1,14 +1,26 @@
 *"* use this source file for any type of declarations (class
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
+TYPES BEGIN OF ty_tadir_object_extended.
+        INCLUDE TYPE zif_adcoset_ty_global=>ty_tadir_object_info AS info.
+TYPES   complete_main_object TYPE abap_bool.
+TYPES   subobjects           TYPE zif_adcoset_ty_global=>ty_tadir_object_infos.
+TYPES END OF ty_tadir_object_extended.
+
+TYPES:
+  BEGIN OF ty_scope_package_ext,
+    count  TYPE i,
+    object TYPE STANDARD TABLE OF ty_tadir_object_extended WITH DEFAULT KEY,
+  END OF ty_scope_package_ext.
+
 CLASS lcl_limu_processor DEFINITION.
 
   PUBLIC SECTION.
-    DATA result TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+    DATA result_extended TYPE ty_scope_package_ext.
 
     METHODS constructor
       IMPORTING
-        !result TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+        result_extended TYPE ty_scope_package_ext.
 
     METHODS handle_function_module
       IMPORTING
@@ -50,25 +62,22 @@ CLASS lcl_limu_processor DEFINITION.
   PRIVATE SECTION.
     METHODS add_subobject
       IMPORTING
-        main_object_name       TYPE sobj_name
-        main_object_type       TYPE trobjtype
-        has_deleted_subobjects TYPE abap_bool
-        subobjects             TYPE zif_adcoset_ty_global=>ty_tadir_object_infos
+        main_object_name TYPE sobj_name
+        main_object_type TYPE trobjtype
+        subobjects       TYPE zif_adcoset_ty_global=>ty_tadir_object_infos
       RAISING
         cx_sy_itab_line_not_found.
 
     METHODS add_result
       IMPORTING
-        tr_object              TYPE zif_adcoset_ty_global=>ty_tr_request_object
-        main_object_name       TYPE sobj_name
-        main_object_type       TYPE trobjtype
-        has_deleted_subobjects TYPE abap_bool.
+        tr_object        TYPE zif_adcoset_ty_global=>ty_tr_request_object
+        main_object_name TYPE sobj_name
+        main_object_type TYPE trobjtype.
 
     METHODS add_result_cl_definition
       IMPORTING
-        tr_object              TYPE zif_adcoset_ty_global=>ty_tr_request_object
-        main_object_name       TYPE sobj_name
-        main_object_type       TYPE trobjtype
-        has_deleted_subobjects TYPE abap_bool.
+        tr_object        TYPE zif_adcoset_ty_global=>ty_tr_request_object
+        main_object_name TYPE sobj_name
+        main_object_type TYPE trobjtype.
 
 ENDCLASS.
