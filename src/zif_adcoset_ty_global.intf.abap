@@ -53,6 +53,7 @@ INTERFACE zif_adcoset_ty_global
          END OF ty_tadir_object_info.
 
   TYPES ty_tadir_object_infos TYPE STANDARD TABLE OF ty_tadir_object_info WITH EMPTY KEY.
+  TYPES ty_tadir_object_infos_sorted TYPE SORTED TABLE OF ty_tadir_object_info WITH UNIQUE KEY type name.
 
   TYPES: BEGIN OF ty_tr_request_object,
            trkorr   TYPE trkorr,
@@ -87,7 +88,7 @@ INTERFACE zif_adcoset_ty_global
   "! <p class="shorttext synchronized">tadir object with corresponding subobjects</p>
   TYPES BEGIN OF ty_tadir_object.
           INCLUDE TYPE ty_tadir_object_info AS info.
-  TYPES   subobjects           TYPE ty_tadir_object_infos.
+  TYPES   subobjects TYPE ty_tadir_object_infos_sorted.
   TYPES END OF ty_tadir_object.
 
   "! <p class="shorttext synchronized">Table of tadir object with corresponding subobjects</p>
@@ -96,7 +97,7 @@ INTERFACE zif_adcoset_ty_global
   TYPES:
     BEGIN OF ty_scope_package,
       count  TYPE i,
-      object TYPE zif_adcoset_ty_global=>ty_tadir_objects,
+      objects TYPE zif_adcoset_ty_global=>ty_tadir_objects,
     END OF ty_scope_package.
 
   "! <p class="shorttext synchronized">Ranges / data to define an object scope</p>

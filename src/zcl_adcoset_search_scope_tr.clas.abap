@@ -17,24 +17,19 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
   PRIVATE SECTION.
     DATA limu_processor TYPE REF TO lcl_limu_processor.
 
-    "! <p class="shorttext synchronized">Read Source Code Objects from Transport Requests</p>
-    "!
-    "! @parameter max_rows   | <p class="shorttext synchronized">Maximum number of rows to be read</p>
-    "! @parameter tr_objects | <p class="shorttext synchronized">Source Code Objects from Transport Requests</p>
+    "! Read Source Code Objects from Transport Requests
     METHODS get_tr_objects
       IMPORTING
         max_rows          TYPE i
       RETURNING
         VALUE(tr_objects) TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
 
-    "! <p class="shorttext synchronized">Determine the maan </p>
-    "!
-    "! @parameter tr_object | <p class="shorttext synchronized"></p>
+    "! Determine the main object for limu objects
     METHODS determine_tadir_obj_for_limu
       IMPORTING
         tr_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
 
-    "! <p class="shorttext synchronized">Enhance the type filter with corresponding LIMU types</p>
+    "! Enhance the type filter with corresponding LIMU types
     METHODS add_subobj_type_to_filter.
 
 ENDCLASS.
@@ -47,7 +42,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
-    DATA result_extended TYPE ty_scope_package_ext.
+    DATA objects TYPE ty_tadir_objects_extended.
 
     DATA(max_rows) = package_size.
     IF     current_offset IS INITIAL
@@ -59,20 +54,21 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
     LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_r3tr_object>)
          WHERE pgmid = zif_adcoset_c_global=>c_program_id-r3tr.
-      result_extended-object = VALUE #( BASE result_extended-object
-                                        ( type                 = <tr_r3tr_object>-obj_type
-                                          name                 = <tr_r3tr_object>-obj_name
-                                          complete_main_object = abap_true ) ).
-      result_extended-count = result_extended-count + 1.
+      objects = VALUE #( BASE objects
+                         ( type                 = <tr_r3tr_object>-obj_type
+                           name                 = <tr_r3tr_object>-obj_name
+                           complete_main_object = abap_true ) ).
     ENDLOOP.
 
-    limu_processor = NEW lcl_limu_processor( result_extended ).
+    limu_processor = NEW lcl_limu_processor( objects ).
     LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_limu_object>)
          WHERE pgmid = zif_adcoset_c_global=>c_program_id-limu.
       determine_tadir_obj_for_limu( tr_object = <tr_limu_object> ).
     ENDLOOP.
 
-    result = CORRESPONDING #( DEEP limu_processor->result_extended ).
+    result = VALUE #( count   = lines( tr_objects )
+                      objects = CORRESPONDING #( DEEP limu_processor->objects ) ).
+
     current_offset = current_offset + result-count.
 
     IF current_offset < max_rows.

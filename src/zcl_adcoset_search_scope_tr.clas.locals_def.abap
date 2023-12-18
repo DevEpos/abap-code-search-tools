@@ -1,26 +1,22 @@
 *"* use this source file for any type of declarations (class
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
+
 TYPES BEGIN OF ty_tadir_object_extended.
-        INCLUDE TYPE zif_adcoset_ty_global=>ty_tadir_object_info AS info.
+        INCLUDE TYPE zif_adcoset_ty_global=>ty_tadir_object.
 TYPES   complete_main_object TYPE abap_bool.
-TYPES   subobjects           TYPE zif_adcoset_ty_global=>ty_tadir_object_infos.
 TYPES END OF ty_tadir_object_extended.
 
-TYPES:
-  BEGIN OF ty_scope_package_ext,
-    count  TYPE i,
-    object TYPE STANDARD TABLE OF ty_tadir_object_extended WITH DEFAULT KEY,
-  END OF ty_scope_package_ext.
+TYPES ty_tadir_objects_extended TYPE TABLE OF ty_tadir_object_extended.
 
 CLASS lcl_limu_processor DEFINITION.
 
   PUBLIC SECTION.
-    DATA result_extended TYPE ty_scope_package_ext.
+    DATA objects TYPE TABLE OF ty_tadir_object_extended READ-ONLY.
 
     METHODS constructor
       IMPORTING
-        result_extended TYPE ty_scope_package_ext.
+        !objects TYPE ty_tadir_objects_extended.
 
     METHODS handle_function_module
       IMPORTING
