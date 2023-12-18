@@ -32,6 +32,11 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
     "! Enhance the type filter with corresponding LIMU types
     METHODS add_subobj_type_to_filter.
 
+    METHODS process_limu_object
+      IMPORTING
+        limu_object  TYPE zif_adcoset_ty_global=>ty_tr_request_object
+        main_objects TYPE ty_tadir_objects_extended.
+
 ENDCLASS.
 
 
@@ -42,7 +47,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
-    DATA objects TYPE ty_tadir_objects_extended.
+    DATA main_objects TYPE ty_tadir_objects_extended.
 
     DATA(max_rows) = package_size.
     IF     current_offset IS INITIAL
@@ -54,16 +59,17 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
     LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_r3tr_object>)
          WHERE pgmid = zif_adcoset_c_global=>c_program_id-r3tr.
-      objects = VALUE #( BASE objects
-                         ( type                 = <tr_r3tr_object>-obj_type
-                           name                 = <tr_r3tr_object>-obj_name
-                           complete_main_object = abap_true ) ).
+      main_objects = VALUE #( BASE main_objects
+                              ( type                 = <tr_r3tr_object>-obj_type
+                                name                 = <tr_r3tr_object>-obj_name
+                                complete_main_object = abap_true ) ).
     ENDLOOP.
 
-    limu_processor = NEW lcl_limu_processor( objects ).
     LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_limu_object>)
          WHERE pgmid = zif_adcoset_c_global=>c_program_id-limu.
-      determine_tadir_obj_for_limu( tr_object = <tr_limu_object> ).
+      process_limu_object( main_objects = main_objects
+                           limu_object  = <tr_limu_object> ).
+
     ENDLOOP.
 
     result = VALUE #( count   = lines( tr_objects )
@@ -183,5 +189,13 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
             option = 'EQ'
             low    = zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
     ENDIF.
+  ENDMETHOD.
+
+  METHOD process_limu_object.
+    IF limu_processor IS INITIAL.
+      limu_processor = NEW lcl_limu_processor( objects             = main_objects
+                                               filter_object_types = search_ranges-object_type_range ).
+    ENDIF.
+    determine_tadir_obj_for_limu( limu_object ).
   ENDMETHOD.
 ENDCLASS.

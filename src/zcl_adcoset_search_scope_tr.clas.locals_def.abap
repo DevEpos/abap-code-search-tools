@@ -8,15 +8,18 @@ TYPES   complete_main_object TYPE abap_bool.
 TYPES END OF ty_tadir_object_extended.
 
 TYPES ty_tadir_objects_extended TYPE TABLE OF ty_tadir_object_extended.
+TYPES ty_object_type_range TYPE RANGE OF trobjtype.
 
 CLASS lcl_limu_processor DEFINITION.
 
   PUBLIC SECTION.
     DATA objects TYPE TABLE OF ty_tadir_object_extended READ-ONLY.
+    DATA filter_object_types TYPE ty_object_type_range.
 
     METHODS constructor
       IMPORTING
-        !objects TYPE ty_tadir_objects_extended.
+        !objects            TYPE ty_tadir_objects_extended
+        filter_object_types TYPE ty_object_type_range.
 
     METHODS handle_function_module
       IMPORTING
