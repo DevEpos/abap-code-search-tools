@@ -73,8 +73,9 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     ENDLOOP.
 
     result = VALUE #( count   = lines( tr_objects )
-                      objects = CORRESPONDING #( DEEP limu_processor->objects ) ).
-
+                      objects = CORRESPONDING #( DEEP COND #( WHEN limu_processor IS BOUND
+                                                              THEN limu_processor->objects
+                                                              ELSE main_objects ) ) ).
     current_offset = current_offset + result-count.
 
     IF current_offset < max_rows.
