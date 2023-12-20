@@ -7,7 +7,7 @@ TYPES BEGIN OF ty_tadir_object_extended.
 TYPES   complete_main_object TYPE abap_bool.
 TYPES END OF ty_tadir_object_extended.
 
-TYPES ty_tadir_objects_extended TYPE TABLE OF ty_tadir_object_extended.
+TYPES ty_tadir_objects_extended TYPE TABLE OF ty_tadir_object_extended WITH DEFAULT KEY.
 TYPES ty_object_type_range TYPE RANGE OF trobjtype.
 
 CLASS lcl_limu_processor DEFINITION.

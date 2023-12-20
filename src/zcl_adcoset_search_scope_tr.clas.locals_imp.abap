@@ -82,7 +82,7 @@ CLASS lcl_limu_processor IMPLEMENTATION.
                                        obj_name = tr_object-obj_name )
       IMPORTING we_tadir = main_obj.
 
-    " REPS object can come from different main types, if the determined main type is needed in the search, object can be ignored
+    " REPS object can come from different main types, if the determined main type is not needed in the search, object can be ignored
     IF         filter_object_types IS NOT INITIAL
        AND NOT line_exists( filter_object_types[ low = main_obj-object ] ).
       RETURN.

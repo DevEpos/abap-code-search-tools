@@ -32,10 +32,18 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
     "! Enhance the type filter with corresponding LIMU types
     METHODS add_subobj_type_to_filter.
 
-    METHODS process_limu_object
+    METHODS process_limu_objects
       IMPORTING
-        limu_object  TYPE zif_adcoset_ty_global=>ty_tr_request_object
-        main_objects TYPE ty_tadir_objects_extended.
+        limu_objects         TYPE zif_adcoset_ty_global=>ty_tr_request_objects
+        main_objects         TYPE ty_tadir_objects_extended
+      RETURNING
+        VALUE(scope_objects) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+
+    METHODS process_r3tr_objects
+      IMPORTING
+        r3tr_objects        TYPE zif_adcoset_ty_global=>ty_tr_request_objects
+      RETURNING
+        VALUE(main_objects) TYPE ty_tadir_objects_extended.
 
 ENDCLASS.
 
@@ -57,25 +65,17 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
     DATA(tr_objects) = get_tr_objects( max_rows ).
 
-    LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_r3tr_object>)
-         WHERE pgmid = zif_adcoset_c_global=>c_program_id-r3tr.
-      main_objects = VALUE #( BASE main_objects
-                              ( type                 = <tr_r3tr_object>-obj_type
-                                name                 = <tr_r3tr_object>-obj_name
-                                complete_main_object = abap_true ) ).
-    ENDLOOP.
+    main_objects = process_r3tr_objects(
+                       VALUE #( FOR object IN tr_objects WHERE ( pgmid = zif_adcoset_c_global=>c_program_id-r3tr )
+                                ( object ) ) ).
 
-    LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_limu_object>)
-         WHERE pgmid = zif_adcoset_c_global=>c_program_id-limu.
-      process_limu_object( main_objects = main_objects
-                           limu_object  = <tr_limu_object> ).
+    result = VALUE #(
+        count   = lines( tr_objects )
+        objects = process_limu_objects(
+            main_objects = main_objects
+            limu_objects = VALUE #( FOR object IN tr_objects WHERE ( pgmid = zif_adcoset_c_global=>c_program_id-limu )
+                                    ( object ) ) ) ).
 
-    ENDLOOP.
-
-    result = VALUE #( count   = lines( tr_objects )
-                      objects = CORRESPONDING #( DEEP COND #( WHEN limu_processor IS BOUND
-                                                              THEN limu_processor->objects
-                                                              ELSE main_objects ) ) ).
     current_offset = current_offset + result-count.
 
     IF current_offset < max_rows.
@@ -192,11 +192,29 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD process_limu_object.
+  METHOD process_limu_objects.
     IF limu_processor IS INITIAL.
       limu_processor = NEW lcl_limu_processor( objects             = main_objects
                                                filter_object_types = search_ranges-object_type_range ).
     ENDIF.
-    determine_tadir_obj_for_limu( limu_object ).
+
+    LOOP AT limu_objects ASSIGNING FIELD-SYMBOL(<limu_object>).
+      determine_tadir_obj_for_limu( <limu_object> ).
+    ENDLOOP.
+
+    IF limu_objects IS INITIAL.
+      scope_objects = CORRESPONDING #( DEEP main_objects ).
+    ELSE.
+      scope_objects = CORRESPONDING #( DEEP limu_processor->objects ).
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD process_r3tr_objects.
+    LOOP AT r3tr_objects ASSIGNING FIELD-SYMBOL(<tr_r3tr_object>).
+      main_objects = VALUE #( BASE main_objects
+                              ( type                 = <tr_r3tr_object>-obj_type
+                                name                 = <tr_r3tr_object>-obj_name
+                                complete_main_object = abap_true ) ).
+    ENDLOOP.
   ENDMETHOD.
 ENDCLASS.
