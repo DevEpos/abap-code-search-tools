@@ -23,7 +23,7 @@ CLASS zcl_adcoset_search_scope_fac DEFINITION
       IMPORTING
         scope_id          TYPE sysuuid_x16
       RETURNING
-        VALUE(scope_type) TYPE zadcoset_scope_type.
+        VALUE(result) TYPE zadcoset_scope_type.
 ENDCLASS.
 
 
@@ -46,6 +46,6 @@ CLASS zcl_adcoset_search_scope_fac IMPLEMENTATION.
   METHOD read_scope_type.
     SELECT SINGLE scope_type FROM zadcoset_csscope
       WHERE id = @scope_id
-      INTO @scope_type.
+      INTO @result.
   ENDMETHOD.
 ENDCLASS.

@@ -22,7 +22,7 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
       IMPORTING
         max_rows          TYPE i
       RETURNING
-        VALUE(tr_objects) TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
+        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
 
     "! Determine the main object for limu objects
     METHODS determine_tadir_obj_for_limu
@@ -37,13 +37,13 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
         limu_objects         TYPE zif_adcoset_ty_global=>ty_tr_request_objects
         main_objects         TYPE ty_tadir_objects_extended
       RETURNING
-        VALUE(scope_objects) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
 
     METHODS process_r3tr_objects
       IMPORTING
         r3tr_objects        TYPE zif_adcoset_ty_global=>ty_tr_request_objects
       RETURNING
-        VALUE(main_objects) TYPE ty_tadir_objects_extended.
+        VALUE(result) TYPE ty_tadir_objects_extended.
 
 ENDCLASS.
 
@@ -133,7 +133,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
       ORDER BY obj_name,
                pgmid,
                obj_type
-      INTO CORRESPONDING FIELDS OF TABLE @tr_objects
+      INTO CORRESPONDING FIELDS OF TABLE @result
       UP TO @max_rows ROWS
       OFFSET @current_offset.
   ENDMETHOD.
@@ -203,15 +203,15 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     ENDLOOP.
 
     IF limu_objects IS INITIAL.
-      scope_objects = CORRESPONDING #( DEEP main_objects ).
+      result = CORRESPONDING #( DEEP main_objects ).
     ELSE.
-      scope_objects = CORRESPONDING #( DEEP limu_processor->objects ).
+      result = CORRESPONDING #( DEEP limu_processor->objects ).
     ENDIF.
   ENDMETHOD.
 
   METHOD process_r3tr_objects.
     LOOP AT r3tr_objects ASSIGNING FIELD-SYMBOL(<tr_r3tr_object>).
-      main_objects = VALUE #( BASE main_objects
+      result = VALUE #( BASE result
                               ( type                 = <tr_r3tr_object>-obj_type
                                 name                 = <tr_r3tr_object>-obj_name
                                 complete_main_object = abap_true ) ).

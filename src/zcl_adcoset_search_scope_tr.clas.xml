@@ -36,12 +36,6 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Maximum number of rows to be read</DESCRIPT>
     </SEOSUBCOTX>
-    <SEOSUBCOTX>
-     <CMPNAME>GET_TR_OBJECTS</CMPNAME>
-     <SCONAME>TR_OBJECTS</SCONAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Source Code Objects from Transport Requests</DESCRIPT>
-    </SEOSUBCOTX>
    </DESCRIPTIONS_SUB>
   </asx:values>
  </asx:abap>

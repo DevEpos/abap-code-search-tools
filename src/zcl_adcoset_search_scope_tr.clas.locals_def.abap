@@ -63,9 +63,7 @@ CLASS lcl_limu_processor DEFINITION.
       IMPORTING
         main_object_name TYPE sobj_name
         main_object_type TYPE trobjtype
-        subobjects       TYPE zif_adcoset_ty_global=>ty_tadir_object_infos
-      RAISING
-        cx_sy_itab_line_not_found.
+        subobjects       TYPE zif_adcoset_ty_global=>ty_tadir_object_infos..
 
     METHODS add_result
       IMPORTING
