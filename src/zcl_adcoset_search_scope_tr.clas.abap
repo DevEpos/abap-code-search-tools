@@ -186,8 +186,9 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
     ENDIF.
 
-    IF    line_exists( search_ranges-object_type_range[ sign = 'I'
-                                                        low  = zif_adcoset_c_global=>c_source_code_type-function_group ] )
+    IF    line_exists( search_ranges-object_type_range[
+                           sign = 'I'
+                           low  = zif_adcoset_c_global=>c_source_code_type-function_group ] )
        OR line_exists( search_ranges-object_type_range[ sign = 'I'
                                                         low  = zif_adcoset_c_global=>c_source_code_type-program ] ).
       search_ranges-object_type_range = VALUE #(
@@ -225,6 +226,8 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD resolve_tr_request.
+    CHECK search_ranges-tr_request_range IS NOT INITIAL.
+
     SELECT trkorr FROM e070
       WHERE strkorr IN @search_ranges-tr_request_range
       INTO TABLE @DATA(tr_tasks).
