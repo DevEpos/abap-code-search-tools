@@ -19,11 +19,6 @@
      <DESCRIPT>Enhance the type filter with corresponding LIMU types</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CMPNAME>DETERMINE_TADIR_OBJ_FOR_LIMU</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Determine the maan</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
      <CMPNAME>GET_TR_OBJECTS</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Read Source Code Objects from Transport Requests</DESCRIPT>

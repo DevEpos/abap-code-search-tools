@@ -3,20 +3,47 @@
 *"* declarations
 CLASS lcl_limu_processor IMPLEMENTATION.
   METHOD constructor.
-    me->objects             = objects.
+    objects = main_objects.
+    me->limu_tr_objects     = limu_tr_objects.
     me->filter_object_types = filter_object_types.
+  ENDMETHOD.
+
+  METHOD run.
+    LOOP AT limu_tr_objects ASSIGNING FIELD-SYMBOL(<limu_object>).
+      handle_limu_object( <limu_object> ).
+    ENDLOOP.
+    result = CORRESPONDING #( DEEP objects ).
+  ENDMETHOD.
+
+  METHOD handle_limu_object.
+    CASE limu_object-obj_type.
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-function_module.
+        handle_function_module( limu_object ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-report_source_code.
+        handle_report_source_code( limu_object ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-method.
+        handle_class_method( limu_object ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_include.
+        handle_class_include( limu_object ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_private_section.
+        handle_class_private_section( limu_object ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_public_section.
+        handle_class_public_section( limu_object ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section.
+        handle_class_protected_section( limu_object ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_definition.
+        handle_class_definition( limu_object ).
+    ENDCASE.
   ENDMETHOD.
 
   METHOD handle_function_module.
     DATA func_group_name TYPE rs38l_area.
 
-    DATA(funcname) = CONV rs38l_fnam( tr_object-obj_name ).
+    DATA(funcname) = CONV rs38l_fnam( limu_object-obj_name ).
     CALL FUNCTION 'FUNCTION_INCLUDE_INFO'
-      CHANGING
-        funcname            = funcname
-        group               = func_group_name
-      EXCEPTIONS
-        function_not_exists = 1.
+      CHANGING   funcname            = funcname
+                 group               = func_group_name
+      EXCEPTIONS function_not_exists = 1.
 
     IF sy-subrc <> 0.
       RETURN.
@@ -25,10 +52,10 @@ CLASS lcl_limu_processor IMPLEMENTATION.
     TRY.
         add_subobject( main_object_name = CONV #( func_group_name )
                        main_object_type = zif_adcoset_c_global=>c_source_code_type-function_group
-                       subobjects       = VALUE #( ( name = tr_object-obj_name type = tr_object-obj_type ) ) ).
+                       subobjects       = VALUE #( ( name = limu_object-obj_name type = limu_object-obj_type ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object        = tr_object
+        add_result( tr_object        = limu_object
                     main_object_name = CONV #( func_group_name )
                     main_object_type = zif_adcoset_c_global=>c_source_code_type-function_group ).
     ENDTRY.
@@ -52,13 +79,13 @@ CLASS lcl_limu_processor IMPLEMENTATION.
           subobjects = VALUE #(
               ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_public_section
                 name = cl_oo_classname_service=>get_pubsec_name(
-                           CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) )
+                           CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ) ) )
               ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_private_section
                 name = cl_oo_classname_service=>get_prisec_name(
-                           CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) )
+                           CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ) ) )
               ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section
                 name = cl_oo_classname_service=>get_prosec_name(
-                           CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) ) ) ) ).
+                           CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ) ) ) ) ) ).
   ENDMETHOD.
 
   METHOD add_subobject.
@@ -78,13 +105,11 @@ CLASS lcl_limu_processor IMPLEMENTATION.
 
     " todo - test deleted function include
     CALL FUNCTION 'TR_CHECK_TYPE'
-      EXPORTING
-        wi_e071  = VALUE e071( trkorr   = tr_object-trkorr
-                               pgmid    = tr_object-pgmid
-                               object   = tr_object-obj_type
-                               obj_name = tr_object-obj_name )
-      IMPORTING
-        we_tadir = main_obj.
+      EXPORTING wi_e071  = VALUE e071( trkorr   = limu_object-trkorr
+                                       pgmid    = limu_object-pgmid
+                                       object   = limu_object-obj_type
+                                       obj_name = limu_object-obj_name )
+      IMPORTING we_tadir = main_obj.
 
     " REPS object can come from different main types
     " if the determined main type does not match filters, object can be ignored
@@ -92,10 +117,10 @@ CLASS lcl_limu_processor IMPLEMENTATION.
       TRY.
           add_subobject( main_object_name = main_obj-obj_name
                          main_object_type = main_obj-object
-                         subobjects       = VALUE #( ( name = tr_object-obj_name type = tr_object-obj_type ) ) ).
+                         subobjects       = VALUE #( ( name = limu_object-obj_name type = limu_object-obj_type ) ) ).
 
         CATCH cx_sy_itab_line_not_found.
-          add_result( tr_object        = tr_object
+          add_result( tr_object        = limu_object
                       main_object_name = main_obj-obj_name
                       main_object_type = main_obj-object ).
       ENDTRY.
@@ -104,16 +129,17 @@ CLASS lcl_limu_processor IMPLEMENTATION.
 
   METHOD handle_class_method.
     TRY.
-        add_subobject( main_object_name = CONV #( tr_object-obj_name(30) ) " class_name.
-                       main_object_type = zif_adcoset_c_global=>c_source_code_type-class
-                       subobjects       = VALUE #( ( name = tr_object-obj_name+30(30) type = tr_object-obj_type ) ) ).
+        add_subobject(
+            main_object_name = CONV #( limu_object-obj_name(30) ) " class_name.
+            main_object_type = zif_adcoset_c_global=>c_source_code_type-class
+            subobjects       = VALUE #( ( name = limu_object-obj_name+30(30) type = limu_object-obj_type ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object        = VALUE #( trkorr   = tr_object-trkorr
-                                                pgmid    = tr_object-pgmid
-                                                obj_type = tr_object-obj_type
-                                                obj_name = tr_object-obj_name+30(30) )
-                    main_object_name = CONV #( tr_object-obj_name(30) ) " class_name.
+        add_result( tr_object        = VALUE #( trkorr   = limu_object-trkorr
+                                                pgmid    = limu_object-pgmid
+                                                obj_type = limu_object-obj_type
+                                                obj_name = limu_object-obj_name+30(30) )
+                    main_object_name = CONV #( limu_object-obj_name(30) ) " class_name.
                     main_object_type = zif_adcoset_c_global=>c_source_code_type-class ).
     ENDTRY.
   ENDMETHOD.
@@ -121,13 +147,13 @@ CLASS lcl_limu_processor IMPLEMENTATION.
   METHOD handle_class_include.
     TRY.
         add_subobject(
-            main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
+            main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
             main_object_type = zif_adcoset_c_global=>c_source_code_type-class
-            subobjects       = VALUE #( ( name = tr_object-obj_name type = tr_object-obj_type ) ) ).
+            subobjects       = VALUE #( ( name = limu_object-obj_name type = limu_object-obj_type ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object        = tr_object
-                    main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
+        add_result( tr_object        = limu_object
+                    main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
                     main_object_type = zif_adcoset_c_global=>c_source_code_type-class ).
     ENDTRY.
   ENDMETHOD.
@@ -135,60 +161,60 @@ CLASS lcl_limu_processor IMPLEMENTATION.
   METHOD handle_class_section.
     TRY.
         add_subobject(
-            main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
+            main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
             main_object_type = zif_adcoset_c_global=>c_source_code_type-class
             subobjects       = VALUE #( ( name = section_include
-                                          type = tr_object-obj_type ) ) ).
+                                          type = limu_object-obj_type ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
         add_result( tr_object        = VALUE #( obj_name = section_include
-                                                obj_type = tr_object-obj_type )
-                    main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
+                                                obj_type = limu_object-obj_type )
+                    main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
                     main_object_type = zif_adcoset_c_global=>c_source_code_type-class ).
     ENDTRY.
   ENDMETHOD.
 
   METHOD handle_class_private_section.
     handle_class_section(
-        tr_object       = tr_object
+        limu_object     = limu_object
         section_include = cl_oo_classname_service=>get_prisec_name(
-                              CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) ).
+            CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ) ) ).
   ENDMETHOD.
 
   METHOD handle_class_protected_section.
     handle_class_section(
-        tr_object       = tr_object
+        limu_object     = limu_object
         section_include = cl_oo_classname_service=>get_prosec_name(
-                              CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) ).
+            CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ) ) ).
   ENDMETHOD.
 
   METHOD handle_class_public_section.
     handle_class_section(
-        tr_object       = tr_object
+        limu_object     = limu_object
         section_include = cl_oo_classname_service=>get_pubsec_name(
-                              CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) ).
+            CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ) ) ).
   ENDMETHOD.
 
   METHOD handle_class_definition.
     TRY.
         add_subobject(
-            main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
+            main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
             main_object_type = zif_adcoset_c_global=>c_source_code_type-class
             subobjects       = VALUE #(
                 ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_public_section
                   name = cl_oo_classname_service=>get_pubsec_name(
-                             CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) )
+                             CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ) ) )
                 ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_private_section
                   name = cl_oo_classname_service=>get_prisec_name(
-                             CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) )
+                             CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ) ) )
                 ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section
                   name = cl_oo_classname_service=>get_prosec_name(
-                             CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) ) ) ) ) ) ).
+                             CONV #( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ) ) ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
         add_result_cl_definition(
-            tr_object        = tr_object
-            main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( tr_object-obj_name ) )
+            limu_object      = limu_object
+            main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
             main_object_type = zif_adcoset_c_global=>c_source_code_type-class ).
     ENDTRY.
   ENDMETHOD.
