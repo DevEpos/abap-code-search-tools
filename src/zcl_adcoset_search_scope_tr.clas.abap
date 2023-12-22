@@ -45,6 +45,8 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
       RETURNING
         VALUE(result) TYPE ty_tadir_objects_extended.
 
+    METHODS resolve_tr_request.
+
 ENDCLASS.
 
 
@@ -84,6 +86,8 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD determine_count.
+    resolve_tr_request( ).
+
     DATA(selection_limit) = COND i(
     WHEN max_objects > 0
     THEN max_objects + 1
@@ -216,5 +220,14 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
                                 name                 = <tr_r3tr_object>-obj_name
                                 complete_main_object = abap_true ) ).
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD resolve_tr_request.
+    SELECT trkorr FROM e070
+      WHERE strkorr IN @search_ranges-tr_request_range
+      INTO TABLE @DATA(tr_tasks).
+
+    search_ranges-tr_request_range = VALUE #( BASE search_ranges-tr_request_range FOR task IN tr_tasks
+                                              ( sign = 'I' option = 'EQ' low = task ) ).
   ENDMETHOD.
 ENDCLASS.
