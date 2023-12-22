@@ -12,9 +12,11 @@ CLASS lcl_limu_processor IMPLEMENTATION.
 
     DATA(funcname) = CONV rs38l_fnam( tr_object-obj_name ).
     CALL FUNCTION 'FUNCTION_INCLUDE_INFO'
-      CHANGING   funcname            = funcname
-                 group               = func_group_name
-      EXCEPTIONS function_not_exists = 1.
+      CHANGING
+        funcname            = funcname
+        group               = func_group_name
+      EXCEPTIONS
+        function_not_exists = 1.
 
     IF sy-subrc <> 0.
       RETURN.
@@ -76,28 +78,28 @@ CLASS lcl_limu_processor IMPLEMENTATION.
 
     " todo - test deleted function include
     CALL FUNCTION 'TR_CHECK_TYPE'
-      EXPORTING wi_e071  = VALUE e071( trkorr   = tr_object-trkorr
-                                       pgmid    = tr_object-pgmid
-                                       object   = tr_object-obj_type
-                                       obj_name = tr_object-obj_name )
-      IMPORTING we_tadir = main_obj.
+      EXPORTING
+        wi_e071  = VALUE e071( trkorr   = tr_object-trkorr
+                               pgmid    = tr_object-pgmid
+                               object   = tr_object-obj_type
+                               obj_name = tr_object-obj_name )
+      IMPORTING
+        we_tadir = main_obj.
 
-    " REPS object can come from different main types, if the determined main type is not needed in the search, object can be ignored
-    IF         filter_object_types IS NOT INITIAL
-       AND NOT line_exists( filter_object_types[ low = main_obj-object ] ).
-      RETURN.
+    " REPS object can come from different main types
+    " if the determined main type does not match filters, object can be ignored
+    IF main_obj-object IN filter_object_types.
+      TRY.
+          add_subobject( main_object_name = main_obj-obj_name
+                         main_object_type = main_obj-object
+                         subobjects       = VALUE #( ( name = tr_object-obj_name type = tr_object-obj_type ) ) ).
+
+        CATCH cx_sy_itab_line_not_found.
+          add_result( tr_object        = tr_object
+                      main_object_name = main_obj-obj_name
+                      main_object_type = main_obj-object ).
+      ENDTRY.
     ENDIF.
-
-    TRY.
-        add_subobject( main_object_name = main_obj-obj_name
-                       main_object_type = main_obj-object
-                       subobjects       = VALUE #( ( name = tr_object-obj_name type = tr_object-obj_type ) ) ).
-
-      CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object        = tr_object
-                    main_object_name = main_obj-obj_name
-                    main_object_type = main_obj-object ).
-    ENDTRY.
   ENDMETHOD.
 
   METHOD handle_class_method.

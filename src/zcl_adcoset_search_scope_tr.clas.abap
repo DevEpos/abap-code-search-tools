@@ -20,7 +20,7 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
     "! Read Source Code Objects from Transport Requests
     METHODS get_tr_objects
       IMPORTING
-        max_rows          TYPE i
+        max_rows      TYPE i
       RETURNING
         VALUE(result) TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
 
@@ -34,14 +34,14 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
 
     METHODS process_limu_objects
       IMPORTING
-        limu_objects         TYPE zif_adcoset_ty_global=>ty_tr_request_objects
-        main_objects         TYPE ty_tadir_objects_extended
+        limu_objects  TYPE zif_adcoset_ty_global=>ty_tr_request_objects
+        main_objects  TYPE ty_tadir_objects_extended
       RETURNING
         VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
 
     METHODS process_r3tr_objects
       IMPORTING
-        r3tr_objects        TYPE zif_adcoset_ty_global=>ty_tr_request_objects
+        r3tr_objects  TYPE zif_adcoset_ty_global=>ty_tr_request_objects
       RETURNING
         VALUE(result) TYPE ty_tadir_objects_extended.
 
@@ -167,7 +167,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     IF line_exists( search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-class ] ).
       search_ranges-object_type_range = VALUE #(
           BASE search_ranges-object_type_range
-          sign   = 'I'
+          sign   = search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-class ]-sign
           option = 'EQ'
           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_definition )
           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_include )
@@ -181,18 +181,20 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     IF line_exists( search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-function_group ] ).
       search_ranges-object_type_range = VALUE #(
           BASE search_ranges-object_type_range
-          sign   = 'I'
+          sign   = search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-function_group ]-sign
           option = 'EQ'
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module )
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
     ENDIF.
 
-    IF line_exists( search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-program ] ).
+    IF    line_exists( search_ranges-object_type_range[ sign = 'I'
+                                                        low  = zif_adcoset_c_global=>c_source_code_type-function_group ] )
+       OR line_exists( search_ranges-object_type_range[ sign = 'I'
+                                                        low  = zif_adcoset_c_global=>c_source_code_type-program ] ).
       search_ranges-object_type_range = VALUE #(
           BASE search_ranges-object_type_range
-          ( sign   = 'I'
-            option = 'EQ'
-            low    = zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+          sign   = 'I'
+          option = 'EQ'
+          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
     ENDIF.
   ENDMETHOD.
 
@@ -216,9 +218,9 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   METHOD process_r3tr_objects.
     LOOP AT r3tr_objects ASSIGNING FIELD-SYMBOL(<tr_r3tr_object>).
       result = VALUE #( BASE result
-                              ( type                 = <tr_r3tr_object>-obj_type
-                                name                 = <tr_r3tr_object>-obj_name
-                                complete_main_object = abap_true ) ).
+                        ( type                 = <tr_r3tr_object>-obj_type
+                          name                 = <tr_r3tr_object>-obj_name
+                          complete_main_object = abap_true ) ).
     ENDLOOP.
   ENDMETHOD.
 
