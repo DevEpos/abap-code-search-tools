@@ -3,16 +3,22 @@
 *"* declarations
 CLASS lcl_limu_processor IMPLEMENTATION.
   METHOD constructor.
-    objects = main_objects.
-    me->limu_tr_objects     = limu_tr_objects.
+    me->tr_objects          = tr_objects.
     me->filter_object_types = filter_object_types.
   ENDMETHOD.
 
   METHOD run.
-    LOOP AT limu_tr_objects ASSIGNING FIELD-SYMBOL(<limu_object>).
+    LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<r3tr_object>)
+         WHERE pgmid = zif_adcoset_c_global=>c_program_id-r3tr.
+      objects = VALUE #( BASE objects
+                         ( type = <r3tr_object>-obj_type
+                           name = <r3tr_object>-obj_name ) ).
+    ENDLOOP.
+    LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<limu_object>)
+         WHERE pgmid = zif_adcoset_c_global=>c_program_id-limu.
       handle_limu_object( <limu_object> ).
     ENDLOOP.
-    result = CORRESPONDING #( DEEP objects ).
+    result = objects.
   ENDMETHOD.
 
   METHOD handle_limu_object.
@@ -55,7 +61,7 @@ CLASS lcl_limu_processor IMPLEMENTATION.
                        subobjects       = VALUE #( ( name = limu_object-obj_name type = limu_object-obj_type ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object        = limu_object
+        add_result( limu_object      = limu_object
                     main_object_name = CONV #( func_group_name )
                     main_object_type = zif_adcoset_c_global=>c_source_code_type-function_group ).
     ENDTRY.
@@ -65,10 +71,9 @@ CLASS lcl_limu_processor IMPLEMENTATION.
     objects = VALUE #( BASE objects
                        ( type       = main_object_type
                          name       = main_object_name
-                         subobjects = COND #( WHEN tr_object-obj_name IS NOT INITIAL
-                                              THEN VALUE zif_adcoset_ty_global=>ty_tadir_object_infos(
-                                                             ( type = tr_object-obj_type
-                                                               name = tr_object-obj_name ) ) ) ) ).
+                         subobjects = VALUE zif_adcoset_ty_global=>ty_tadir_object_infos(
+                                                ( type = limu_object-obj_type
+                                                  name = limu_object-obj_name ) ) ) ).
   ENDMETHOD.
 
   METHOD add_result_cl_definition.
@@ -93,7 +98,9 @@ CLASS lcl_limu_processor IMPLEMENTATION.
                                         name = main_object_name ] ).
     " if main object already exists as a complete object, sub objects are not needed anymore because the whole object will be
     " used for the search
-    IF main_object->complete_main_object = abap_false.
+    IF NOT line_exists( tr_objects[ pgmid    = zif_adcoset_c_global=>c_program_id-r3tr
+                                    obj_type = main_object_type
+                                    obj_name = main_object_name ] ).
       LOOP AT subobjects ASSIGNING FIELD-SYMBOL(<subobject>).
         INSERT <subobject> INTO TABLE main_object->subobjects.
       ENDLOOP.
@@ -103,28 +110,26 @@ CLASS lcl_limu_processor IMPLEMENTATION.
   METHOD handle_report_source_code.
     DATA main_obj TYPE tadir.
 
-    " todo - test deleted function include
     CALL FUNCTION 'TR_CHECK_TYPE'
-      EXPORTING wi_e071  = VALUE e071( trkorr   = limu_object-trkorr
-                                       pgmid    = limu_object-pgmid
-                                       object   = limu_object-obj_type
-                                       obj_name = limu_object-obj_name )
+      EXPORTING wi_e071  = CORRESPONDING e071( limu_object MAPPING object = obj_type )
       IMPORTING we_tadir = main_obj.
 
     " REPS object can come from different main types
     " if the determined main type does not match filters, object can be ignored
-    IF main_obj-object IN filter_object_types.
-      TRY.
-          add_subobject( main_object_name = main_obj-obj_name
-                         main_object_type = main_obj-object
-                         subobjects       = VALUE #( ( name = limu_object-obj_name type = limu_object-obj_type ) ) ).
-
-        CATCH cx_sy_itab_line_not_found.
-          add_result( tr_object        = limu_object
-                      main_object_name = main_obj-obj_name
-                      main_object_type = main_obj-object ).
-      ENDTRY.
+    IF main_obj-object NOT IN filter_object_types.
+      RETURN.
     ENDIF.
+
+    TRY.
+        add_subobject( main_object_name = main_obj-obj_name
+                       main_object_type = main_obj-object
+                       subobjects       = VALUE #( ( name = limu_object-obj_name type = limu_object-obj_type ) ) ).
+
+      CATCH cx_sy_itab_line_not_found.
+        add_result( limu_object      = limu_object
+                    main_object_name = main_obj-obj_name
+                    main_object_type = main_obj-object ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD handle_class_method.
@@ -135,7 +140,7 @@ CLASS lcl_limu_processor IMPLEMENTATION.
             subobjects       = VALUE #( ( name = limu_object-obj_name+30(30) type = limu_object-obj_type ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object        = VALUE #( trkorr   = limu_object-trkorr
+        add_result( limu_object      = VALUE #( trkorr   = limu_object-trkorr
                                                 pgmid    = limu_object-pgmid
                                                 obj_type = limu_object-obj_type
                                                 obj_name = limu_object-obj_name+30(30) )
@@ -152,7 +157,7 @@ CLASS lcl_limu_processor IMPLEMENTATION.
             subobjects       = VALUE #( ( name = limu_object-obj_name type = limu_object-obj_type ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object        = limu_object
+        add_result( limu_object      = limu_object
                     main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
                     main_object_type = zif_adcoset_c_global=>c_source_code_type-class ).
     ENDTRY.
@@ -167,7 +172,7 @@ CLASS lcl_limu_processor IMPLEMENTATION.
                                           type = limu_object-obj_type ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
-        add_result( tr_object        = VALUE #( obj_name = section_include
+        add_result( limu_object      = VALUE #( obj_name = section_include
                                                 obj_type = limu_object-obj_type )
                     main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
                     main_object_type = zif_adcoset_c_global=>c_source_code_type-class ).

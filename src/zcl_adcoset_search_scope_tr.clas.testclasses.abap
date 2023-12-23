@@ -12,9 +12,10 @@ ENDCLASS.
 
 CLASS ltcl_limu_processor IMPLEMENTATION.
   METHOD setup.
-    mr_cut = NEW #( main_objects        = VALUE #( ( name = 'CLS1' type = 'CLAS' ) )
-                    limu_tr_objects     = VALUE #( )
-                    filter_object_types = VALUE #( ) ).
+    mr_cut = NEW #(
+        tr_objects          = VALUE #( ( obj_name = 'CLS1' obj_type = 'CLAS' )
+                                       ( obj_name = 'CLS1                          METH1'  obj_type = 'METH' ) )
+        filter_object_types = VALUE #( ) ).
   ENDMETHOD.
 
   METHOD test_handle_method.

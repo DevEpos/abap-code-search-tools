@@ -31,7 +31,7 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
       IMPORTING
         tr_objects    TYPE zif_adcoset_ty_global=>ty_tr_request_objects
       RETURNING
-        VALUE(result) TYPE ty_tadir_objects_extended.
+        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
 
     METHODS resolve_tr_request.
 
@@ -45,8 +45,6 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
-    DATA main_objects TYPE ty_tadir_objects_extended.
-
     DATA(max_rows) = package_size.
     IF     current_offset IS INITIAL
        AND ( object_count < package_size OR package_size = 0 ).
@@ -54,19 +52,15 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     ENDIF.
 
     DATA(tr_objects) = get_tr_objects( max_rows ).
-    main_objects = extract_r3tr_objects( tr_objects ).
 
     IF line_exists( tr_objects[ pgmid = zif_adcoset_c_global=>c_program_id-limu ] ).
-      result = VALUE #(
-          count   = lines( tr_objects )
-          objects = NEW lcl_limu_processor(
-              main_objects        = main_objects
-              limu_tr_objects     = VALUE #( FOR object IN tr_objects WHERE ( pgmid = zif_adcoset_c_global=>c_program_id-limu )
-                                             ( object ) )
-              filter_object_types = search_ranges-object_type_range )->run( ) ).
+      result = VALUE #( count   = lines( tr_objects )
+                        objects = NEW lcl_limu_processor(
+                                          tr_objects          = tr_objects
+                                          filter_object_types = search_ranges-object_type_range )->run( ) ).
     ELSE.
       result = VALUE #( count   = lines( tr_objects )
-                        objects = CORRESPONDING #( DEEP main_objects ) ).
+                        objects = extract_r3tr_objects( tr_objects ) ).
     ENDIF.
 
     current_offset = current_offset + result-count.
@@ -173,9 +167,8 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_object>)
          WHERE pgmid = zif_adcoset_c_global=>c_program_id-r3tr.
       result = VALUE #( BASE result
-                        ( type                 = <tr_object>-obj_type
-                          name                 = <tr_object>-obj_name
-                          complete_main_object = abap_true ) ).
+                        ( type = <tr_object>-obj_type
+                          name = <tr_object>-obj_name ) ).
     ENDLOOP.
   ENDMETHOD.
 
