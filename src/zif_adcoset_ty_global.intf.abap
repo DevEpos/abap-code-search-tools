@@ -56,11 +56,13 @@ INTERFACE zif_adcoset_ty_global
   TYPES ty_tadir_object_infos_sorted TYPE SORTED TABLE OF ty_tadir_object_info WITH UNIQUE KEY type name.
 
   TYPES: BEGIN OF ty_tr_request_object,
-           trkorr   TYPE trkorr,
-           pgmid    TYPE pgmid,
-           obj_type TYPE trobjtype,
-           obj_name TYPE trobj_name,
-
+           trkorr       TYPE trkorr,
+           pgmid        TYPE pgmid,
+           obj_type     TYPE trobjtype,
+           obj_name     TYPE trobj_name,
+           package_name TYPE devclass,
+           owner        TYPE responsibl,
+           created_date TYPE creationdt,
          END OF ty_tr_request_object,
 
          ty_tr_request_objects TYPE SORTED TABLE OF ty_tr_request_object WITH UNIQUE KEY obj_name pgmid obj_type.
@@ -96,7 +98,7 @@ INTERFACE zif_adcoset_ty_global
 
   TYPES:
     BEGIN OF ty_scope_package,
-      count  TYPE i,
+      count   TYPE i,
       objects TYPE zif_adcoset_ty_global=>ty_tadir_objects,
     END OF ty_scope_package.
 

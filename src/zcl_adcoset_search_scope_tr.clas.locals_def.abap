@@ -2,15 +2,13 @@
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
 
-TYPES ty_object_type_range TYPE RANGE OF trobjtype.
-
 CLASS lcl_limu_processor DEFINITION.
 
   PUBLIC SECTION.
     METHODS constructor
       IMPORTING
-        tr_objects          TYPE zif_adcoset_ty_global=>ty_tr_request_objects
-        filter_object_types TYPE ty_object_type_range.
+        tr_objects    TYPE zif_adcoset_ty_global=>ty_tr_request_objects
+        search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
 
     METHODS run
       RETURNING
@@ -19,7 +17,7 @@ CLASS lcl_limu_processor DEFINITION.
   PRIVATE SECTION.
     DATA objects TYPE zif_adcoset_ty_global=>ty_tadir_objects.
     DATA tr_objects TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
-    DATA filter_object_types TYPE ty_object_type_range.
+    DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
 
     METHODS handle_limu_object
       IMPORTING
@@ -81,5 +79,11 @@ CLASS lcl_limu_processor DEFINITION.
         limu_object      TYPE zif_adcoset_ty_global=>ty_tr_request_object
         main_object_name TYPE sobj_name
         main_object_type TYPE trobjtype.
+
+    METHODS apply_post_filter.
+
+    METHODS fill_missing_tadir_info.
+
+    METHODS post_filter.
 
 ENDCLASS.

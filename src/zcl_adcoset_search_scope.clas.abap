@@ -20,9 +20,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
     DATA tags_dyn_where_cond TYPE string.
     DATA appl_comp_dyn_where_cond TYPE string.
 
-    METHODS resolve_packages.
     METHODS config_dyn_where_clauses.
-
 ENDCLASS.
 
 
@@ -89,49 +87,6 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       object_count = max_objects.
       more_objects_in_scope = abap_true.
     ENDIF.
-  ENDMETHOD.
-
-  METHOD resolve_packages.
-    DATA include_package_range TYPE zif_adcoset_ty_global=>ty_package_name_range.
-    DATA exclude_package_range TYPE zif_adcoset_ty_global=>ty_package_name_range.
-
-    FIELD-SYMBOLS <package_range> TYPE LINE OF zif_adcoset_ty_global=>ty_package_name_range.
-
-    CHECK search_ranges-package_range IS NOT INITIAL.
-
-    " only determine sub packages from ranges with option EQ
-    LOOP AT search_ranges-package_range ASSIGNING <package_range> WHERE option = 'EQ'.
-      IF <package_range>-sign = 'I'.
-        include_package_range = VALUE #( BASE include_package_range
-                                         ( <package_range> ) ).
-      ELSEIF <package_range>-sign = 'E'.
-        exclude_package_range = VALUE #( BASE exclude_package_range
-                                         ( sign = 'I' option = 'EQ' low = <package_range>-low ) ).
-      ENDIF.
-      DELETE search_ranges-package_range.
-    ENDLOOP.
-
-    " collect sub packages of packages that should be excluded
-    exclude_package_range = VALUE #(
-        BASE exclude_package_range
-        ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( exclude_package_range ) ) ).
-
-    " convert sign back to 'E' for the excluded packages
-    LOOP AT exclude_package_range ASSIGNING <package_range>.
-      <package_range>-sign = 'E'.
-    ENDLOOP.
-
-    search_ranges-package_range = VALUE #(
-        BASE search_ranges-package_range
-        ( LINES OF include_package_range )
-        ( LINES OF zcl_adcoset_devc_reader=>get_subpackages_by_range( include_package_range ) )
-        ( LINES OF exclude_package_range ) ).
-
-    SORT search_ranges-package_range BY sign
-                                        option
-                                        low
-                                        high.
-    DELETE ADJACENT DUPLICATES FROM search_ranges-package_range COMPARING sign option low high.
   ENDMETHOD.
 
   METHOD init_from_db.

@@ -34,7 +34,6 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
         VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
 
     METHODS resolve_tr_request.
-
 ENDCLASS.
 
 
@@ -52,12 +51,12 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     ENDIF.
 
     DATA(tr_objects) = get_tr_objects( max_rows ).
+    resolve_packages( ).
 
     IF line_exists( tr_objects[ pgmid = zif_adcoset_c_global=>c_program_id-limu ] ).
       result = VALUE #( count   = lines( tr_objects )
-                        objects = NEW lcl_limu_processor(
-                                          tr_objects          = tr_objects
-                                          filter_object_types = search_ranges-object_type_range )->run( ) ).
+                        objects = NEW lcl_limu_processor( tr_objects    = tr_objects
+                                                          search_ranges = search_ranges )->run( ) ).
     ELSE.
       result = VALUE #( count   = lines( tr_objects )
                         objects = extract_r3tr_objects( tr_objects ) ).
@@ -65,7 +64,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
     current_offset = current_offset + result-count.
 
-    IF current_offset < max_rows.
+    IF result-count < max_rows.
       all_packages_read = abap_true.
     ENDIF.
   ENDMETHOD.
@@ -112,9 +111,12 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    SELECT DISTINCT programid  AS pgmid,
-                    objecttype AS obj_type,
-                    objectname AS obj_name
+    SELECT DISTINCT programid          AS pgmid,
+                    objecttype         AS obj_type,
+                    objectname         AS obj_name,
+                    developmentpackage AS package_name,
+                    owner,
+                    createddate        AS created_date
       FROM zadcoset_transportsourcecodobj
       WHERE objecttype IN @search_ranges-object_type_range
         AND objectname IN @search_ranges-object_name_range
@@ -165,10 +167,15 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
   METHOD extract_r3tr_objects.
     LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_object>)
-         WHERE pgmid = zif_adcoset_c_global=>c_program_id-r3tr.
+         WHERE     pgmid         = zif_adcoset_c_global=>c_program_id-r3tr
+               AND created_date IN search_ranges-created_on_range
+               AND package_name IN search_ranges-package_range
+               AND owner        IN search_ranges-owner_range.
       result = VALUE #( BASE result
-                        ( type = <tr_object>-obj_type
-                          name = <tr_object>-obj_name ) ).
+                        ( type         = <tr_object>-obj_type
+                          name         = <tr_object>-obj_name
+                          package_name = <tr_object>-package_name
+                          owner        = <tr_object>-owner ) ).
     ENDLOOP.
   ENDMETHOD.
 

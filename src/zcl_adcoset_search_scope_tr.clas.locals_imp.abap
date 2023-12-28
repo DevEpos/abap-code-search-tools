@@ -3,8 +3,8 @@
 *"* declarations
 CLASS lcl_limu_processor IMPLEMENTATION.
   METHOD constructor.
-    me->tr_objects          = tr_objects.
-    me->filter_object_types = filter_object_types.
+    me->tr_objects    = tr_objects.
+    me->search_ranges = search_ranges.
   ENDMETHOD.
 
   METHOD run.
@@ -14,10 +14,13 @@ CLASS lcl_limu_processor IMPLEMENTATION.
                          ( type = <r3tr_object>-obj_type
                            name = <r3tr_object>-obj_name ) ).
     ENDLOOP.
+
     LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<limu_object>)
          WHERE pgmid = zif_adcoset_c_global=>c_program_id-limu.
       handle_limu_object( <limu_object> ).
     ENDLOOP.
+    apply_post_filter( ).
+
     result = objects.
   ENDMETHOD.
 
@@ -116,9 +119,9 @@ CLASS lcl_limu_processor IMPLEMENTATION.
 
     " REPS object can come from different main types
     " if the determined main type does not match filters, object can be ignored
-    IF main_obj-object NOT IN filter_object_types.
-      RETURN.
-    ENDIF.
+*    IF main_obj-object NOT IN filter_object_types.
+*      RETURN.
+*    ENDIF.
 
     TRY.
         add_subobject( main_object_name = main_obj-obj_name
@@ -222,5 +225,54 @@ CLASS lcl_limu_processor IMPLEMENTATION.
             main_object_name = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
             main_object_type = zif_adcoset_c_global=>c_source_code_type-class ).
     ENDTRY.
+  ENDMETHOD.
+
+  METHOD fill_missing_tadir_info.
+    DATA(tadir_objects_no_details) = objects.
+    DELETE tadir_objects_no_details WHERE package_name IS NOT INITIAL.
+
+    IF tadir_objects_no_details IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    SELECT objectname,
+           objecttype,
+           developmentpackage,
+           owner
+      FROM zadcoset_sourcecodeobject
+      FOR ALL ENTRIES IN @tadir_objects_no_details
+      WHERE objectname   = @tadir_objects_no_details-name
+        AND objecttype   = @tadir_objects_no_details-type
+        AND createddate IN @search_ranges-created_on_range
+      INTO TABLE @DATA(tadir_object_details).
+
+    LOOP AT objects ASSIGNING FIELD-SYMBOL(<tadir_object>)
+         WHERE package_name IS INITIAL.
+      TRY.
+          DATA(detailed_tadir_object) = tadir_object_details[ objecttype = <tadir_object>-type
+                                                              objectname = <tadir_object>-name ].
+          <tadir_object>-package_name = detailed_tadir_object-developmentpackage.
+          <tadir_object>-owner        = detailed_tadir_object-owner.
+        CATCH cx_sy_itab_line_not_found.
+          DELETE objects. " the current line does not meet the filter for created date
+      ENDTRY.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD post_filter.
+    DATA tadir_objects_after_filter TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+
+    LOOP AT objects ASSIGNING FIELD-SYMBOL(<tadir_object>)
+         WHERE     package_name IN search_ranges-package_range
+               AND owner        IN search_ranges-owner_range.
+      tadir_objects_after_filter = VALUE #( BASE tadir_objects_after_filter
+                                            ( <tadir_object> ) ).
+    ENDLOOP.
+    objects = tadir_objects_after_filter.
+  ENDMETHOD.
+
+  METHOD apply_post_filter.
+    fill_missing_tadir_info( ).
+    post_filter( ).
   ENDMETHOD.
 ENDCLASS.
