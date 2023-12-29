@@ -15,8 +15,6 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
     METHODS determine_count REDEFINITION.
 
   PRIVATE SECTION.
-    DATA limu_processor TYPE REF TO lcl_limu_processor.
-
     "! Read Source Code Objects from Transport Requests
     METHODS get_tr_objects
       IMPORTING
@@ -26,12 +24,6 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
 
     "! Enhance the type filter with corresponding LIMU types
     METHODS add_subobj_type_to_filter.
-
-    METHODS extract_r3tr_objects
-      IMPORTING
-        tr_objects    TYPE zif_adcoset_ty_global=>ty_tr_request_objects
-      RETURNING
-        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
 
     METHODS resolve_tr_request.
 ENDCLASS.
@@ -51,16 +43,9 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     ENDIF.
 
     DATA(tr_objects) = get_tr_objects( max_rows ).
-    resolve_packages( ).
-
-    IF line_exists( tr_objects[ pgmid = zif_adcoset_c_global=>c_program_id-limu ] ).
-      result = VALUE #( count   = lines( tr_objects )
-                        objects = NEW lcl_limu_processor( tr_objects    = tr_objects
-                                                          search_ranges = search_ranges )->run( ) ).
-    ELSE.
-      result = VALUE #( count   = lines( tr_objects )
-                        objects = extract_r3tr_objects( tr_objects ) ).
-    ENDIF.
+    result = VALUE #( count   = lines( tr_objects )
+                      objects = NEW zcl_adcoset_tr_obj_processor( tr_objects    = tr_objects
+                                                                  search_ranges = search_ranges )->run( ) ).
 
     current_offset = current_offset + result-count.
 
@@ -70,18 +55,18 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD determine_count.
-    resolve_tr_request( ).
-
-    DATA(selection_limit) = COND i(
-    WHEN max_objects > 0
-    THEN max_objects + 1
-    ELSE 0 ).
+    DATA(selection_limit) = COND i( WHEN max_objects > 0
+                                    THEN max_objects + 1
+                                    ELSE 0 ).
 
     IF     search_ranges-object_type_range IS INITIAL
        AND search_ranges-object_name_range IS INITIAL
        AND search_ranges-tr_request_range  IS INITIAL.
       RETURN.
     ENDIF.
+
+    resolve_tr_request( ).
+    resolve_packages( ).
 
     add_subobj_type_to_filter( ).
 
@@ -130,53 +115,49 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD add_subobj_type_to_filter.
-    IF line_exists( search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-class ] ).
-      search_ranges-object_type_range = VALUE #(
-          BASE search_ranges-object_type_range
-          sign   = search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-class ]-sign
-          option = 'EQ'
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_definition )
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_include )
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_private_section )
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section )
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_public_section )
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-method ) ).
+    " some R3TR object types are associated with LIMU types which can be included
+    " in transport requests. These types are added to the filter criteria
+    " special case: REPS LIMU type is associate with PROG as well as FUGR
+    DATA subobject_type_ranges TYPE RANGE OF trobjtype.
 
-    ENDIF.
-
-    IF line_exists( search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-function_group ] ).
-      search_ranges-object_type_range = VALUE #(
-          BASE search_ranges-object_type_range
-          sign   = search_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-function_group ]-sign
-          option = 'EQ'
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
-    ENDIF.
-
-    IF    line_exists( search_ranges-object_type_range[
-                           sign = 'I'
-                           low  = zif_adcoset_c_global=>c_source_code_type-function_group ] )
-       OR line_exists( search_ranges-object_type_range[ sign = 'I'
-                                                        low  = zif_adcoset_c_global=>c_source_code_type-program ] ).
-      search_ranges-object_type_range = VALUE #(
-          BASE search_ranges-object_type_range
-          sign   = 'I'
-          option = 'EQ'
-          ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD extract_r3tr_objects.
-    LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<tr_object>)
-         WHERE     pgmid         = zif_adcoset_c_global=>c_program_id-r3tr
-               AND created_date IN search_ranges-created_on_range
-               AND package_name IN search_ranges-package_range
-               AND owner        IN search_ranges-owner_range.
-      result = VALUE #( BASE result
-                        ( type         = <tr_object>-obj_type
-                          name         = <tr_object>-obj_name
-                          package_name = <tr_object>-package_name
-                          owner        = <tr_object>-owner ) ).
+    LOOP AT search_ranges-object_type_range REFERENCE INTO DATA(object_type_range).
+      IF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-class.
+        subobject_type_ranges = VALUE #(
+            BASE subobject_type_ranges
+            sign   = object_type_range->sign
+            option = 'EQ'
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_definition )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_include )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_private_section )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_public_section )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-method ) ).
+      ENDIF.
+      IF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-function_group.
+        IF object_type_range->sign = 'I'.
+          subobject_type_ranges = VALUE #( BASE subobject_type_ranges
+                                           sign   = 'I'
+                                           option = 'EQ'
+                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module )
+                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+        ELSEIF object_type_range->sign = 'E'.
+          subobject_type_ranges = VALUE #( BASE subobject_type_ranges
+                                           sign   = 'E'
+                                           option = 'EQ'
+                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
+        ENDIF.
+      ENDIF.
+      IF     object_type_range->low  = zif_adcoset_c_global=>c_source_code_type-program
+         AND object_type_range->sign = 'I'.
+        subobject_type_ranges = VALUE #( BASE subobject_type_ranges
+                                         sign   = 'I'
+                                         option = 'EQ'
+                                         ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+      ENDIF.
     ENDLOOP.
+
+    search_ranges-object_type_range = VALUE #( BASE search_ranges-object_type_range
+                                               ( LINES OF subobject_type_ranges ) ).
   ENDMETHOD.
 
   METHOD resolve_tr_request.

@@ -65,7 +65,7 @@ INTERFACE zif_adcoset_ty_global
            created_date TYPE creationdt,
          END OF ty_tr_request_object,
 
-         ty_tr_request_objects TYPE SORTED TABLE OF ty_tr_request_object WITH UNIQUE KEY obj_name pgmid obj_type.
+         ty_tr_request_objects TYPE SORTED TABLE OF ty_tr_request_object WITH UNIQUE KEY pgmid obj_type obj_name.
 
   TYPES: BEGIN OF ty_object,
            name TYPE sobj_name,

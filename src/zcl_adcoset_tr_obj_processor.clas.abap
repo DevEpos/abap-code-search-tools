@@ -1,26 +1,112 @@
-*"* use this source file for the definition and implementation of
-*"* local helper classes, interface definitions and type
-*"* declarations
-CLASS lcl_limu_processor IMPLEMENTATION.
+CLASS zcl_adcoset_tr_obj_processor DEFINITION
+  PUBLIC FINAL
+  CREATE PUBLIC.
+
+  PUBLIC SECTION.
+    METHODS constructor
+      IMPORTING
+        tr_objects    TYPE zif_adcoset_ty_global=>ty_tr_request_objects
+        search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
+
+    METHODS run
+      RETURNING
+        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+
+  PRIVATE SECTION.
+    DATA objects TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+    DATA tr_objects TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
+    DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
+
+    METHODS handle_limu_object
+      IMPORTING
+        limu_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS handle_function_module
+      IMPORTING
+        limu_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS handle_report_source_code
+      IMPORTING
+        limu_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS handle_class_method
+      IMPORTING
+        limu_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS handle_class_include
+      IMPORTING
+        limu_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS handle_class_section
+      IMPORTING
+        limu_object     TYPE zif_adcoset_ty_global=>ty_tr_request_object
+        section_include TYPE program.
+
+    METHODS handle_class_private_section
+      IMPORTING
+        limu_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS handle_class_protected_section
+      IMPORTING
+        limu_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS handle_class_public_section
+      IMPORTING
+        limu_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS handle_class_definition
+      IMPORTING
+        limu_object TYPE zif_adcoset_ty_global=>ty_tr_request_object.
+
+    METHODS add_subobject
+      IMPORTING
+        main_object_name TYPE sobj_name
+        main_object_type TYPE trobjtype
+        subobjects       TYPE zif_adcoset_ty_global=>ty_tadir_object_infos
+      RAISING
+        cx_sy_itab_line_not_found.
+
+    METHODS add_result
+      IMPORTING
+        limu_object      TYPE zif_adcoset_ty_global=>ty_tr_request_object
+        main_object_name TYPE sobj_name
+        main_object_type TYPE trobjtype.
+
+    METHODS add_result_cl_definition
+      IMPORTING
+        limu_object      TYPE zif_adcoset_ty_global=>ty_tr_request_object
+        main_object_name TYPE sobj_name
+        main_object_type TYPE trobjtype.
+
+    METHODS post_filter.
+
+    METHODS extract_r3tr_objects
+      RETURNING
+        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+
+ENDCLASS.
+
+
+CLASS zcl_adcoset_tr_obj_processor IMPLEMENTATION.
   METHOD constructor.
     me->tr_objects    = tr_objects.
     me->search_ranges = search_ranges.
   ENDMETHOD.
 
   METHOD run.
-    LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<r3tr_object>)
-         WHERE pgmid = zif_adcoset_c_global=>c_program_id-r3tr.
-      objects = VALUE #( BASE objects
-                         ( type = <r3tr_object>-obj_type
-                           name = <r3tr_object>-obj_name ) ).
-    ENDLOOP.
+    objects = extract_r3tr_objects( ).
 
-    LOOP AT tr_objects ASSIGNING FIELD-SYMBOL(<limu_object>)
+    LOOP AT tr_objects REFERENCE INTO DATA(limu_object)
          WHERE pgmid = zif_adcoset_c_global=>c_program_id-limu.
-      handle_limu_object( <limu_object> ).
+      handle_limu_object( limu_object->* ).
     ENDLOOP.
-    apply_post_filter( ).
 
+    IF sy-subrc <> 0. " no limu objects found, post filter not needed
+      result = objects. "return r3tr objects
+      RETURN.
+    ENDIF.
+
+    post_filter( ).
     result = objects.
   ENDMETHOD.
 
@@ -104,8 +190,8 @@ CLASS lcl_limu_processor IMPLEMENTATION.
     IF NOT line_exists( tr_objects[ pgmid    = zif_adcoset_c_global=>c_program_id-r3tr
                                     obj_type = main_object_type
                                     obj_name = main_object_name ] ).
-      LOOP AT subobjects ASSIGNING FIELD-SYMBOL(<subobject>).
-        INSERT <subobject> INTO TABLE main_object->subobjects.
+      LOOP AT subobjects REFERENCE INTO DATA(subobject).
+        INSERT subobject->* INTO TABLE main_object->subobjects.
       ENDLOOP.
     ENDIF.
   ENDMETHOD.
@@ -119,9 +205,9 @@ CLASS lcl_limu_processor IMPLEMENTATION.
 
     " REPS object can come from different main types
     " if the determined main type does not match filters, object can be ignored
-*    IF main_obj-object NOT IN filter_object_types.
-*      RETURN.
-*    ENDIF.
+    IF main_obj-object NOT IN search_ranges-object_type_range.
+      RETURN.
+    ENDIF.
 
     TRY.
         add_subobject( main_object_name = main_obj-obj_name
@@ -227,7 +313,9 @@ CLASS lcl_limu_processor IMPLEMENTATION.
     ENDTRY.
   ENDMETHOD.
 
-  METHOD fill_missing_tadir_info.
+  METHOD post_filter.
+    DATA tadir_object_details TYPE zif_adcoset_ty_global=>ty_tadir_object_infos_sorted.
+
     DATA(tadir_objects_no_details) = objects.
     DELETE tadir_objects_no_details WHERE package_name IS NOT INITIAL.
 
@@ -235,44 +323,43 @@ CLASS lcl_limu_processor IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    SELECT objectname,
-           objecttype,
-           developmentpackage,
+    SELECT objectname         AS name,
+           objecttype         AS type,
+           developmentpackage AS package_name,
            owner
       FROM zadcoset_sourcecodeobject
       FOR ALL ENTRIES IN @tadir_objects_no_details
-      WHERE objectname   = @tadir_objects_no_details-name
-        AND objecttype   = @tadir_objects_no_details-type
-        AND createddate IN @search_ranges-created_on_range
-      INTO TABLE @DATA(tadir_object_details).
+      WHERE objectname          = @tadir_objects_no_details-name
+        AND objecttype          = @tadir_objects_no_details-type
+        AND createddate        IN @search_ranges-created_on_range
+        AND developmentpackage IN @search_ranges-package_range
+        AND owner              IN @search_ranges-owner_range
+      INTO CORRESPONDING FIELDS OF TABLE @tadir_object_details.
 
-    LOOP AT objects ASSIGNING FIELD-SYMBOL(<tadir_object>)
+    LOOP AT objects REFERENCE INTO DATA(tadir_object)
          WHERE package_name IS INITIAL.
       TRY.
-          DATA(detailed_tadir_object) = tadir_object_details[ objecttype = <tadir_object>-type
-                                                              objectname = <tadir_object>-name ].
-          <tadir_object>-package_name = detailed_tadir_object-developmentpackage.
-          <tadir_object>-owner        = detailed_tadir_object-owner.
+          DATA(detailed_tadir_object) = tadir_object_details[ type = tadir_object->type
+                                                              name = tadir_object->name ].
+          tadir_object->package_name = detailed_tadir_object-package_name.
+          tadir_object->owner        = detailed_tadir_object-owner.
         CATCH cx_sy_itab_line_not_found.
           DELETE objects. " the current line does not meet the filter for created date
       ENDTRY.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD post_filter.
-    DATA tadir_objects_after_filter TYPE zif_adcoset_ty_global=>ty_tadir_objects.
-
-    LOOP AT objects ASSIGNING FIELD-SYMBOL(<tadir_object>)
-         WHERE     package_name IN search_ranges-package_range
+  METHOD extract_r3tr_objects.
+    LOOP AT tr_objects REFERENCE INTO DATA(tr_object)
+         WHERE     pgmid         = zif_adcoset_c_global=>c_program_id-r3tr
+               AND created_date IN search_ranges-created_on_range
+               AND package_name IN search_ranges-package_range
                AND owner        IN search_ranges-owner_range.
-      tadir_objects_after_filter = VALUE #( BASE tadir_objects_after_filter
-                                            ( <tadir_object> ) ).
+      result = VALUE #( BASE result
+                        ( type         = tr_object->obj_type
+                          name         = tr_object->obj_name
+                          package_name = tr_object->package_name
+                          owner        = tr_object->owner ) ).
     ENDLOOP.
-    objects = tadir_objects_after_filter.
-  ENDMETHOD.
-
-  METHOD apply_post_filter.
-    fill_missing_tadir_info( ).
-    post_filter( ).
   ENDMETHOD.
 ENDCLASS.
