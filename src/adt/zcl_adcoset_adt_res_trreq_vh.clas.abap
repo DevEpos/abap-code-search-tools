@@ -161,12 +161,13 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
 
   METHOD get_name_filter.
     IF filter IS NOT INITIAL.
+      DATA(l_filter) = to_upper( COND string( WHEN filter = '*' AND custom_filter_active = abap_true
+                                              THEN |{ sy-sysid }K*|
+                                              ELSE filter ) ).
       name_filter = VALUE #( ( sign   = 'I'
                                option = 'CP'
-                               low    = to_upper( COND string( WHEN filter = '*' AND custom_filter_active = abap_true
-                                                               THEN |{ sy-sysid }K*|
-                                                               ELSE filter ) ) ) ).
-      text_filter = VALUE #( ( sign = 'I' option = 'CP' low = to_upper( filter ) ) ).
+                               low    = l_filter ) ).
+      text_filter = VALUE #( ( sign = 'I' option = 'CP' low = l_filter ) ).
     ENDIF.
   ENDMETHOD.
 
