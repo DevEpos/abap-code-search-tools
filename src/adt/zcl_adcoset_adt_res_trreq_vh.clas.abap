@@ -78,11 +78,6 @@ CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
       CHANGING
         range_tab  TYPE table.
 
-    METHODS get_filters
-      IMPORTING
-        name_filter_str TYPE string
-        data_filter_str TYPE string.
-
     METHODS transform_special_values
       CHANGING
         user_filter LIKE owner_filter.
@@ -98,6 +93,14 @@ CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
     METHODS get_status_filter
       IMPORTING
         values_str TYPE string.
+
+    METHODS parse_data_filter
+      IMPORTING
+        !filter TYPE string.
+
+    METHODS get_name_filter
+      IMPORTING
+        !filter TYPE string.
 ENDCLASS.
 
 
@@ -113,9 +116,8 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
            requests,
            custom_filter_active.
 
-    get_filters( name_filter_str = p_filter_name
-                 data_filter_str = p_filter_data ).
-
+    parse_data_filter( filter = p_filter_data ).
+    get_name_filter( filter = p_filter_name ).
     select_tr_requests( p_filter_max_item_count ).
 
     p_named_item_list = convert_to_named_items( ).
@@ -124,25 +126,16 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
     p_named_item_list-total_item_count = lines( p_named_item_list-items ).
   ENDMETHOD.
 
-  METHOD get_filters.
-    DATA data_filters_encoded TYPE string_table.
+  METHOD parse_data_filter.
+    DATA filters_encoded TYPE string_table.
 
-    IF name_filter_str IS NOT INITIAL.
-      name_filter = VALUE #( ( sign   = 'I'
-                               option = 'CP'
-                               low    = to_upper( COND string( WHEN name_filter_str = '*'
-                                                               THEN |{ sy-sysid }K*|
-                                                               ELSE name_filter_str ) ) ) ).
-      text_filter = VALUE #( ( sign = 'I' option = 'CP' low = to_upper( name_filter_str ) ) ).
-    ENDIF.
-
-    IF data_filter_str IS INITIAL.
+    IF filter IS INITIAL.
       RETURN.
     ENDIF.
 
-    SPLIT data_filter_str AT c_split_marker INTO TABLE data_filters_encoded.
+    SPLIT filter AT c_split_marker INTO TABLE filters_encoded.
 
-    LOOP AT data_filters_encoded INTO DATA(single_filter).
+    LOOP AT filters_encoded INTO DATA(single_filter).
       SPLIT single_filter AT '=' INTO DATA(name) DATA(val).
       CASE name.
         WHEN 'customFilter'.
@@ -167,6 +160,17 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
 
     IF is_all_status_requested = abap_true AND changed_date_filter IS INITIAL.
       CLEAR is_all_status_requested.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD get_name_filter.
+    IF filter IS NOT INITIAL.
+      name_filter = VALUE #( ( sign   = 'I'
+                               option = 'CP'
+                               low    = to_upper( COND string( WHEN filter = '*' AND custom_filter_active = abap_true
+                                                               THEN |{ sy-sysid }K*|
+                                                               ELSE filter ) ) ) ).
+      text_filter = VALUE #( ( sign = 'I' option = 'CP' low = to_upper( filter ) ) ).
     ENDIF.
   ENDMETHOD.
 
