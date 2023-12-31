@@ -15,22 +15,14 @@ ENDCLASS.
 
 CLASS zcl_adcoset_adt_res_trtype_vh IMPLEMENTATION.
   METHOD get_named_items.
-    DATA fix_values TYPE dd07v_tab.
-
-    CALL FUNCTION 'DDUT_DOMVALUES_GET'
-      EXPORTING  name          = 'TRFUNCTION'
-                 langu         = 'E'
-      TABLES     dd07v_tab     = fix_values
-      EXCEPTIONS illegal_input = 1
-                 OTHERS        = 2.
-    IF sy-subrc = 0.
-      " Customizing Tasks/Requests do not contain any searchable objects
-      DELETE fix_values WHERE domvalue_l = 'W' OR domvalue_l = 'Q'.
-      p_named_item_list-items            = VALUE #( FOR fix_val IN fix_values
-                                                    ( name = fix_val-domvalue_l description = fix_val-ddtext ) ).
-      p_named_item_list-total_item_count = lines( fix_values ).
-
-    ENDIF.
+    p_named_item_list-items            = VALUE #(
+        ( name = zif_adcoset_c_global=>c_trkorr_type_vh-workbench_request description = 'Workbench Request' )
+        ( name = zif_adcoset_c_global=>c_trkorr_type_vh-dev_corr_task description = 'Development/Correction Task' )
+        ( name = zif_adcoset_c_global=>c_trkorr_type_vh-repair_task description = 'Repair Task' )
+        ( name = zif_adcoset_c_global=>c_trkorr_type_vh-transport_of_copies description = 'Transport of Copies' )
+        ( name = zif_adcoset_c_global=>c_trkorr_type_vh-piece_list description = 'Piece List' )
+        ( name = zif_adcoset_c_global=>c_trkorr_type_vh-relocation_request description = 'Relocation Request' ) ).
+    p_named_item_list-total_item_count = lines( p_named_item_list-items ).
 
     p_filter_already_applied = abap_true.
   ENDMETHOD.

@@ -5,6 +5,7 @@ CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
   CREATE PUBLIC.
 
   PUBLIC SECTION.
+    METHODS constructor.
 
   PROTECTED SECTION.
     METHODS get_named_items REDEFINITION.
@@ -34,28 +35,12 @@ CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
       END OF c_date_filters.
 
     CONSTANTS:
-      BEGIN OF c_tr_type,
-        cust_request      TYPE trfunction VALUE 'W',
-        dev_corr_task     TYPE trfunction VALUE 'S',
-        repair_task       TYPE trfunction VALUE 'R',
-        cust_task         TYPE trfunction VALUE 'Q',
-        unclassified_task TYPE trfunction VALUE 'X',
-      END OF c_tr_type.
-
-    CONSTANTS:
-      BEGIN OF c_tr_status,
-        modifiable               TYPE trstatus VALUE 'D',
-        modifiable_protected     TYPE trstatus VALUE 'L',
-        release_started          TYPE trstatus VALUE 'O',
-        released                 TYPE trstatus VALUE 'R',
-        released_with_protection TYPE trstatus VALUE 'N',
-      END OF c_tr_status.
-    CONSTANTS:
       BEGIN OF c_tr_status_ext,
         modifiable TYPE string VALUE 'modifiable',
         released   TYPE string VALUE 'released',
       END OF c_tr_status_ext.
 
+    DATA excluded_types TYPE RANGE OF e070-trfunction.
     DATA name_filter TYPE RANGE OF e070-trkorr.
     DATA text_filter TYPE RANGE OF e07t-as4text.
     DATA changed_date_filter TYPE RANGE OF e070-as4date.
@@ -67,6 +52,10 @@ CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
     DATA is_all_status_requested TYPE abap_bool.
 
     METHODS get_changed_date_filter
+      IMPORTING
+        values_str TYPE string.
+
+    METHODS get_type_filter
       IMPORTING
         values_str TYPE string.
 
@@ -105,6 +94,16 @@ ENDCLASS.
 
 
 CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    excluded_types = VALUE #( sign   = 'I'
+                              option = 'EQ'
+                              ( low = sctsc_type_customizing )
+                              ( low = sctsc_type_cust_task )
+                              ( low = sctsc_type_unclass_task )
+                              ( low = sctsc_type_client ) ).
+  ENDMETHOD.
+
   METHOD get_named_items.
     CLEAR: is_all_status_requested,
            name_filter,
@@ -149,10 +148,7 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
                               CHANGING  range_tab  = owner_filter ).
           transform_special_values( CHANGING user_filter = owner_filter ).
         WHEN 'type'.
-          get_generic_filter( EXPORTING name       = name
-                                        values_str = val
-                                        upper_case = abap_true
-                              CHANGING  range_tab  = type_filter ).
+          get_type_filter( val ).
         WHEN 'status'.
           get_status_filter( val ).
       ENDCASE.
@@ -165,12 +161,13 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
 
   METHOD get_name_filter.
     IF filter IS NOT INITIAL.
+      DATA(l_filter) = to_upper( COND string( WHEN filter = '*' AND custom_filter_active = abap_true
+                                              THEN |{ sy-sysid }K*|
+                                              ELSE filter ) ).
       name_filter = VALUE #( ( sign   = 'I'
                                option = 'CP'
-                               low    = to_upper( COND string( WHEN filter = '*' AND custom_filter_active = abap_true
-                                                               THEN |{ sy-sysid }K*|
-                                                               ELSE filter ) ) ) ).
-      text_filter = VALUE #( ( sign = 'I' option = 'CP' low = to_upper( filter ) ) ).
+                               low    = l_filter ) ).
+      text_filter = VALUE #( ( sign = 'I' option = 'CP' low = l_filter ) ).
     ENDIF.
   ENDMETHOD.
 
@@ -206,6 +203,45 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD get_type_filter.
+    DATA values TYPE string_table.
+
+    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
+
+    LOOP AT values INTO DATA(value).
+      value = to_upper( value ).
+      CASE value.
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-workbench_request.
+          type_filter = VALUE #( BASE type_filter
+                                 ( sign = 'I' option = 'EQ' low = sctsc_type_workbench ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-dev_corr_task.
+          type_filter = VALUE #( BASE type_filter
+                                 ( sign = 'I' option = 'EQ' low = sctsc_type_correction ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-piece_list.
+          type_filter = VALUE #( BASE type_filter
+                                 sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_type_objlist )
+                                 ( low = sctsc_type_projectlist )
+                                 ( low = sctsc_type_upgradelist )
+                                 ( low = sctsc_type_patch ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-repair_task.
+          type_filter = VALUE #( BASE type_filter
+                                 ( sign = 'I' option = 'EQ' low = sctsc_type_repair ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-transport_of_copies.
+          type_filter = VALUE #( BASE type_filter
+                                 ( sign = 'I' option = 'EQ' low = sctsc_type_transport ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-relocation_request.
+          type_filter = VALUE #( BASE type_filter
+                                 sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_type_relocation )
+                                 ( low = sctsc_type_relocation_devclass )
+                                 ( low = sctsc_type_relocation_objs ) ).
+      ENDCASE.
+    ENDLOOP.
+  ENDMETHOD.
+
   METHOD get_status_filter.
     DATA values TYPE string_table.
 
@@ -218,14 +254,14 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
       IF value = c_tr_status_ext-modifiable.
         status_filter = VALUE #( BASE status_filter sign   = 'I'
                                  option = 'EQ'
-                                 ( low = c_tr_status-modifiable )
-                                 ( low = c_tr_status-modifiable_protected  ) ).
+                                 ( low = sctsc_state_changeable )
+                                 ( low = sctsc_state_protected  ) ).
       ELSEIF value = c_tr_status_ext-released.
         status_filter = VALUE #( BASE status_filter sign   = 'I'
                                  option = 'EQ'
-                                 ( low = c_tr_status-release_started )
-                                 ( low = c_tr_status-released )
-                                 ( low = c_tr_status-released_with_protection ) ).
+                                 ( low = sctsc_state_export_started )
+                                 ( low = sctsc_state_notconfirmed )
+                                 ( low = sctsc_state_released ) ).
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
@@ -287,8 +323,8 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
           AND tr_request~as4user        IN @owner_filter
           AND tr_request~as4date        IN @changed_date_filter
           AND tr_request~trfunction     IN @type_filter
-          " Exclude customizing Tasks/Requests
-          AND tr_request~trfunction NOT IN ( @c_tr_type-cust_request, @c_tr_type-cust_task )
+          " Exclude requests without source code objects
+          AND tr_request~trfunction NOT IN @excluded_types
           AND tr_request~trstatus       IN @status_filter
         ORDER BY tr_request~trkorr
         INTO TABLE @requests
@@ -306,10 +342,10 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
           AND text~langu                 = @sy-langu
           AND tr_request~as4user        IN @owner_filter
           AND tr_request~trfunction     IN @type_filter
-          " Exclude customizing Tasks/Requests
-          AND tr_request~trfunction NOT IN ( @c_tr_type-cust_request, @c_tr_type-cust_task )
-          AND (    tr_request~trstatus IN ( @c_tr_status-modifiable, @c_tr_status-modifiable_protected )
-                OR (     tr_request~trstatus IN ( @c_tr_status-released, @c_tr_status-released_with_protection, @c_tr_status-release_started )
+          " Exclude requests without source code objects
+          AND tr_request~trfunction NOT IN @excluded_types
+          AND (    tr_request~trstatus IN ( @sctsc_state_changeable, @sctsc_state_protected )
+                OR (     tr_request~trstatus IN ( @sctsc_state_released, @sctsc_state_notconfirmed, @sctsc_state_export_started )
                      AND tr_request~as4date  IN @changed_date_filter ) )
         ORDER BY tr_request~trkorr
         INTO TABLE @requests
@@ -324,12 +360,13 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
           ( name        = request->trkorr
             description = request->as4text
             data        = 'isTask=' && SWITCH string( request->trfunction
-                                                      WHEN c_tr_type-dev_corr_task OR c_tr_type-unclassified_task OR c_tr_type-repair_task
+                                                      WHEN sctsc_type_correction OR
+                                                           sctsc_type_repair
                                                       THEN c_true
                                                       ELSE c_false ) &&
                           c_split_marker &&
                           'isReleased=' && SWITCH string( request->trstatus
-                                                          WHEN c_tr_status-released OR c_tr_status-released_with_protection
+                                                          WHEN sctsc_state_notconfirmed OR sctsc_state_released
                                                           THEN c_true
                                                           ELSE c_false ) ) ).
     ENDLOOP.
