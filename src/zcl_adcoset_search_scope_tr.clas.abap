@@ -24,7 +24,6 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
 
     "! Enhance the type filter with corresponding LIMU types
     METHODS add_subobj_type_to_filter.
-
     METHODS resolve_tr_request.
 ENDCLASS.
 
@@ -132,8 +131,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
             ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section )
             ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_public_section )
             ( low =  zif_adcoset_c_global=>c_source_code_limu_type-method ) ).
-      ENDIF.
-      IF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-function_group.
+      ELSEIF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-function_group.
         IF object_type_range->sign = 'I'.
           subobject_type_ranges = VALUE #( BASE subobject_type_ranges
                                            sign   = 'I'
@@ -146,9 +144,8 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
                                            option = 'EQ'
                                            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
         ENDIF.
-      ENDIF.
-      IF     object_type_range->low  = zif_adcoset_c_global=>c_source_code_type-program
-         AND object_type_range->sign = 'I'.
+      ELSEIF     object_type_range->low  = zif_adcoset_c_global=>c_source_code_type-program
+             AND object_type_range->sign = 'I'.
         subobject_type_ranges = VALUE #( BASE subobject_type_ranges
                                          sign   = 'I'
                                          option = 'EQ'

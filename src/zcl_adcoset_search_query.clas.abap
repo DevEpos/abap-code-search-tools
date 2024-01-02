@@ -54,7 +54,7 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
                                                           src_code_reader   = source_code_reader ).
 
             IF matches IS NOT INITIAL.
-              INSERT VALUE #( object       = <object>
+              INSERT VALUE #( object       = <object>-info
                               text_matches = matches
                               match_count  = lines( matches ) ) INTO TABLE search_results.
             ENDIF.
