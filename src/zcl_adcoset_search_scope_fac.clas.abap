@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Factory for creating search scopes</p>
 CLASS zcl_adcoset_search_scope_fac DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -22,9 +21,9 @@ CLASS zcl_adcoset_search_scope_fac DEFINITION
   PRIVATE SECTION.
     CLASS-METHODS read_scope_type
       IMPORTING
-        scope_id          TYPE sysuuid_x16
+        scope_id      TYPE sysuuid_x16
       RETURNING
-        VALUE(scope_type) TYPE zadcoset_scope_type.
+        VALUE(result) TYPE zadcoset_scope_type.
 ENDCLASS.
 
 
@@ -45,9 +44,8 @@ CLASS zcl_adcoset_search_scope_fac IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD read_scope_type.
-    SELECT SINGLE scope_type
-      FROM zadcoset_csscope
+    SELECT SINGLE scope_type FROM zadcoset_csscope
       WHERE id = @scope_id
-      INTO @scope_type.
+      INTO @result.
   ENDMETHOD.
 ENDCLASS.

@@ -53,6 +53,11 @@ INTERFACE lif_adbc_scope_obj_reader.
   METHODS read_next_package
     RETURNING
       VALUE(result) TYPE zif_adcoset_ty_global=>ty_scope_package.
+
+  METHODS get_current_offset
+    RETURNING
+      VALUE(result) TYPE i.
+
 ENDINTERFACE.
 
 
@@ -177,6 +182,7 @@ CLASS lcl_cond_builder DEFINITION.
     DATA not TYPE string.
     DATA val1 TYPE string.
     DATA val2 TYPE string.
+
     METHODS negate_selopt_option.
 
     METHODS to_sql_val

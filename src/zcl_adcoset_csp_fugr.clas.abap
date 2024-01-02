@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Search provider for Function Groups</p>
 CLASS zcl_adcoset_csp_fugr DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -84,7 +83,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     ENDIF.
 
     DATA(includes) = get_fugr_includes( fugr_include_prefix ).
-    IF line_exists( includes[ is_function_include = abap_true ] ) AND function_names_loaded = abap_false.
+    IF object-subobjects IS NOT INITIAL.
       mixin_function_names( EXPORTING fugr_program_name = fugr_include
                             CHANGING  includes          = includes ).
       function_names_loaded = abap_true.
@@ -108,6 +107,12 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
           DATA(matches) = src_code_searcher->search( source_code ).
           CHECK matches IS NOT INITIAL.
 
+          IF <include>-is_function_include = abap_true AND function_names_loaded = abap_false.
+            mixin_function_names( EXPORTING fugr_program_name = fugr_include
+                                  CHANGING  includes          = includes ).
+            function_names_loaded = abap_true.
+          ENDIF.
+
           assign_objects_to_matches( EXPORTING unassigned_matches = matches
                                                object             = object-info
                                                include            = <include>
@@ -126,8 +131,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
     DATA(include_pattern) = CONV progname( |{ include_prefix }___| ).
 
-    SELECT name
-      FROM trdir
+    SELECT name FROM trdir
       WHERE name LIKE @include_pattern
       INTO TABLE @DATA(includes).
 
@@ -160,7 +164,8 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         new_include-adt_type = c_include_types-include.
       ENDIF.
 
-      result = VALUE #( BASE result ( new_include ) ).
+      result = VALUE #( BASE result
+                        ( new_include ) ).
     ENDLOOP.
   ENDMETHOD.
 

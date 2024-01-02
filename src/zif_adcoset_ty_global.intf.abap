@@ -139,7 +139,7 @@ INTERFACE zif_adcoset_ty_global
   TYPES ty_search_matches TYPE STANDARD TABLE OF ty_search_match WITH EMPTY KEY.
 
   TYPES: BEGIN OF ty_search_result_object,
-           object       TYPE ty_tadir_object,
+           object       TYPE ty_tadir_object_info,
            text_matches TYPE ty_search_matches,
            match_count  TYPE i,
          END OF ty_search_result_object,

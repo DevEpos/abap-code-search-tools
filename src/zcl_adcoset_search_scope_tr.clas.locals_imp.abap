@@ -37,6 +37,7 @@ CLASS lcl_oracle_scope_obj_reader IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD build_with_statement.
+    build_where_clause( ).
     result =
     `WITH e071_aggr AS (` &&
        `SELECT DISTINCT programid pgmid,` &&
@@ -129,7 +130,10 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     me->max_objects           = max_objects.
     adbc_stmnt_cols = VALUE #( ( CONV adbc_name( 'PGMID' ) )
                                ( CONV adbc_name( 'OBJ_TYPE' ) )
-                               ( CONV adbc_name( 'OBJ_NAME' ) ) ).
+                               ( CONV adbc_name( 'OBJ_NAME' ) )
+                               ( CONV adbc_name( 'PACKAGE_NAME' ) )
+                               ( CONV adbc_name( 'OWNER' ) )
+                               ( CONV adbc_name( 'CREATED_DATE' ) ) ).
 
     build_query_clauses( ).
   ENDMETHOD.
@@ -138,7 +142,9 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     DATA tr_objects TYPE zif_adcoset_ty_global=>ty_std_tr_request_objects.
     DATA tr_objects_sorted TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
 
-    current_offset = paging_provider->get_skip( ).
+    IF current_offset IS INITIAL.
+      current_offset = paging_provider->get_skip( ).
+    ENDIF.
     max_rows = paging_provider->get_top( ).
 
     build_where_clause( ).
@@ -204,14 +210,17 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
 
   METHOD build_order_by_clause.
     order_by_clause = `ORDER BY obj_name,` &&
-                                `pgmid,` &&
+                                `pgmid,  ` &&
                                 `obj_type `.
   ENDMETHOD.
 
   METHOD build_select_clause.
     select_clause = `SELECT DISTINCT programid pgmid, ` &&
-                    `objecttype obj_type, ` &&
-                    `objectname obj_name `.
+                    `objecttype obj_type,             ` &&
+                    `objectname obj_name,             ` &&
+                    `developmentpackage package_name, ` &&
+                    `owner,                           ` &&
+                    `createddate created_date `.
   ENDMETHOD.
 
   METHOD combine_clauses.
@@ -304,6 +313,10 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
       CATCH cx_sql_exception.
         result = 0.
     ENDTRY.
+  ENDMETHOD.
+
+  METHOD lif_adbc_scope_obj_reader~get_current_offset.
+    result = current_offset.
   ENDMETHOD.
 ENDCLASS.
 

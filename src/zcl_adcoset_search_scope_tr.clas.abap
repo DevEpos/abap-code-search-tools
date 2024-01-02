@@ -42,6 +42,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
   METHOD zif_adcoset_search_scope~next_package.
     result = scope_pack_reader->read_next_package( ).
+    current_offset = scope_pack_reader->get_current_offset( ).
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~configure_package_size.
@@ -59,6 +60,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
     resolve_tr_request( ).
     resolve_packages( ).
+    add_subobj_type_to_filter( ).
 
     DATA(selection_limit) = COND i( WHEN max_objects > 0
                                     THEN max_objects + 1
