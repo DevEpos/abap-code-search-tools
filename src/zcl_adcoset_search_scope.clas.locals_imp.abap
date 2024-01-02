@@ -7,14 +7,14 @@ CLASS lcl_adbc_scope_reader_fac IMPLEMENTATION.
     " see domain DBSYS_TYPE_SELECTOR for possible values
     CASE sy-dbsys.
       WHEN 'ORACLE'.
-        result = NEW lcl_oracle_scope_obj_reader( search_ranges  = search_ranges
-                                                  current_offset = current_offset ).
+        result = NEW lcl_oracle_scope_obj_reader( search_ranges   = search_ranges
+                                                  paging_provider = paging_provider ).
       WHEN 'HDB'.
-        result = NEW lcl_hdb_scope_obj_reader( search_ranges  = search_ranges
-                                               current_offset = current_offset ).
+        result = NEW lcl_hdb_scope_obj_reader( search_ranges   = search_ranges
+                                               paging_provider = paging_provider ).
       WHEN 'MSSQL'.
-        result = NEW lcl_mssql_scope_obj_reader( search_ranges  = search_ranges
-                                                 current_offset = current_offset ).
+        result = NEW lcl_mssql_scope_obj_reader( search_ranges   = search_ranges
+                                                 paging_provider = paging_provider ).
     ENDCASE.
   ENDMETHOD.
 ENDCLASS.
@@ -22,8 +22,8 @@ ENDCLASS.
 
 CLASS lcl_oracle_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
-    super->constructor( current_offset = current_offset
-                        search_ranges  = search_ranges ).
+    super->constructor( paging_provider = paging_provider
+                        search_ranges   = search_ranges ).
   ENDMETHOD.
 
   METHOD build_limit_clause.
@@ -38,8 +38,8 @@ ENDCLASS.
 
 CLASS lcl_hdb_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
-    super->constructor( current_offset = current_offset
-                        search_ranges  = search_ranges ).
+    super->constructor( paging_provider = paging_provider
+                        search_ranges   = search_ranges ).
   ENDMETHOD.
 
   METHOD combine_clauses.
@@ -59,8 +59,8 @@ ENDCLASS.
 
 CLASS lcl_mssql_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
-    super->constructor( current_offset = current_offset
-                        search_ranges  = search_ranges ).
+    super->constructor( paging_provider = paging_provider
+                        search_ranges   = search_ranges ).
   ENDMETHOD.
 
   METHOD combine_clauses.
@@ -80,8 +80,8 @@ ENDCLASS.
 
 CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   METHOD constructor.
-    me->search_ranges  = search_ranges.
-    me->current_offset = current_offset.
+    me->search_ranges   = search_ranges.
+    me->paging_provider = paging_provider.
     adbc_stmnt_cols = VALUE #( ( CONV adbc_name( 'TYPE' ) )
                                ( CONV adbc_name( 'NAME' ) )
                                ( CONV adbc_name( 'OWNER' ) )
@@ -91,11 +91,8 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD lif_adbc_scope_obj_reader~read_next_package.
-    max_rows = package_size.
-    IF     current_offset IS INITIAL
-       AND ( object_count < package_size OR package_size = 0 ).
-      max_rows = object_count.
-    ENDIF.
+    current_offset = paging_provider->get_skip( ).
+    max_rows = paging_provider->get_top( ).
 
     build_offset_clause( ).
     build_limit_clause( ).
@@ -122,10 +119,6 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
 
   METHOD lif_adbc_scope_obj_reader~set_object_count.
     object_count = value.
-  ENDMETHOD.
-
-  METHOD lif_adbc_scope_obj_reader~set_package_size.
-    me->package_size = value.
   ENDMETHOD.
 
   METHOD lif_adbc_scope_obj_reader~has_more_packages.

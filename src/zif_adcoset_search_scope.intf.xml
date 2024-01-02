@@ -22,11 +22,6 @@
      <DESCRIPT>Retrieves number of objects in scope</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CMPNAME>GET_SCOPE_RANGES</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Retrieves the ranges of this scope</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
      <CMPNAME>HAS_NEXT_PACKAGE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Returns &apos;X&apos; if another package exists</DESCRIPT>

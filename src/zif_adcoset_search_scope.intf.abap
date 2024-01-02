@@ -2,6 +2,10 @@
 INTERFACE zif_adcoset_search_scope
   PUBLIC.
 
+  INTERFACES zif_adcoset_search_sr_provider.
+
+  ALIASES get_scope_ranges FOR zif_adcoset_search_sr_provider~get_scope_ranges.
+
   CONSTANTS c_min_parl_package_size TYPE i VALUE 10.
   CONSTANTS c_max_parl_package_size TYPE i VALUE 2500.
   CONSTANTS c_serial_package_size TYPE i VALUE 10000.
@@ -32,9 +36,4 @@ INTERFACE zif_adcoset_search_scope
     IMPORTING
       max_objects    TYPE i OPTIONAL
       max_task_count TYPE i.
-
-  "! <p class="shorttext synchronized">Retrieves the ranges of this scope</p>
-  METHODS get_scope_ranges DEFAULT IGNORE
-    RETURNING
-      VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
 ENDINTERFACE.

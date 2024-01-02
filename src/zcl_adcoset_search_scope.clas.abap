@@ -50,7 +50,6 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
                                                             max_task_count = max_task_count ).
 
     scope_pack_reader->set_object_count( object_count ).
-    scope_pack_reader->set_package_size( package_size ).
   ENDMETHOD.
 
   METHOD determine_count.
@@ -86,10 +85,9 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ENDIF.
 
     IF scope_pack_reader IS INITIAL.
-      scope_pack_reader = lcl_adbc_scope_reader_fac=>create_package_reader( search_ranges  = search_ranges
-                                                                            current_offset = current_offset ).
+      scope_pack_reader = lcl_adbc_scope_reader_fac=>create_package_reader( search_ranges   = search_ranges
+                                                                            paging_provider = me ).
       scope_pack_reader->set_object_count( object_count ).
-      scope_pack_reader->set_package_size( package_size ).
     ENDIF.
   ENDMETHOD.
 

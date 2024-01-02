@@ -91,7 +91,7 @@ INTERFACE zif_adcoset_ty_global
   "! <p class="shorttext synchronized">Tadir object with corresponding subobjects</p>
   TYPES BEGIN OF ty_tadir_object.
           INCLUDE TYPE ty_tadir_object_info AS info.
-  TYPES   subobjects TYPE ty_tadir_object_infos.
+  TYPES   subobjects TYPE ty_tadir_object_infos_sorted.
   TYPES END OF ty_tadir_object.
 
   "! <p class="shorttext synchronized">Table of tadir object with corresponding subobjects</p>

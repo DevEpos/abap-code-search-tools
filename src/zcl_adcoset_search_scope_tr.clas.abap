@@ -12,16 +12,19 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
     METHODS zif_adcoset_search_scope~next_package           REDEFINITION.
     METHODS zif_adcoset_search_scope~configure_package_size REDEFINITION.
     METHODS zif_adcoset_search_scope~has_next_package       REDEFINITION.
-    METHODS zif_adcoset_search_scope~more_objects_in_scope  REDEFINITION.
 
   PROTECTED SECTION.
     METHODS determine_count REDEFINITION.
+    METHODS init_from_db    REDEFINITION.
 
   PRIVATE SECTION.
     "! Reader for packages of object scope
     DATA scope_pack_reader TYPE REF TO lif_adbc_scope_obj_reader.
 
     METHODS init_package_reader.
+    "! Enhance the type filter with corresponding LIMU types
+    METHODS add_subobj_type_to_filter.
+    METHODS resolve_tr_request.
 ENDCLASS.
 
 
@@ -34,64 +37,101 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~has_next_package.
-    scope_pack_reader->has_more_packages( ).
+    result = scope_pack_reader->has_more_packages( ).
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
     result = scope_pack_reader->read_next_package( ).
-*    DATA(max_rows) = package_size.
-*    IF     current_offset IS INITIAL
-*       AND ( object_count < package_size OR package_size = 0 ).
-*      max_rows = object_count.
-*    ENDIF.
-*    TRY.
-*        DATA(tr_objects) = get_tr_objects( max_rows ).
-*
-*        result = VALUE #( count   = lines( tr_objects )
-*                          objects = NEW zcl_adcoset_tr_obj_processor( tr_objects    = tr_objects
-*                                                                      search_ranges = search_ranges )->run( ) ).
-*
-*        current_offset = current_offset + result-count.
-*
-*        IF result-count < max_rows.
-*          all_packages_read = abap_true.
-*        ENDIF.
-*
-*      CATCH cx_sql_exception INTO DATA(err). " TODO: variable is assigned but never used (ABAP cleaner)
-*        all_packages_read = abap_true.
-*    ENDTRY.
-  ENDMETHOD.
-
-  METHOD zif_adcoset_search_scope~more_objects_in_scope.
-    result = scope_pack_reader->more_objects_in_scope( ).
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~configure_package_size.
     super->zif_adcoset_search_scope~configure_package_size( max_objects    = max_objects
                                                             max_task_count = max_task_count ).
-
     scope_pack_reader->set_object_count( object_count ).
-    scope_pack_reader->set_package_size( package_size ).
   ENDMETHOD.
 
   METHOD determine_count.
-*    DATA(selection_limit) = COND i( WHEN max_objects > 0
-*                                    THEN max_objects + 1
-*                                    ELSE 0 ).
-*
-*    IF     search_ranges-object_type_range IS INITIAL
-*       AND search_ranges-object_name_range IS INITIAL
-*       AND search_ranges-tr_request_range  IS INITIAL.
-*      RETURN.
-*    ENDIF.
+    IF     search_ranges-object_type_range IS INITIAL
+       AND search_ranges-object_name_range IS INITIAL
+       AND search_ranges-tr_request_range  IS INITIAL.
+      RETURN.
+    ENDIF.
 
-*    init_package_reader( ).
-    object_count = scope_pack_reader->count_scope_objects( ).
+    resolve_tr_request( ).
+    resolve_packages( ).
 
-*    IF object_count = selection_limit.
-*      object_count = max_objects.
-*      more_objects_in_scope = abap_true.
-*    ENDIF.
+    DATA(selection_limit) = COND i( WHEN max_objects > 0
+                                    THEN max_objects + 1
+                                    ELSE 0 ).
+
+    object_count = scope_pack_reader->count_scope_objects( selection_limit ).
+
+    IF object_count = selection_limit.
+      object_count = max_objects.
+      more_objects_in_scope = abap_true.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD init_from_db.
+    super->init_from_db( search_scope = search_scope ).
+    scope_pack_reader->set_object_count( object_count ).
+  ENDMETHOD.
+
+  METHOD add_subobj_type_to_filter.
+    " some R3TR object types are associated with LIMU types which can be included
+    " in transport requests. These types are added to the filter criteria
+    " special case: REPS LIMU type is associate with PROG as well as FUGR
+    DATA subobject_type_ranges TYPE RANGE OF trobjtype.
+
+    LOOP AT search_ranges-object_type_range REFERENCE INTO DATA(object_type_range).
+      IF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-class.
+        subobject_type_ranges = VALUE #(
+            BASE subobject_type_ranges
+            sign   = object_type_range->sign
+            option = 'EQ'
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_definition )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_include )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_private_section )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_public_section )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-method ) ).
+      ENDIF.
+      IF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-function_group.
+        IF object_type_range->sign = 'I'.
+          subobject_type_ranges = VALUE #( BASE subobject_type_ranges
+                                           sign   = 'I'
+                                           option = 'EQ'
+                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module )
+                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+        ELSEIF object_type_range->sign = 'E'.
+          subobject_type_ranges = VALUE #( BASE subobject_type_ranges
+                                           sign   = 'E'
+                                           option = 'EQ'
+                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
+        ENDIF.
+      ENDIF.
+      IF     object_type_range->low  = zif_adcoset_c_global=>c_source_code_type-program
+         AND object_type_range->sign = 'I'.
+        subobject_type_ranges = VALUE #( BASE subobject_type_ranges
+                                         sign   = 'I'
+                                         option = 'EQ'
+                                         ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+      ENDIF.
+    ENDLOOP.
+
+    search_ranges-object_type_range = VALUE #( BASE search_ranges-object_type_range
+                                               ( LINES OF subobject_type_ranges ) ).
+  ENDMETHOD.
+
+  METHOD resolve_tr_request.
+    CHECK search_ranges-tr_request_range IS NOT INITIAL.
+
+    SELECT trkorr FROM e070
+      WHERE strkorr IN @search_ranges-tr_request_range
+      INTO TABLE @DATA(tr_tasks).
+
+    search_ranges-tr_request_range = VALUE #( BASE search_ranges-tr_request_range FOR task IN tr_tasks
+                                              ( sign = 'I' option = 'EQ' low = task ) ).
   ENDMETHOD.
 
   METHOD init_package_reader.
@@ -101,11 +141,8 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     ENDIF.
 
     IF scope_pack_reader IS INITIAL.
-      scope_pack_reader = lcl_adbc_scope_reader_fac=>create_package_reader( search_ranges  = search_ranges
-                                                                            current_offset = current_offset
-                                                                            max_objects    = max_objects ).
-*      scope_pack_reader->set_object_count( object_count ).
-      scope_pack_reader->set_package_size( package_size ).
+      scope_pack_reader = lcl_adbc_scope_reader_fac=>create_package_reader( search_range_provider = me
+                                                                            paging_provider       = me  ).
     ENDIF.
   ENDMETHOD.
 ENDCLASS.
