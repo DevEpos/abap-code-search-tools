@@ -9,9 +9,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
       IMPORTING
         search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
 
-    METHODS zif_adcoset_search_scope~next_package           REDEFINITION.
-    METHODS zif_adcoset_search_scope~configure_package_size REDEFINITION.
-    METHODS zif_adcoset_search_scope~has_next_package       REDEFINITION.
+    METHODS zif_adcoset_search_scope~next_package REDEFINITION.
 
   PROTECTED SECTION.
     METHODS determine_count REDEFINITION.
@@ -22,11 +20,10 @@ CLASS zcl_adcoset_search_scope DEFINITION
     DATA tags_dyn_where_cond TYPE string.
     DATA appl_comp_dyn_where_cond TYPE string.
 
-    "! Reader for packages of object scope
-    DATA scope_pack_reader TYPE REF TO lif_adbc_scope_obj_reader.
+    DATA native_scope_query TYPE REF TO zcl_adcoset_nsql_sscope_query.
 
     METHODS config_dyn_where_clauses.
-    METHODS init_package_reader.
+    METHODS init_native_scope_query.
 ENDCLASS.
 
 
@@ -34,22 +31,26 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   METHOD constructor.
     super->constructor( ).
     init( search_scope ).
-    init_package_reader( ).
-  ENDMETHOD.
-
-  METHOD zif_adcoset_search_scope~has_next_package.
-    result = scope_pack_reader->has_more_packages( ).
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
-    result = scope_pack_reader->read_next_package( ).
-  ENDMETHOD.
+    DATA(max_rows) = get_max_rows( ).
 
-  METHOD zif_adcoset_search_scope~configure_package_size.
-    super->zif_adcoset_search_scope~configure_package_size( max_objects    = max_objects
-                                                            max_task_count = max_task_count ).
+    init_native_scope_query( ).
+    native_scope_query->set_limit( max_rows ).
+    native_scope_query->set_offset( current_offset ).
 
-    scope_pack_reader->set_object_count( object_count ).
+    IF NOT native_scope_query->execute_query( REF #( result-objects ) ).
+      all_packages_read = abap_true.
+      RETURN.
+    ENDIF.
+
+    result-count = lines( result-objects ).
+    current_offset = current_offset + result-count.
+
+    IF result-count < max_rows.
+      all_packages_read = abap_true.
+    ENDIF.
   ENDMETHOD.
 
   METHOD determine_count.
@@ -78,17 +79,51 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD init_package_reader.
-    " Fail safe if user somehow managed to get to this point
-    IF NOT zcl_adcoset_db_support_util=>is_db_supported( ).
-      MESSAGE a000(00) WITH |DB '{ sy-dbsys }' is not supported by ABAP Code Search|.
+  METHOD init_native_scope_query.
+    IF native_scope_query IS NOT INITIAL.
+      RETURN.
     ENDIF.
 
-    IF scope_pack_reader IS INITIAL.
-      scope_pack_reader = lcl_adbc_scope_reader_fac=>create_package_reader( search_ranges   = search_ranges
-                                                                            paging_provider = me ).
-      scope_pack_reader->set_object_count( object_count ).
+    native_scope_query = NEW #( ).
+    native_scope_query->set_select( value = `obj.objecttype type, ` &&
+                                            `obj.objectname name, ` &&
+                                            `obj.owner, ` &&
+                                            `obj.developmentpackage package_name `
+                                    cols  = VALUE #( ( 'TYPE'  )
+                                                     ( 'NAME'  )
+                                                     ( 'OWNER'  )
+                                                     ( 'PACKAGE_NAME' ) ) ).
+    DATA(from_clause) = `ZADCOSET_SRCDOBJ obj`.
+    IF search_ranges-tag_id_range IS NOT INITIAL.
+      from_clause = from_clause &&
+        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } tgobj | &&
+        `ON  obj.objectname = tgobj.object_name ` &&
+        `AND obj.objecttype = tgobj.object_type `.
     ENDIF.
+
+    IF search_ranges-appl_comp_range IS NOT INITIAL.
+      from_clause = from_clause &&
+        `INNER JOIN tdevc pack ON obj.developmentpackage = pack.devclass ` &&
+        `INNER JOIN df14l appl ON pack.component = appl.fctr_id `.
+    ENDIF.
+
+    native_scope_query->set_from( from_clause ).
+    native_scope_query->set_order_by( `obj.programid` ).
+
+    native_scope_query->add_range_to_where( ranges        = search_ranges-object_type_range
+                                            sql_fieldname = 'obj.objecttype' ).
+    native_scope_query->add_range_to_where( ranges        = search_ranges-object_name_range
+                                            sql_fieldname = 'obj.objectname' ).
+    native_scope_query->add_range_to_where( ranges        = search_ranges-package_range
+                                            sql_fieldname = 'obj.developmentpackage' ).
+    native_scope_query->add_range_to_where( ranges        = search_ranges-owner_range
+                                            sql_fieldname = 'obj.owner' ).
+    native_scope_query->add_range_to_where( ranges        = search_ranges-created_on_range
+                                            sql_fieldname = 'obj.createddate' ).
+    native_scope_query->add_range_to_where( ranges        = search_ranges-tag_id_range
+                                            sql_fieldname = 'tgobj.tag_id' ).
+    native_scope_query->add_range_to_where( ranges        = search_ranges-appl_comp_range
+                                            sql_fieldname = 'appl.ps_posid' ).
   ENDMETHOD.
 
   METHOD init_from_db.
