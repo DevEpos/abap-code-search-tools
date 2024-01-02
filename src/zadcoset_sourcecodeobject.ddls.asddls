@@ -1,8 +1,9 @@
 @AbapCatalog.sqlViewName: 'ZADCOSET_SRCDOBJ'
-@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.compiler.CompareFilter: true
 @AbapCatalog.preserveKey: true
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Repository object for code search'
+
 define view ZADCOSET_SourceCodeObject
   as select from tadir
 {

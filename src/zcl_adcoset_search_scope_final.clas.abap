@@ -25,7 +25,7 @@ CLASS zcl_adcoset_search_scope_final IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~has_next_package.
-    result = xsdbool( package-objects IS NOT INITIAL ).
+    result = xsdbool( package IS NOT INITIAL ).
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
