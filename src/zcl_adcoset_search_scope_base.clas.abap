@@ -7,6 +7,8 @@ CLASS zcl_adcoset_search_scope_base DEFINITION
     INTERFACES zif_adcoset_search_scope
       ABSTRACT METHODS next_package has_next_package.
 
+    INTERFACES zif_adcoset_paging_provider.
+
   PROTECTED SECTION.
     DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
 
@@ -71,7 +73,7 @@ CLASS zcl_adcoset_search_scope_base IMPLEMENTATION.
     result = more_objects_in_scope.
   ENDMETHOD.
 
-  METHOD zif_adcoset_search_scope~get_scope_ranges.
+  METHOD zif_adcoset_search_sr_provider~get_scope_ranges.
     result = search_ranges.
   ENDMETHOD.
 
@@ -189,5 +191,17 @@ CLASS zcl_adcoset_search_scope_base IMPLEMENTATION.
                                         low
                                         high.
     DELETE ADJACENT DUPLICATES FROM search_ranges-package_range COMPARING sign option low high.
+  ENDMETHOD.
+
+  METHOD zif_adcoset_paging_provider~get_skip.
+    result = current_offset.
+  ENDMETHOD.
+
+  METHOD zif_adcoset_paging_provider~get_top.
+    result = package_size.
+    IF     current_offset IS INITIAL
+       AND ( object_count < package_size OR package_size = 0 ).
+      result = object_count.
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.

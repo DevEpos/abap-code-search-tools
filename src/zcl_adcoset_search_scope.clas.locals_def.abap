@@ -8,18 +8,19 @@ CONSTANTS c_sql_not TYPE string VALUE `NOT `.
 CONSTANTS c_sql_between TYPE string VALUE `BETWEEN `.
 CONSTANTS c_sql_escape_w_char TYPE string VALUE `ESCAPE '#' `.
 
-CONSTANTS: BEGIN OF c_selopt_option,
-             between              TYPE string VALUE 'BT',
-             not_between          TYPE string VALUE 'NB',
-             equals               TYPE string VALUE 'EQ',
-             not_equals           TYPE string VALUE 'NE',
-             greater_than         TYPE string VALUE 'GT',
-             greater_equal        TYPE string VALUE 'GE',
-             lesser_than          TYPE string VALUE 'LT',
-             lesser_equal         TYPE string VALUE 'LE',
-             contains_pattern     TYPE string VALUE 'CP',
-             not_contains_pattern TYPE string VALUE 'NP',
-           END OF c_selopt_option.
+CONSTANTS:
+  BEGIN OF c_selopt_option,
+    between              TYPE string VALUE 'BT',
+    not_between          TYPE string VALUE 'NB',
+    equals               TYPE string VALUE 'EQ',
+    not_equals           TYPE string VALUE 'NE',
+    greater_than         TYPE string VALUE 'GT',
+    greater_equal        TYPE string VALUE 'GE',
+    lesser_than          TYPE string VALUE 'LT',
+    lesser_equal         TYPE string VALUE 'LE',
+    contains_pattern     TYPE string VALUE 'CP',
+    not_contains_pattern TYPE string VALUE 'NP',
+  END OF c_selopt_option.
 
 CONSTANTS:
   BEGIN OF c_sql_comparator,
@@ -43,10 +44,6 @@ INTERFACE lif_adbc_scope_obj_reader.
     IMPORTING
       !value TYPE i.
 
-  METHODS set_package_size
-    IMPORTING
-      !value TYPE i.
-
   METHODS has_more_packages
     RETURNING
       VALUE(result) TYPE abap_bool.
@@ -61,10 +58,10 @@ CLASS lcl_adbc_scope_reader_fac DEFINITION
     "! in a Code Search Scope
     CLASS-METHODS create_package_reader
       IMPORTING
-        search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
-        current_offset TYPE i
+        search_ranges   TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
+        paging_provider TYPE REF TO zif_adcoset_paging_provider
       RETURNING
-        VALUE(result)  TYPE REF TO lif_adbc_scope_obj_reader.
+        VALUE(result)   TYPE REF TO lif_adbc_scope_obj_reader.
 ENDCLASS.
 
 
@@ -76,20 +73,18 @@ CLASS lcl_adbc_scope_obj_reader_base DEFINITION
 
     METHODS constructor
       IMPORTING
-        search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
-        current_offset TYPE i.
+        search_ranges   TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
+        paging_provider TYPE REF TO zif_adcoset_paging_provider.
 
   PROTECTED SECTION.
     DATA adbc_stmnt_cols TYPE adbc_column_tab.
+    DATA paging_provider TYPE REF TO zif_adcoset_paging_provider.
     DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
     "! Restricts the maximum number of objects to select for the search
     DATA current_offset TYPE i.
     DATA object_count TYPE i.
     DATA max_rows TYPE i.
-    DATA package_size TYPE i.
     DATA all_packages_read TYPE abap_bool.
-    "! needs custom configuration per DBMS
-    DATA appl_comp_dyn_where_cond TYPE string.
     DATA select_clause TYPE string.
     DATA where_clause TYPE string.
     DATA order_by_clause TYPE string.
@@ -166,7 +161,6 @@ CLASS lcl_cond_builder DEFINITION.
     DATA not TYPE string.
     DATA val1 TYPE string.
     DATA val2 TYPE string.
-    DATA sql_cond TYPE string.
 
     METHODS negate_selopt_option.
 
@@ -194,8 +188,8 @@ CLASS lcl_oracle_scope_obj_reader DEFINITION
   PUBLIC SECTION.
     METHODS constructor
       IMPORTING
-        search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
-        current_offset TYPE i.
+        search_ranges   TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
+        paging_provider TYPE REF TO zif_adcoset_paging_provider.
 
   PROTECTED SECTION.
     METHODS build_offset_clause REDEFINITION.
@@ -209,8 +203,8 @@ CLASS lcl_hdb_scope_obj_reader DEFINITION
   PUBLIC SECTION.
     METHODS constructor
       IMPORTING
-        search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
-        current_offset TYPE i.
+        search_ranges   TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
+        paging_provider TYPE REF TO zif_adcoset_paging_provider.
 
   PROTECTED SECTION.
     METHODS combine_clauses     REDEFINITION.
@@ -225,8 +219,8 @@ CLASS lcl_mssql_scope_obj_reader DEFINITION
   PUBLIC SECTION.
     METHODS constructor
       IMPORTING
-        search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
-        current_offset TYPE i.
+        search_ranges   TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
+        paging_provider TYPE REF TO zif_adcoset_paging_provider.
 
   PROTECTED SECTION.
     METHODS combine_clauses     REDEFINITION.

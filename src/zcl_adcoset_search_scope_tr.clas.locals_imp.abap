@@ -7,14 +7,14 @@ CLASS lcl_adbc_scope_reader_fac IMPLEMENTATION.
     " see domain DBSYS_TYPE_SELECTOR for possible values
     CASE sy-dbsys.
       WHEN 'ORACLE'.
-        result = NEW lcl_oracle_scope_obj_reader( search_ranges  = search_ranges
-                                                  current_offset = current_offset ).
+        result = NEW lcl_oracle_scope_obj_reader( search_range_provider = search_range_provider
+                                                  paging_provider       = paging_provider ).
       WHEN 'HDB'.
-        result = NEW lcl_hdb_scope_obj_reader( search_ranges  = search_ranges
-                                               current_offset = current_offset ).
+        result = NEW lcl_hdb_scope_obj_reader( search_range_provider = search_range_provider
+                                               paging_provider       = paging_provider  ).
       WHEN 'MSSQL'.
-        result = NEW lcl_mssql_scope_obj_reader( search_ranges  = search_ranges
-                                                 current_offset = current_offset ).
+        result = NEW lcl_mssql_scope_obj_reader( search_range_provider = search_range_provider
+                                                 paging_provider       = paging_provider  ).
     ENDCASE.
   ENDMETHOD.
 ENDCLASS.
@@ -22,11 +22,10 @@ ENDCLASS.
 
 CLASS lcl_oracle_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
-    super->constructor( current_offset = current_offset
-                        search_ranges  = search_ranges
-                        max_objects    = max_objects ).
-    build_offset_clause( ).
-    build_limit_clause( ).
+    super->constructor( current_offset        = current_offset
+                        search_range_provider = search_range_provider
+                        paging_provider       = paging_provider
+                        max_objects           = max_objects ).
   ENDMETHOD.
 
   METHOD build_limit_clause.
@@ -57,9 +56,10 @@ ENDCLASS.
 
 CLASS lcl_hdb_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
-    super->constructor( current_offset = current_offset
-                        search_ranges  = search_ranges
-                        max_objects    = max_objects ).
+    super->constructor( current_offset        = current_offset
+                        search_range_provider = search_range_provider
+                        paging_provider       = paging_provider
+                        max_objects           = max_objects ).
   ENDMETHOD.
 
   METHOD combine_clauses.
@@ -76,15 +76,31 @@ CLASS lcl_hdb_scope_obj_reader IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD build_with_statement.
+    build_where_clause( ).
+
+    result =
+      `WITH e071_aggr AS (` &&
+      `  SELECT DISTINCT programid pgmid,` &&
+      `                  objecttype obj_type,` &&
+      `                  objectname obj_name ` &&
+      from_clause &&
+      where_clause &&
+      `  ) ` &&
+      `  SELECT COUNT(*) FROM e071_aggr `.
+
+    IF selection_limit IS NOT INITIAL.
+      result = result && |FETCH FIRST { selection_limit } ROWS ONLY|.
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.
 
 
 CLASS lcl_mssql_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
-    super->constructor( current_offset = current_offset
-                        search_ranges  = search_ranges
-                        max_objects    = max_objects ).
+    super->constructor( current_offset        = current_offset
+                        search_range_provider = search_range_provider
+                        paging_provider       = paging_provider
+                        max_objects           = max_objects ).
   ENDMETHOD.
 
   METHOD combine_clauses.
@@ -107,11 +123,10 @@ ENDCLASS.
 
 CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   METHOD constructor.
-    me->search_ranges = search_ranges.
-    resolve_tr_request( ).
-    add_subobj_type_to_filter( ).
-    me->current_offset = current_offset.
-    me->max_objects    = max_objects.
+    me->search_range_provider = search_range_provider.
+    me->paging_provider       = paging_provider.
+    me->current_offset        = current_offset.
+    me->max_objects           = max_objects.
     adbc_stmnt_cols = VALUE #( ( CONV adbc_name( 'PGMID' ) )
                                ( CONV adbc_name( 'OBJ_TYPE' ) )
                                ( CONV adbc_name( 'OBJ_NAME' ) ) ).
@@ -123,11 +138,12 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     DATA tr_objects TYPE zif_adcoset_ty_global=>ty_std_tr_request_objects.
     DATA tr_objects_sorted TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
 
-    DATA(max_rows) = package_size.
-    IF     current_offset IS INITIAL
-       AND ( object_count < package_size OR package_size = 0 ).
-      max_rows = object_count.
-    ENDIF.
+    current_offset = paging_provider->get_skip( ).
+    max_rows = paging_provider->get_top( ).
+
+    build_where_clause( ).
+    build_offset_clause( ).
+    build_limit_clause( ).
 
     DATA(query) = combine_clauses( ).
     TRY.
@@ -137,8 +153,9 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
         IF result_set->next_package( ) > 0.
           tr_objects_sorted = tr_objects.
           result = VALUE #( count   = lines( tr_objects )
-                            objects = NEW zcl_adcoset_tr_obj_processor( tr_objects    = tr_objects_sorted
-                                                                        search_ranges = search_ranges )->run( ) ).
+                            objects = NEW zcl_adcoset_tr_obj_processor(
+                                              tr_objects    = tr_objects_sorted
+                                              search_ranges = search_range_provider->get_scope_ranges( ) )->run( ) ).
         ENDIF.
         current_offset = current_offset + result-count.
 
@@ -146,7 +163,7 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
           all_packages_read = abap_true.
         ENDIF.
 
-      CATCH cx_sql_exception.
+      CATCH cx_sql_exception INTO DATA(lx_error). " TODO: variable is assigned but never used (ABAP cleaner)
         all_packages_read = abap_true.
     ENDTRY.
   ENDMETHOD.
@@ -155,26 +172,18 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     object_count = value.
   ENDMETHOD.
 
-  METHOD lif_adbc_scope_obj_reader~set_package_size.
-    me->package_size = value.
-  ENDMETHOD.
-
   METHOD lif_adbc_scope_obj_reader~has_more_packages.
     result = xsdbool( all_packages_read = abap_false AND current_offset < object_count ).
   ENDMETHOD.
 
-  METHOD lif_adbc_scope_obj_reader~more_objects_in_scope.
-    result = more_objects_in_scope.
-  ENDMETHOD.
-
   METHOD build_query_clauses.
     build_select_clause( ).
-    build_where_clause( ).
     build_from_clause( ).
     build_order_by_clause( ).
   ENDMETHOD.
 
   METHOD build_where_clause.
+    DATA(search_ranges) = search_range_provider->get_scope_ranges( ).
     add_range_to_where( EXPORTING ranges        = search_ranges-object_type_range
                                   sql_fieldname = 'objecttype'
                         CHANGING  where         = where_clause ).
@@ -196,11 +205,11 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   METHOD build_order_by_clause.
     order_by_clause = `ORDER BY obj_name,` &&
                                 `pgmid,` &&
-                                `obj_type`.
+                                `obj_type `.
   ENDMETHOD.
 
   METHOD build_select_clause.
-    select_clause = `SELECT programid pgmid, ` &&
+    select_clause = `SELECT DISTINCT programid pgmid, ` &&
                     `objecttype obj_type, ` &&
                     `objectname obj_name `.
   ENDMETHOD.
@@ -286,87 +295,15 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD lif_adbc_scope_obj_reader~count_scope_objects.
-    DATA(selection_limit) = COND i( WHEN max_objects > 0
-                                    THEN max_objects + 1
-                                    ELSE 0 ).
-
-    IF     search_ranges-object_type_range IS INITIAL
-       AND search_ranges-object_name_range IS INITIAL
-       AND search_ranges-tr_request_range  IS INITIAL.
-      RETURN.
-    ENDIF.
-
     DATA(query) = build_with_statement( selection_limit ).
+
     TRY.
         DATA(result_set) = NEW cl_sql_statement( )->execute_query( query ).
-        result_set->set_param( data_ref = REF #( object_count ) ).
+        result_set->set_param( data_ref = REF #( result ) ).
         result_set->next( ).
-
-      CATCH cx_sql_exception INTO DATA(err). " TODO: variable is assigned but never used (ABAP cleaner)
-        object_count = 0.
+      CATCH cx_sql_exception.
+        result = 0.
     ENDTRY.
-
-    IF object_count = selection_limit.
-      object_count = max_objects.
-      more_objects_in_scope = abap_true.
-    ENDIF.
-
-    result = object_count.
-  ENDMETHOD.
-
-  METHOD add_subobj_type_to_filter.
-    " some R3TR object types are associated with LIMU types which can be included
-    " in transport requests. These types are added to the filter criteria
-    " special case: REPS LIMU type is associate with PROG as well as FUGR
-    DATA subobject_type_ranges TYPE RANGE OF trobjtype.
-
-    LOOP AT search_ranges-object_type_range REFERENCE INTO DATA(object_type_range).
-      IF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-class.
-        subobject_type_ranges = VALUE #(
-            BASE subobject_type_ranges
-            sign   = object_type_range->sign
-            option = 'EQ'
-            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_definition )
-            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_include )
-            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_private_section )
-            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section )
-            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_public_section )
-            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-method ) ).
-      ELSEIF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-function_group.
-        IF object_type_range->sign = 'I'.
-          subobject_type_ranges = VALUE #( BASE subobject_type_ranges
-                                           sign   = 'I'
-                                           option = 'EQ'
-                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module )
-                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
-        ELSEIF object_type_range->sign = 'E'.
-          subobject_type_ranges = VALUE #( BASE subobject_type_ranges
-                                           sign   = 'E'
-                                           option = 'EQ'
-                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
-        ENDIF.
-      ELSEIF     object_type_range->low  = zif_adcoset_c_global=>c_source_code_type-program
-             AND object_type_range->sign = 'I'.
-        subobject_type_ranges = VALUE #( BASE subobject_type_ranges
-                                         sign   = 'I'
-                                         option = 'EQ'
-                                         ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
-      ENDIF.
-    ENDLOOP.
-
-    search_ranges-object_type_range = VALUE #( BASE search_ranges-object_type_range
-                                               ( LINES OF subobject_type_ranges ) ).
-  ENDMETHOD.
-
-  METHOD resolve_tr_request.
-    CHECK search_ranges-tr_request_range IS NOT INITIAL.
-
-    SELECT trkorr FROM e070
-      WHERE strkorr IN @search_ranges-tr_request_range
-      INTO TABLE @DATA(tr_tasks).
-
-    search_ranges-tr_request_range = VALUE #( BASE search_ranges-tr_request_range FOR task IN tr_tasks
-                                              ( sign = 'I' option = 'EQ' low = task ) ).
   ENDMETHOD.
 ENDCLASS.
 
