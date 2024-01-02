@@ -63,6 +63,8 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_code_search_prov~search.
+    DATA searched_sources_count TYPE i.
+
     DATA(class_includes) = get_class_includes( name = object-name ).
     IF class_includes IS INITIAL.
       RETURN.
@@ -71,10 +73,12 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     LOOP AT class_includes ASSIGNING FIELD-SYMBOL(<include>).
 
       IF NOT (    object-subobjects IS INITIAL
-               OR line_exists( object-subobjects[ name = <include>-method_name ] ) ).
+               OR line_exists( object-subobjects[ name = <include>-method_name ] )
+               OR line_exists( object-subobjects[ name = <include>-name ] ) ).
         CONTINUE.
       ENDIF.
 
+      searched_sources_count = searched_sources_count + 1.
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
           DATA(matches) = src_code_searcher->search( source_code = source_code ).
@@ -89,7 +93,7 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       ENDTRY.
     ENDLOOP.
 
-    zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( class_includes ) ).
+    zcl_adcoset_search_protocol=>increase_searchd_sources_count( searched_sources_count ).
   ENDMETHOD.
 
   METHOD get_class_includes.

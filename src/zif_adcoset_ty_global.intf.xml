@@ -71,6 +71,16 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Internal code search settings</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>TY_TADIR_OBJECT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Tadir object with corresponding subobjects</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>TY_TADIR_OBJECTS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Table of tadir object with corresponding subobjects</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

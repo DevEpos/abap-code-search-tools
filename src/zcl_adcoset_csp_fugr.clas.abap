@@ -73,6 +73,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
   METHOD zif_adcoset_code_search_prov~search.
     DATA function_names_loaded TYPE abap_bool.
+    DATA searched_sources_count TYPE i.
 
     DATA(fugr_name) = CONV rs38l_area( object-name ).
     get_fugr_include_info( EXPORTING fugr_name           = fugr_name
@@ -101,6 +102,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
+      searched_sources_count = searched_sources_count + 1.
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
           DATA(matches) = src_code_searcher->search( source_code ).
@@ -114,7 +116,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
       ENDTRY.
     ENDLOOP.
 
-    zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( includes ) ).
+    zcl_adcoset_search_protocol=>increase_searchd_sources_count( searched_sources_count ).
   ENDMETHOD.
 
   METHOD get_fugr_includes.
