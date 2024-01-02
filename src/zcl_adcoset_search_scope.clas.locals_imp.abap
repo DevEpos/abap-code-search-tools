@@ -91,7 +91,9 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD lif_adbc_scope_obj_reader~read_next_package.
-    current_offset = paging_provider->get_skip( ).
+    IF current_offset IS INITIAL.
+      current_offset = paging_provider->get_skip( ).
+    ENDIF.
     max_rows = paging_provider->get_top( ).
 
     build_offset_clause( ).

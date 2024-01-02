@@ -57,6 +57,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
       RETURN.
     ENDIF.
 
+    add_subobj_type_to_filter( ).
     resolve_tr_request( ).
     resolve_packages( ).
 

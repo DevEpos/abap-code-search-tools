@@ -39,13 +39,22 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
     FIELD-SYMBOLS <package_result> TYPE zif_adcoset_ty_global=>ty_search_package_result.
 
     ASSIGN results TO <package_result>.
-    IF sy-subrc = 0.
-      INSERT LINES OF <package_result>-result_objects INTO TABLE search_results.
-      zcl_adcoset_log=>add_all_messages( <package_result>-messages ).
-      zcl_adcoset_search_protocol=>increase_searchd_objects_count( <package_result>-searched_objects_count ).
-      zcl_adcoset_search_protocol=>increase_searchd_sources_count( <package_result>-searched_sources_count ).
-      zcl_adcoset_search_protocol=>add_loc( <package_result>-loc ).
+    IF sy-subrc <> 0.
+      RETURN.
     ENDIF.
+
+    LOOP AT <package_result>-result_objects REFERENCE INTO DATA(result_object).
+      INSERT result_object->* INTO TABLE search_results.
+      IF sy-subrc <> 0.
+        DATA(existing_object) = REF #( search_results[ object-name = result_object->object-name
+                                                       object-type = result_object->object-type ] ).
+        INSERT LINES OF result_object->text_matches INTO TABLE existing_object->text_matches.
+      ENDIF.
+    ENDLOOP.
+    zcl_adcoset_log=>add_all_messages( <package_result>-messages ).
+    zcl_adcoset_search_protocol=>increase_searchd_objects_count( <package_result>-searched_objects_count ).
+    zcl_adcoset_search_protocol=>increase_searchd_sources_count( <package_result>-searched_sources_count ).
+    zcl_adcoset_search_protocol=>add_loc( <package_result>-loc ).
   ENDMETHOD.
 
   METHOD zif_adcoset_search_query~run.

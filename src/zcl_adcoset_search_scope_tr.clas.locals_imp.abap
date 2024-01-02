@@ -138,7 +138,9 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     DATA tr_objects TYPE zif_adcoset_ty_global=>ty_std_tr_request_objects.
     DATA tr_objects_sorted TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
 
-    current_offset = paging_provider->get_skip( ).
+    IF current_offset IS INITIAL.
+      current_offset = paging_provider->get_skip( ).
+    ENDIF.
     max_rows = paging_provider->get_top( ).
 
     build_where_clause( ).
