@@ -23,7 +23,10 @@ ENDCLASS.
 CLASS lcl_oracle_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
     super->constructor( current_offset = current_offset
-                        search_ranges  = search_ranges ).
+                        search_ranges  = search_ranges
+                        max_objects    = max_objects ).
+    build_offset_clause( ).
+    build_limit_clause( ).
   ENDMETHOD.
 
   METHOD build_limit_clause.
@@ -31,7 +34,23 @@ CLASS lcl_oracle_scope_obj_reader IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD build_offset_clause.
-    offset_clause = |OFFSET { current_offset } ROWS |.
+    offset_clause = | OFFSET { current_offset } ROWS |.
+  ENDMETHOD.
+
+  METHOD build_with_statement.
+    result =
+    `WITH e071_aggr AS (` &&
+       `SELECT DISTINCT programid pgmid,` &&
+                       `objecttype obj_type,` &&
+                       `objectname obj_name ` &&
+         from_clause &&
+         where_clause &&
+        `) ` &&
+     ` SELECT COUNT(*) FROM e071_aggr `.
+
+    IF selection_limit IS NOT INITIAL.
+      result = result && |FETCH FIRST { selection_limit } ROWS ONLY|.
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.
 
@@ -39,7 +58,8 @@ ENDCLASS.
 CLASS lcl_hdb_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
     super->constructor( current_offset = current_offset
-                        search_ranges  = search_ranges ).
+                        search_ranges  = search_ranges
+                        max_objects    = max_objects ).
   ENDMETHOD.
 
   METHOD combine_clauses.
@@ -54,12 +74,17 @@ CLASS lcl_hdb_scope_obj_reader IMPLEMENTATION.
   METHOD build_offset_clause.
     offset_clause = |OFFSET { current_offset }|.
   ENDMETHOD.
+
+  METHOD build_with_statement.
+  ENDMETHOD.
 ENDCLASS.
+
 
 CLASS lcl_mssql_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
     super->constructor( current_offset = current_offset
-                        search_ranges  = search_ranges ).
+                        search_ranges  = search_ranges
+                        max_objects    = max_objects ).
   ENDMETHOD.
 
   METHOD combine_clauses.
@@ -74,47 +99,54 @@ CLASS lcl_mssql_scope_obj_reader IMPLEMENTATION.
   METHOD build_offset_clause.
     offset_clause = |OFFSET { current_offset } ROWS |.
   ENDMETHOD.
+
+  METHOD build_with_statement.
+  ENDMETHOD.
 ENDCLASS.
+
 
 CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   METHOD constructor.
-    me->search_ranges  = search_ranges.
+    me->search_ranges = search_ranges.
+    resolve_tr_request( ).
+    add_subobj_type_to_filter( ).
     me->current_offset = current_offset.
-    adbc_stmnt_cols = VALUE #( ( CONV adbc_name( 'TYPE' ) )
-                               ( CONV adbc_name( 'NAME' ) )
-                               ( CONV adbc_name( 'OWNER' ) )
-                               ( CONV adbc_name( 'PACKAGE_NAME' ) ) ).
+    me->max_objects    = max_objects.
+    adbc_stmnt_cols = VALUE #( ( CONV adbc_name( 'PGMID' ) )
+                               ( CONV adbc_name( 'OBJ_TYPE' ) )
+                               ( CONV adbc_name( 'OBJ_NAME' ) ) ).
 
     build_query_clauses( ).
   ENDMETHOD.
 
   METHOD lif_adbc_scope_obj_reader~read_next_package.
-    max_rows = package_size.
+    DATA tr_objects TYPE zif_adcoset_ty_global=>ty_std_tr_request_objects.
+    DATA tr_objects_sorted TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
+
+    DATA(max_rows) = package_size.
     IF     current_offset IS INITIAL
        AND ( object_count < package_size OR package_size = 0 ).
       max_rows = object_count.
     ENDIF.
 
-    build_offset_clause( ).
-    build_limit_clause( ).
-
     DATA(query) = combine_clauses( ).
-
     TRY.
         DATA(result_set) = NEW cl_sql_statement( )->execute_query( query ).
-
-        result_set->set_param_table( itab_ref             = REF #( result )
+        result_set->set_param_table( itab_ref             = REF #( tr_objects )
                                      corresponding_fields = adbc_stmnt_cols ).
         IF result_set->next_package( ) > 0.
+          tr_objects_sorted = tr_objects.
+          result = VALUE #( count   = lines( tr_objects )
+                            objects = NEW zcl_adcoset_tr_obj_processor( tr_objects    = tr_objects_sorted
+                                                                        search_ranges = search_ranges )->run( ) ).
         ENDIF.
+        current_offset = current_offset + result-count.
 
-        DATA(package_result_count) = lines( result ).
-        current_offset = current_offset + package_result_count.
-
-        IF package_result_count < max_rows.
+        IF result-count < max_rows.
           all_packages_read = abap_true.
         ENDIF.
-      CATCH cx_sql_exception INTO DATA(err). " TODO: variable is assigned but never used (ABAP cleaner)
+
+      CATCH cx_sql_exception.
         all_packages_read = abap_true.
     ENDTRY.
   ENDMETHOD.
@@ -131,6 +163,10 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     result = xsdbool( all_packages_read = abap_false AND current_offset < object_count ).
   ENDMETHOD.
 
+  METHOD lif_adbc_scope_obj_reader~more_objects_in_scope.
+    result = more_objects_in_scope.
+  ENDMETHOD.
+
   METHOD build_query_clauses.
     build_select_clause( ).
     build_where_clause( ).
@@ -140,57 +176,33 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
 
   METHOD build_where_clause.
     add_range_to_where( EXPORTING ranges        = search_ranges-object_type_range
-                                  sql_fieldname = 'obj.object_type'
+                                  sql_fieldname = 'objecttype'
                         CHANGING  where         = where_clause ).
     add_range_to_where( EXPORTING ranges        = search_ranges-object_name_range
-                                  sql_fieldname = 'obj.object_name'
+                                  sql_fieldname = 'objectname'
                         CHANGING  where         = where_clause ).
-    add_range_to_where( EXPORTING ranges        = search_ranges-package_range
-                                  sql_fieldname = 'obj.devclass'
+    add_range_to_where( EXPORTING ranges        = search_ranges-tr_request_range
+                                  sql_fieldname = 'request'
                         CHANGING  where         = where_clause ).
-    add_range_to_where( EXPORTING ranges        = search_ranges-owner_range
-                                  sql_fieldname = 'obj.owner'
-                        CHANGING  where         = where_clause ).
-    add_range_to_where( EXPORTING ranges        = search_ranges-created_on_range
-                                  sql_fieldname = 'obj.created_date'
-                        CHANGING  where         = where_clause ).
-    add_range_to_where( EXPORTING ranges        = search_ranges-tag_id_range
-                                  sql_fieldname = 'tgobj.tag_id'
-                        CHANGING  where         = where_clause ).
-    add_range_to_where( EXPORTING ranges        = search_ranges-appl_comp_range
-                                  sql_fieldname = 'appl.ps_posid'
-                        CHANGING  where         = where_clause ).
-
     IF where_clause IS NOT INITIAL.
       where_clause = |{ where_clause } |.
     ENDIF.
   ENDMETHOD.
 
   METHOD build_from_clause.
-    from_clause = `FROM ZADCOSET_SRCCOBJ obj `.
-    IF search_ranges-tag_id_range IS NOT INITIAL.
-      from_clause = from_clause &&
-        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } tgobj | &&
-        `ON  obj.object_name = tgobj.object_name ` &&
-        `AND obj.object_type = tgobj.object_type `.
-    ENDIF.
-
-    IF search_ranges-appl_comp_range IS NOT INITIAL.
-      from_clause = from_clause &&
-        `INNER JOIN tdevc pack ON obj.devclass = pack.devclass ` &&
-        `INNER JOIN df14l appl ON pack.component = appl.fctr_id `.
-    ENDIF.
+    from_clause = `FROM ZADCOSET_TRSCO `.
   ENDMETHOD.
 
   METHOD build_order_by_clause.
-    order_by_clause = `ORDER BY obj.pgmid `.
+    order_by_clause = `ORDER BY obj_name,` &&
+                                `pgmid,` &&
+                                `obj_type`.
   ENDMETHOD.
 
   METHOD build_select_clause.
-    select_clause = `SELECT obj.object_type type, ` &&
-                    `obj.object_name name, ` &&
-                    `obj.owner, ` &&
-                    `obj.devclass package_name `.
+    select_clause = `SELECT programid pgmid, ` &&
+                    `objecttype obj_type, ` &&
+                    `objectname obj_name `.
   ENDMETHOD.
 
   METHOD combine_clauses.
@@ -239,9 +251,11 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   METHOD split_including_excluding.
     LOOP AT ranges ASSIGNING FIELD-SYMBOL(<range_entry>).
       IF <range_entry>-sign = 'I'.
-        including = VALUE #( BASE including ( <range_entry> ) ).
+        including = VALUE #( BASE including
+                             ( <range_entry> ) ).
       ELSEIF <range_entry>-sign = 'E'.
-        excluding = VALUE #( BASE excluding ( <range_entry> ) ).
+        excluding = VALUE #( BASE excluding
+                             ( <range_entry> ) ).
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
@@ -269,6 +283,90 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     IF negate = abap_false.
       result = |({ result })|.
     ENDIF.
+  ENDMETHOD.
+
+  METHOD lif_adbc_scope_obj_reader~count_scope_objects.
+    DATA(selection_limit) = COND i( WHEN max_objects > 0
+                                    THEN max_objects + 1
+                                    ELSE 0 ).
+
+    IF     search_ranges-object_type_range IS INITIAL
+       AND search_ranges-object_name_range IS INITIAL
+       AND search_ranges-tr_request_range  IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    DATA(query) = build_with_statement( selection_limit ).
+    TRY.
+        DATA(result_set) = NEW cl_sql_statement( )->execute_query( query ).
+        result_set->set_param( data_ref = REF #( object_count ) ).
+        result_set->next( ).
+
+      CATCH cx_sql_exception INTO DATA(err). " TODO: variable is assigned but never used (ABAP cleaner)
+        object_count = 0.
+    ENDTRY.
+
+    IF object_count = selection_limit.
+      object_count = max_objects.
+      more_objects_in_scope = abap_true.
+    ENDIF.
+
+    result = object_count.
+  ENDMETHOD.
+
+  METHOD add_subobj_type_to_filter.
+    " some R3TR object types are associated with LIMU types which can be included
+    " in transport requests. These types are added to the filter criteria
+    " special case: REPS LIMU type is associate with PROG as well as FUGR
+    DATA subobject_type_ranges TYPE RANGE OF trobjtype.
+
+    LOOP AT search_ranges-object_type_range REFERENCE INTO DATA(object_type_range).
+      IF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-class.
+        subobject_type_ranges = VALUE #(
+            BASE subobject_type_ranges
+            sign   = object_type_range->sign
+            option = 'EQ'
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_definition )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_include )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_private_section )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_public_section )
+            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-method ) ).
+      ELSEIF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-function_group.
+        IF object_type_range->sign = 'I'.
+          subobject_type_ranges = VALUE #( BASE subobject_type_ranges
+                                           sign   = 'I'
+                                           option = 'EQ'
+                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module )
+                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+        ELSEIF object_type_range->sign = 'E'.
+          subobject_type_ranges = VALUE #( BASE subobject_type_ranges
+                                           sign   = 'E'
+                                           option = 'EQ'
+                                           ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
+        ENDIF.
+      ELSEIF     object_type_range->low  = zif_adcoset_c_global=>c_source_code_type-program
+             AND object_type_range->sign = 'I'.
+        subobject_type_ranges = VALUE #( BASE subobject_type_ranges
+                                         sign   = 'I'
+                                         option = 'EQ'
+                                         ( low =  zif_adcoset_c_global=>c_source_code_limu_type-report_source_code ) ).
+      ENDIF.
+    ENDLOOP.
+
+    search_ranges-object_type_range = VALUE #( BASE search_ranges-object_type_range
+                                               ( LINES OF subobject_type_ranges ) ).
+  ENDMETHOD.
+
+  METHOD resolve_tr_request.
+    CHECK search_ranges-tr_request_range IS NOT INITIAL.
+
+    SELECT trkorr FROM e070
+      WHERE strkorr IN @search_ranges-tr_request_range
+      INTO TABLE @DATA(tr_tasks).
+
+    search_ranges-tr_request_range = VALUE #( BASE search_ranges-tr_request_range FOR task IN tr_tasks
+                                              ( sign = 'I' option = 'EQ' low = task ) ).
   ENDMETHOD.
 ENDCLASS.
 
@@ -347,14 +445,29 @@ CLASS lcl_cond_builder IMPLEMENTATION.
     ENDIF.
 
     " 1) escape all '%' with '#%'
-    result = replace( val = value sub = '%' with = '#%' occ = 0 ).
+    result = replace( val  = value
+                      sub  = '%'
+                      with = '#%'
+                      occ  = 0 ).
     " 2) escape all '#' with '##'
-    result = replace( val = result sub = '#' with = '##' occ = 0 ).
+    result = replace( val  = result
+                      sub  = '#'
+                      with = '##'
+                      occ  = 0 ).
     " 3) escape all '_' with '#_'
-    result = replace( val = result sub = '_' with = '#_' occ = 0 ).
+    result = replace( val  = result
+                      sub  = '_'
+                      with = '#_'
+                      occ  = 0 ).
     " 4) escape all '*' with '%'
-    result = replace( val = result sub = '*' with = '%' occ = 0 ).
+    result = replace( val  = result
+                      sub  = '*'
+                      with = '%'
+                      occ  = 0 ).
     " 5) escape all '+' with '_'
-    result = replace( val = result sub = '+' with = '_' occ = 0 ).
+    result = replace( val  = result
+                      sub  = '+'
+                      with = '_'
+                      occ  = 0 ).
   ENDMETHOD.
 ENDCLASS.

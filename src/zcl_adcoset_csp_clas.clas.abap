@@ -50,7 +50,7 @@ CLASS zcl_adcoset_csp_clas DEFINITION
     METHODS assign_objects_to_matches
       IMPORTING
         unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
-        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object
+        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         !include           TYPE ty_class_incl
       CHANGING
         all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.

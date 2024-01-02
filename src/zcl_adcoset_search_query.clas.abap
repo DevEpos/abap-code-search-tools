@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Search query for code search</p>
 CLASS zcl_adcoset_search_query DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -39,33 +38,31 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
   METHOD zif_adcoset_search_query~run.
     WHILE scope->has_next_package( ).
 
-      LOOP AT scope->next_package( ) ASSIGNING FIELD-SYMBOL(<object>).
+      DATA(package) = scope->next_package( ).
+      LOOP AT package-objects ASSIGNING FIELD-SYMBOL(<object>).
 
-        IF <object>-has_deleted_subobjects = abap_false.
-          TRY.
-              DATA(source_code_provider) = zcl_adcoset_csp_factory=>get_search_provider(
-                                               type            = <object>-type
-                                               custom_settings = custom_settings ).
+        TRY.
+            DATA(source_code_provider) = zcl_adcoset_csp_factory=>get_search_provider(
+                                             type            = <object>-type
+                                             custom_settings = custom_settings ).
 
-              DATA(source_code_reader) = zcl_adcoset_scr_factory=>get_reader( type         = <object>-type
-                                                                              is_multiline = settings-multiline_search
-                                                                              line_feed    = settings-line_feed ).
+            DATA(source_code_reader) = zcl_adcoset_scr_factory=>get_reader( type         = <object>-type
+                                                                            is_multiline = settings-multiline_search
+                                                                            line_feed    = settings-line_feed ).
 
-              DATA(matches) = source_code_provider->search( object            = <object>
-                                                            src_code_searcher = src_code_searcher
-                                                            src_code_reader   = source_code_reader ).
+            DATA(matches) = source_code_provider->search( object            = <object>
+                                                          src_code_searcher = src_code_searcher
+                                                          src_code_reader   = source_code_reader ).
 
-              IF matches IS NOT INITIAL.
-                INSERT VALUE #( object       = <object>
-                                text_matches = matches
-                                match_count  = lines( matches ) ) INTO TABLE search_results.
-              ENDIF.
-            CATCH zcx_adcoset_static_error.
-          ENDTRY.
-        ENDIF.
-        zcl_adcoset_search_protocol=>increment_searched_objs_count( <object>-searched_objs_count ).
+            IF matches IS NOT INITIAL.
+              INSERT VALUE #( object       = <object>
+                              text_matches = matches
+                              match_count  = lines( matches ) ) INTO TABLE search_results.
+            ENDIF.
+          CATCH zcx_adcoset_static_error.
+        ENDTRY.
       ENDLOOP.
-
+      zcl_adcoset_search_protocol=>increment_searched_objs_count( package-count ).
     ENDWHILE.
   ENDMETHOD.
 

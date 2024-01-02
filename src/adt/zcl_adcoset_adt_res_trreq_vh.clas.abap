@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Resource for Application Component value help</p>
 CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
   PUBLIC
-  INHERITING FROM cl_adt_res_named_items
-  FINAL
+  INHERITING FROM cl_adt_res_named_items FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -23,13 +22,14 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
     ENDIF.
 
     SELECT tr_request~trkorr AS name,
-           text~as4text AS description
+           text~as4text      AS description
       FROM e070 AS tr_request
-        LEFT OUTER JOIN e07t AS text
-          ON  tr_request~trkorr = text~trkorr
+           LEFT OUTER JOIN e07t AS text
+             ON tr_request~trkorr = text~trkorr
       WHERE tr_request~trkorr IN @lt_tr_request_name_range
-         OR upper( text~as4text ) IN @lt_tr_request_name_range
-        AND text~langu = @sy-langu
+*         OR upper( text~as4text ) IN @lt_tr_request_name_range
+         OR     text~as4text IN @lt_tr_request_name_range
+            AND text~langu    = @sy-langu
       ORDER BY tr_request~trkorr
       INTO CORRESPONDING FIELDS OF TABLE @p_named_item_list-items
       UP TO @p_filter_max_item_count ROWS.

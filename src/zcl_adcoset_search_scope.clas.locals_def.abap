@@ -2,25 +2,24 @@
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
 
-CONSTANTS:
-  c_sql_or            TYPE string VALUE ` OR `,
-  c_sql_and           TYPE string VALUE ` AND `,
-  c_sql_not           TYPE string VALUE `NOT `,
-  c_sql_between       TYPE string VALUE `BETWEEN `,
-  c_sql_escape_w_char TYPE string VALUE `ESCAPE '#' `,
+CONSTANTS c_sql_or TYPE string VALUE ` OR `.
+CONSTANTS c_sql_and TYPE string VALUE ` AND `.
+CONSTANTS c_sql_not TYPE string VALUE `NOT `.
+CONSTANTS c_sql_between TYPE string VALUE `BETWEEN `.
+CONSTANTS c_sql_escape_w_char TYPE string VALUE `ESCAPE '#' `.
 
-  BEGIN OF c_selopt_option,
-    between              TYPE string VALUE 'BT',
-    not_between          TYPE string VALUE 'NB',
-    equals               TYPE string VALUE 'EQ',
-    not_equals           TYPE string VALUE 'NE',
-    greater_than         TYPE string VALUE 'GT',
-    greater_equal        TYPE string VALUE 'GE',
-    lesser_than          TYPE string VALUE 'LT',
-    lesser_equal         TYPE string VALUE 'LE',
-    contains_pattern     TYPE string VALUE 'CP',
-    not_contains_pattern TYPE string VALUE 'NP',
-  END OF c_selopt_option.
+CONSTANTS: BEGIN OF c_selopt_option,
+             between              TYPE string VALUE 'BT',
+             not_between          TYPE string VALUE 'NB',
+             equals               TYPE string VALUE 'EQ',
+             not_equals           TYPE string VALUE 'NE',
+             greater_than         TYPE string VALUE 'GT',
+             greater_equal        TYPE string VALUE 'GE',
+             lesser_than          TYPE string VALUE 'LT',
+             lesser_equal         TYPE string VALUE 'LE',
+             contains_pattern     TYPE string VALUE 'CP',
+             not_contains_pattern TYPE string VALUE 'NP',
+           END OF c_selopt_option.
 
 CONSTANTS:
   BEGIN OF c_sql_comparator,
@@ -38,7 +37,7 @@ TYPES ty_generic_range TYPE RANGE OF string.
 INTERFACE lif_adbc_scope_obj_reader.
   METHODS read_next_package
     RETURNING
-      VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+      VALUE(result) TYPE zif_adcoset_ty_global=>ty_scope_package.
 
   METHODS set_object_count
     IMPORTING
@@ -190,7 +189,7 @@ ENDCLASS.
 
 
 CLASS lcl_oracle_scope_obj_reader DEFINITION
- INHERITING FROM lcl_adbc_scope_obj_reader_base.
+  INHERITING FROM lcl_adbc_scope_obj_reader_base.
 
   PUBLIC SECTION.
     METHODS constructor
@@ -205,7 +204,7 @@ ENDCLASS.
 
 
 CLASS lcl_hdb_scope_obj_reader DEFINITION
- INHERITING FROM lcl_adbc_scope_obj_reader_base.
+  INHERITING FROM lcl_adbc_scope_obj_reader_base.
 
   PUBLIC SECTION.
     METHODS constructor
@@ -221,7 +220,7 @@ ENDCLASS.
 
 
 CLASS lcl_mssql_scope_obj_reader DEFINITION
- INHERITING FROM lcl_adbc_scope_obj_reader_base.
+  INHERITING FROM lcl_adbc_scope_obj_reader_base.
 
   PUBLIC SECTION.
     METHODS constructor

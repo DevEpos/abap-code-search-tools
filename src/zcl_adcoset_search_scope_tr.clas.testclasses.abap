@@ -25,7 +25,7 @@ CLASS ltcl_unit IMPLEMENTATION.
 
     DATA(results) = cut->zif_adcoset_search_scope~next_package( ).
 
-    cl_abap_unit_assert=>assert_equals( act = lines( results )
+    cl_abap_unit_assert=>assert_equals( act = lines( results-objects )
                                         exp = COND #( WHEN obj_count >= 50 THEN 50
                                                       WHEN obj_count < 50  THEN obj_count
                                                       ELSE                      0 ) ).

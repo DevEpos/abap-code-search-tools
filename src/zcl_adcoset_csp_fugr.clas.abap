@@ -47,7 +47,7 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
     METHODS assign_objects_to_matches
       IMPORTING
         unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
-        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object
+        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         !include           TYPE ty_fugr_incl
       CHANGING
         all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.

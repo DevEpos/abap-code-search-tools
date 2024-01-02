@@ -56,6 +56,7 @@ CLASS lcl_hdb_scope_obj_reader IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+
 CLASS lcl_mssql_scope_obj_reader IMPLEMENTATION.
   METHOD constructor.
     super->constructor( current_offset = current_offset
@@ -75,6 +76,7 @@ CLASS lcl_mssql_scope_obj_reader IMPLEMENTATION.
     offset_clause = |OFFSET { current_offset } ROWS |.
   ENDMETHOD.
 ENDCLASS.
+
 
 CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   METHOD constructor.
@@ -103,15 +105,14 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
     TRY.
         DATA(result_set) = NEW cl_sql_statement( )->execute_query( query ).
 
-        result_set->set_param_table( itab_ref             = REF #( result )
+        result_set->set_param_table( itab_ref             = REF #( result-objects )
                                      corresponding_fields = adbc_stmnt_cols ).
-        IF result_set->next_package( ) > 0.
-        ENDIF.
+        result_set->next_package( ).
 
-        DATA(package_result_count) = lines( result ).
-        current_offset = current_offset + package_result_count.
+        result-count = lines( result-objects ).
+        current_offset = current_offset + result-count.
 
-        IF package_result_count < max_rows.
+        IF result-count < max_rows.
           all_packages_read = abap_true.
         ENDIF.
       CATCH cx_sql_exception INTO DATA(err). " TODO: variable is assigned but never used (ABAP cleaner)
@@ -140,19 +141,19 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
 
   METHOD build_where_clause.
     add_range_to_where( EXPORTING ranges        = search_ranges-object_type_range
-                                  sql_fieldname = 'obj.object_type'
+                                  sql_fieldname = 'obj.objecttype'
                         CHANGING  where         = where_clause ).
     add_range_to_where( EXPORTING ranges        = search_ranges-object_name_range
-                                  sql_fieldname = 'obj.object_name'
+                                  sql_fieldname = 'obj.objectname'
                         CHANGING  where         = where_clause ).
     add_range_to_where( EXPORTING ranges        = search_ranges-package_range
-                                  sql_fieldname = 'obj.devclass'
+                                  sql_fieldname = 'obj.developmentpackage'
                         CHANGING  where         = where_clause ).
     add_range_to_where( EXPORTING ranges        = search_ranges-owner_range
                                   sql_fieldname = 'obj.owner'
                         CHANGING  where         = where_clause ).
     add_range_to_where( EXPORTING ranges        = search_ranges-created_on_range
-                                  sql_fieldname = 'obj.created_date'
+                                  sql_fieldname = 'obj.createddate'
                         CHANGING  where         = where_clause ).
     add_range_to_where( EXPORTING ranges        = search_ranges-tag_id_range
                                   sql_fieldname = 'tgobj.tag_id'
@@ -167,30 +168,30 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD build_from_clause.
-    from_clause = `FROM ZADCOSET_SRCCOBJ obj `.
+    from_clause = `FROM ZADCOSET_SRCDOBJ obj `.
     IF search_ranges-tag_id_range IS NOT INITIAL.
       from_clause = from_clause &&
         |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } tgobj | &&
-        `ON  obj.object_name = tgobj.object_name ` &&
-        `AND obj.object_type = tgobj.object_type `.
+        `ON  obj.objectname = tgobj.object_name ` &&
+        `AND obj.objecttype = tgobj.object_type `.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
       from_clause = from_clause &&
-        `INNER JOIN tdevc pack ON obj.devclass = pack.devclass ` &&
+        `INNER JOIN tdevc pack ON obj.developmentpackage = pack.devclass ` &&
         `INNER JOIN df14l appl ON pack.component = appl.fctr_id `.
     ENDIF.
   ENDMETHOD.
 
   METHOD build_order_by_clause.
-    order_by_clause = `ORDER BY obj.pgmid `.
+    order_by_clause = `ORDER BY obj.programid `.
   ENDMETHOD.
 
   METHOD build_select_clause.
-    select_clause = `SELECT obj.object_type type, ` &&
-                    `obj.object_name name, ` &&
+    select_clause = `SELECT obj.objecttype type, ` &&
+                    `obj.objectname name, ` &&
                     `obj.owner, ` &&
-                    `obj.devclass package_name `.
+                    `obj.developmentpackage package_name `.
   ENDMETHOD.
 
   METHOD combine_clauses.
@@ -239,9 +240,11 @@ CLASS lcl_adbc_scope_obj_reader_base IMPLEMENTATION.
   METHOD split_including_excluding.
     LOOP AT ranges ASSIGNING FIELD-SYMBOL(<range_entry>).
       IF <range_entry>-sign = 'I'.
-        including = VALUE #( BASE including ( <range_entry> ) ).
+        including = VALUE #( BASE including
+                             ( <range_entry> ) ).
       ELSEIF <range_entry>-sign = 'E'.
-        excluding = VALUE #( BASE excluding ( <range_entry> ) ).
+        excluding = VALUE #( BASE excluding
+                             ( <range_entry> ) ).
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
@@ -347,14 +350,29 @@ CLASS lcl_cond_builder IMPLEMENTATION.
     ENDIF.
 
     " 1) escape all '%' with '#%'
-    result = replace( val = value sub = '%' with = '#%' occ = 0 ).
+    result = replace( val  = value
+                      sub  = '%'
+                      with = '#%'
+                      occ  = 0 ).
     " 2) escape all '#' with '##'
-    result = replace( val = result sub = '#' with = '##' occ = 0 ).
+    result = replace( val  = result
+                      sub  = '#'
+                      with = '##'
+                      occ  = 0 ).
     " 3) escape all '_' with '#_'
-    result = replace( val = result sub = '_' with = '#_' occ = 0 ).
+    result = replace( val  = result
+                      sub  = '_'
+                      with = '#_'
+                      occ  = 0 ).
     " 4) escape all '*' with '%'
-    result = replace( val = result sub = '*' with = '%' occ = 0 ).
+    result = replace( val  = result
+                      sub  = '*'
+                      with = '%'
+                      occ  = 0 ).
     " 5) escape all '+' with '_'
-    result = replace( val = result sub = '+' with = '_' occ = 0 ).
+    result = replace( val  = result
+                      sub  = '+'
+                      with = '_'
+                      occ  = 0 ).
   ENDMETHOD.
 ENDCLASS.

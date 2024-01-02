@@ -98,27 +98,9 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
 ENDCLASS.
 
 
-CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
-  METHOD post.
-    DATA scope_params TYPE zif_adcoset_ty_adt_types=>ty_search_scope_params.
 
-    delete_expired_scopes( ).
+CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
 
-    request->get_body_data( EXPORTING content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_params_ch( )
-                            IMPORTING data            = scope_params ).
-
-    parse_parameters( scope_params ).
-    determine_scope( ).
-
-    IF scope_ext-object_count > 0.
-      persist_scope( ).
-
-      response->set_body_data( content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_ch( )
-                               data            = scope_ext ).
-    ELSE.
-      response->set_status( cl_rest_status_code=>gc_success_no_content ).
-    ENDIF.
-  ENDMETHOD.
 
   METHOD delete_expired_scopes.
     DATA current_time TYPE timestampl.
@@ -128,6 +110,124 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
     DELETE FROM zadcoset_csscope WHERE     created_by          = sy-uname
                                        AND expiration_datetime < current_time.
   ENDMETHOD.
+
+
+  METHOD determine_scope.
+    DATA(scope) = zcl_adcoset_search_scope_fac=>create_scope( CORRESPONDING #( scope_ranges ) ).
+
+    " update the scope ranges from the created scope as maybe some packages had to be
+    " resolved first (i.e. determine subpackages)
+    scope_ranges = scope->get_scope_ranges( ).
+
+    scope_ext-object_count = scope->count( ).
+  ENDMETHOD.
+
+
+  METHOD extract_appl_comps.
+    DATA(appl_comps) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-appl_comp
+                                input       = appl_comps
+                                flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
+                      IMPORTING range_table = scope_ranges-appl_comp_range ).
+  ENDMETHOD.
+
+
+  METHOD extract_created_dates.
+    DATA dates TYPE string_table.
+
+    DATA(dates_list) = param_value.
+
+    SPLIT dates_list AT c_value_separator INTO TABLE dates.
+
+    LOOP AT dates ASSIGNING FIELD-SYMBOL(<date>).
+      APPEND INITIAL LINE TO scope_ranges-created_on_range ASSIGNING FIELD-SYMBOL(<created_range>).
+
+      <created_range> = <date>.
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD extract_object_names.
+    DATA(object_names) = to_upper( param_value ).
+
+    split_into_range(
+      EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_name
+                input       = object_names
+                separator   = ` `
+                flags       = VALUE #( negation = abap_true patterns = abap_true auto_prefix_matching = abap_true )
+      IMPORTING range_table = scope_ranges-object_name_range ).
+  ENDMETHOD.
+
+
+  METHOD extract_object_types.
+    DATA(types) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_type
+                                input       = types
+                                flags       = VALUE #( negation = abap_true )
+                      IMPORTING range_table = scope_ranges-object_type_range ).
+  ENDMETHOD.
+
+
+  METHOD extract_owners.
+    DATA(owners) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-owner
+                                input       = owners
+                                flags       = VALUE #( negation = abap_true patterns = abap_true )
+                      IMPORTING range_table = scope_ranges-owner_range ).
+
+    LOOP AT scope_ranges-owner_range ASSIGNING FIELD-SYMBOL(<owner_range>) WHERE low = 'ME'.
+      <owner_range>-low = sy-uname.
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD extract_packages.
+    DATA(packages) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-package
+                                input       = packages
+                                flags       = VALUE #( negation = abap_true patterns = abap_true )
+                      IMPORTING range_table = scope_ranges-package_range ).
+  ENDMETHOD.
+
+
+  METHOD extract_tag_ids.
+    DATA ext_uuids TYPE string_table.
+    DATA int_uuid TYPE sysuuid_x16.
+
+    " safety check, in case API was not called from ADT Code Search Plugin
+    CHECK zcl_adcoset_extensions_util=>is_abap_tags_available( ).
+
+    DATA(ext_uuid_csv) = param_value.
+
+    SPLIT ext_uuid_csv AT c_value_separator INTO TABLE ext_uuids.
+
+    LOOP AT ext_uuids INTO DATA(ext_uuid).
+      CLEAR int_uuid.
+      REPLACE ALL OCCURRENCES OF '-' IN ext_uuid WITH space.
+      TRY.
+          cl_system_uuid=>convert_uuid_c32_static( EXPORTING uuid     = to_upper( ext_uuid )
+                                                   IMPORTING uuid_x16 = int_uuid ).
+          scope_ranges-tag_id_range = VALUE #( BASE scope_ranges-tag_id_range
+                                               ( sign = 'I' option = 'EQ' low = int_uuid ) ).
+        CATCH cx_uuid_error.
+      ENDTRY.
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD extract_tr_requests.
+    DATA(tr_request) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-tr_request
+                                input       = tr_request
+                                flags       = VALUE #( negation = abap_true )
+                      IMPORTING range_table = scope_ranges-tr_request_range ).
+  ENDMETHOD.
+
 
   METHOD parse_parameters.
     LOOP AT scope_params ASSIGNING FIELD-SYMBOL(<param>).
@@ -163,15 +263,6 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD determine_scope.
-    DATA(scope) = zcl_adcoset_search_scope_fac=>create_scope( CORRESPONDING #( scope_ranges ) ).
-
-    " update the scope ranges from the created scope as maybe some packages had to be
-    " resolved first (i.e. determine subpackages)
-    scope_ranges = scope->get_scope_ranges( ).
-
-    scope_ext-object_count = scope->count( ).
-  ENDMETHOD.
 
   METHOD persist_scope.
     DATA(scope_db) = VALUE zadcoset_csscope( created_by = sy-uname ).
@@ -190,7 +281,8 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
           scope_ext-id.
       CATCH cx_uuid_error INTO DATA(uuid_error).
         RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-          EXPORTING previous = uuid_error.
+          EXPORTING
+            previous = uuid_error.
     ENDTRY.
 
     GET TIME STAMP FIELD scope_db-expiration_datetime.
@@ -200,103 +292,28 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
     INSERT zadcoset_csscope FROM scope_db.
   ENDMETHOD.
 
-  METHOD extract_owners.
-    DATA(owners) = to_upper( param_value ).
 
-    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-owner
-                                input       = owners
-                                flags       = VALUE #( negation = abap_true patterns = abap_true )
-                      IMPORTING range_table = scope_ranges-owner_range ).
+  METHOD post.
+    DATA scope_params TYPE zif_adcoset_ty_adt_types=>ty_search_scope_params.
 
-    LOOP AT scope_ranges-owner_range ASSIGNING FIELD-SYMBOL(<owner_range>) WHERE low = 'ME'.
-      <owner_range>-low = sy-uname.
-    ENDLOOP.
+    delete_expired_scopes( ).
+
+    request->get_body_data( EXPORTING content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_params_ch( )
+                            IMPORTING data            = scope_params ).
+
+    parse_parameters( scope_params ).
+    determine_scope( ).
+
+    IF scope_ext-object_count > 0.
+      persist_scope( ).
+
+      response->set_body_data( content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_ch( )
+                               data            = scope_ext ).
+    ELSE.
+      response->set_status( cl_rest_status_code=>gc_success_no_content ).
+    ENDIF.
   ENDMETHOD.
 
-  METHOD extract_packages.
-    DATA(packages) = to_upper( param_value ).
-
-    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-package
-                                input       = packages
-                                flags       = VALUE #( negation = abap_true patterns = abap_true )
-                      IMPORTING range_table = scope_ranges-package_range ).
-  ENDMETHOD.
-
-  METHOD extract_appl_comps.
-    DATA(appl_comps) = to_upper( param_value ).
-
-    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-appl_comp
-                                input       = appl_comps
-                                flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
-                      IMPORTING range_table = scope_ranges-appl_comp_range ).
-  ENDMETHOD.
-
-  METHOD extract_object_types.
-    DATA(types) = to_upper( param_value ).
-
-    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_type
-                                input       = types
-                                flags       = VALUE #( negation = abap_true )
-                      IMPORTING range_table = scope_ranges-object_type_range ).
-  ENDMETHOD.
-
-  METHOD extract_object_names.
-    DATA(object_names) = to_upper( param_value ).
-
-    split_into_range(
-      EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_name
-                input       = object_names
-                separator   = ` `
-                flags       = VALUE #( negation = abap_true patterns = abap_true auto_prefix_matching = abap_true )
-      IMPORTING range_table = scope_ranges-object_name_range ).
-  ENDMETHOD.
-
-  METHOD extract_created_dates.
-    DATA dates TYPE string_table.
-
-    DATA(dates_list) = param_value.
-
-    SPLIT dates_list AT c_value_separator INTO TABLE dates.
-
-    LOOP AT dates ASSIGNING FIELD-SYMBOL(<date>).
-      APPEND INITIAL LINE TO scope_ranges-created_on_range ASSIGNING FIELD-SYMBOL(<created_range>).
-
-      <created_range> = <date>.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD extract_tag_ids.
-    DATA ext_uuids TYPE string_table.
-    DATA int_uuid TYPE sysuuid_x16.
-
-    " safety check, in case API was not called from ADT Code Search Plugin
-    CHECK zcl_adcoset_extensions_util=>is_abap_tags_available( ).
-
-    DATA(ext_uuid_csv) = param_value.
-
-    SPLIT ext_uuid_csv AT c_value_separator INTO TABLE ext_uuids.
-
-    LOOP AT ext_uuids INTO DATA(ext_uuid).
-      CLEAR int_uuid.
-      REPLACE ALL OCCURRENCES OF '-' IN ext_uuid WITH space.
-      TRY.
-          cl_system_uuid=>convert_uuid_c32_static( EXPORTING uuid     = to_upper( ext_uuid )
-                                                   IMPORTING uuid_x16 = int_uuid ).
-          scope_ranges-tag_id_range = VALUE #( BASE scope_ranges-tag_id_range
-                                               ( sign = 'I' option = 'EQ' low = int_uuid ) ).
-        CATCH cx_uuid_error.
-      ENDTRY.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD extract_tr_requests.
-    DATA(tr_request) = to_upper( param_value ).
-
-    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-tr_request
-                                input       = tr_request
-                                flags       = VALUE #( negation = abap_true )
-                      IMPORTING range_table = scope_ranges-tr_request_range ).
-  ENDMETHOD.
 
   METHOD split_into_range.
     DATA tokens TYPE string_table.
@@ -324,7 +341,8 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
       IF token CA '*?'.
         IF flags-patterns = abap_false.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING text = |Parameter '{ filter_name }' does not support patterns|.
+            EXPORTING
+              text = |Parameter '{ filter_name }' does not support patterns|.
         ENDIF.
         token = replace( val = token sub = '?' occ = 0  with = '+' ).
         <option> = 'CP'.
@@ -338,11 +356,13 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
       IF token(1) = '!'.
         IF flags-negation = abap_false.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING text = |Parameter '{ filter_name }' does not support negation!|.
+            EXPORTING
+              text = |Parameter '{ filter_name }' does not support negation!|.
         ENDIF.
         IF length = 1.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING text = |No value provided after negation character '!' for Parameter '{ filter_name }'!|.
+            EXPORTING
+              text = |No value provided after negation character '!' for Parameter '{ filter_name }'!|.
         ENDIF.
         <sign> = 'E'.
         token = token+1.

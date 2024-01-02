@@ -2,25 +2,24 @@
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
 
-CONSTANTS:
-  c_sql_or            TYPE string VALUE ` OR `,
-  c_sql_and           TYPE string VALUE ` AND `,
-  c_sql_not           TYPE string VALUE `NOT `,
-  c_sql_between       TYPE string VALUE `BETWEEN `,
-  c_sql_escape_w_char TYPE string VALUE `ESCAPE '#' `,
+CONSTANTS c_sql_or TYPE string VALUE ` OR `.
+CONSTANTS c_sql_and TYPE string VALUE ` AND `.
+CONSTANTS c_sql_not TYPE string VALUE `NOT `.
+CONSTANTS c_sql_between TYPE string VALUE `BETWEEN `.
+CONSTANTS c_sql_escape_w_char TYPE string VALUE `ESCAPE '#' `.
 
-  BEGIN OF c_selopt_option,
-    between              TYPE string VALUE 'BT',
-    not_between          TYPE string VALUE 'NB',
-    equals               TYPE string VALUE 'EQ',
-    not_equals           TYPE string VALUE 'NE',
-    greater_than         TYPE string VALUE 'GT',
-    greater_equal        TYPE string VALUE 'GE',
-    lesser_than          TYPE string VALUE 'LT',
-    lesser_equal         TYPE string VALUE 'LE',
-    contains_pattern     TYPE string VALUE 'CP',
-    not_contains_pattern TYPE string VALUE 'NP',
-  END OF c_selopt_option.
+CONSTANTS: BEGIN OF c_selopt_option,
+             between              TYPE string VALUE 'BT',
+             not_between          TYPE string VALUE 'NB',
+             equals               TYPE string VALUE 'EQ',
+             not_equals           TYPE string VALUE 'NE',
+             greater_than         TYPE string VALUE 'GT',
+             greater_equal        TYPE string VALUE 'GE',
+             lesser_than          TYPE string VALUE 'LT',
+             lesser_equal         TYPE string VALUE 'LE',
+             contains_pattern     TYPE string VALUE 'CP',
+             not_contains_pattern TYPE string VALUE 'NP',
+           END OF c_selopt_option.
 
 CONSTANTS:
   BEGIN OF c_sql_comparator,
@@ -36,10 +35,6 @@ CONSTANTS:
 TYPES ty_generic_range TYPE RANGE OF string.
 
 INTERFACE lif_adbc_scope_obj_reader.
-  METHODS read_next_package
-    RETURNING
-      VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
-
   METHODS set_object_count
     IMPORTING
       !value TYPE i.
@@ -51,6 +46,18 @@ INTERFACE lif_adbc_scope_obj_reader.
   METHODS has_more_packages
     RETURNING
       VALUE(result) TYPE abap_bool.
+
+  METHODS more_objects_in_scope
+    RETURNING
+      VALUE(result) TYPE abap_bool.
+
+  METHODS count_scope_objects
+    RETURNING
+      VALUE(result) TYPE i.
+
+  METHODS read_next_package
+    RETURNING
+      VALUE(result) TYPE zif_adcoset_ty_global=>ty_scope_package.
 ENDINTERFACE.
 
 
@@ -64,6 +71,7 @@ CLASS lcl_adbc_scope_reader_fac DEFINITION
       IMPORTING
         search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
         current_offset TYPE i
+        max_objects    TYPE i
       RETURNING
         VALUE(result)  TYPE REF TO lif_adbc_scope_obj_reader.
 ENDCLASS.
@@ -78,7 +86,8 @@ CLASS lcl_adbc_scope_obj_reader_base DEFINITION
     METHODS constructor
       IMPORTING
         search_ranges  TYPE zif_adcoset_ty_global=>ty_search_scope_ranges
-        current_offset TYPE i.
+        current_offset TYPE i
+        max_objects    TYPE i.
 
   PROTECTED SECTION.
     DATA adbc_stmnt_cols TYPE adbc_column_tab.
@@ -89,6 +98,9 @@ CLASS lcl_adbc_scope_obj_reader_base DEFINITION
     DATA max_rows TYPE i.
     DATA package_size TYPE i.
     DATA all_packages_read TYPE abap_bool.
+    DATA more_objects_in_scope TYPE abap_bool.
+    "! Restricts the maximum number of objects to select for the search
+    DATA max_objects TYPE i.
     "! needs custom configuration per DBMS
     DATA appl_comp_dyn_where_cond TYPE string.
     DATA select_clause TYPE string.
@@ -141,6 +153,16 @@ CLASS lcl_adbc_scope_obj_reader_base DEFINITION
         negate        TYPE abap_bool
       RETURNING
         VALUE(result) TYPE string.
+
+    METHODS build_with_statement ABSTRACT
+      IMPORTING
+        selection_limit TYPE i
+      RETURNING
+        VALUE(result)   TYPE string.
+
+    METHODS add_subobj_type_to_filter.
+    METHODS resolve_tr_request.
+
 ENDCLASS.
 
 
@@ -190,7 +212,7 @@ ENDCLASS.
 
 
 CLASS lcl_oracle_scope_obj_reader DEFINITION
- INHERITING FROM lcl_adbc_scope_obj_reader_base.
+  INHERITING FROM lcl_adbc_scope_obj_reader_base.
 
   PUBLIC SECTION.
     METHODS constructor
@@ -199,13 +221,14 @@ CLASS lcl_oracle_scope_obj_reader DEFINITION
         current_offset TYPE i.
 
   PROTECTED SECTION.
-    METHODS build_offset_clause REDEFINITION.
-    METHODS build_limit_clause  REDEFINITION.
+    METHODS build_offset_clause  REDEFINITION.
+    METHODS build_limit_clause   REDEFINITION.
+    METHODS build_with_statement REDEFINITION.
 ENDCLASS.
 
 
 CLASS lcl_hdb_scope_obj_reader DEFINITION
- INHERITING FROM lcl_adbc_scope_obj_reader_base.
+  INHERITING FROM lcl_adbc_scope_obj_reader_base.
 
   PUBLIC SECTION.
     METHODS constructor
@@ -214,14 +237,15 @@ CLASS lcl_hdb_scope_obj_reader DEFINITION
         current_offset TYPE i.
 
   PROTECTED SECTION.
-    METHODS combine_clauses     REDEFINITION.
-    METHODS build_offset_clause REDEFINITION.
-    METHODS build_limit_clause  REDEFINITION.
+    METHODS combine_clauses      REDEFINITION.
+    METHODS build_offset_clause  REDEFINITION.
+    METHODS build_limit_clause   REDEFINITION.
+    METHODS build_with_statement REDEFINITION.
 ENDCLASS.
 
 
 CLASS lcl_mssql_scope_obj_reader DEFINITION
- INHERITING FROM lcl_adbc_scope_obj_reader_base.
+  INHERITING FROM lcl_adbc_scope_obj_reader_base.
 
   PUBLIC SECTION.
     METHODS constructor
@@ -230,7 +254,8 @@ CLASS lcl_mssql_scope_obj_reader DEFINITION
         current_offset TYPE i.
 
   PROTECTED SECTION.
-    METHODS combine_clauses     REDEFINITION.
-    METHODS build_offset_clause REDEFINITION.
-    METHODS build_limit_clause  REDEFINITION.
+    METHODS combine_clauses      REDEFINITION.
+    METHODS build_offset_clause  REDEFINITION.
+    METHODS build_limit_clause   REDEFINITION.
+    METHODS build_with_statement REDEFINITION.
 ENDCLASS.
