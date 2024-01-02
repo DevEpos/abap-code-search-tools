@@ -2,48 +2,58 @@
 INTERFACE zif_adcoset_c_global
   PUBLIC.
 
+  "! Minium Objects in scope that are needed so parallel
+  "! processing will be used.
+  CONSTANTS c_parl_proc_min_objects TYPE i VALUE 100.
+
+  "! Default scope expiration in seconds. <br/>
+  "! A scope is therefore valid for the duration of the current search query
+  CONSTANTS c_default_scope_expiration TYPE i VALUE 600.
+
+  "! Minimum package size for a single ADT request with parallel processing enabled
+  CONSTANTS c_parl_proc_min_pack_size TYPE i VALUE 500.
+
+  "! Maximum package size for a single ADT request with parallel processing enabled
+  CONSTANTS c_parl_proc_max_pack_size TYPE i VALUE 10000.
+
+  "! Type for Server Group (see RZ12)
+  CONSTANTS c_group_type_server_group TYPE rzlli_grpt VALUE 'S'.
+
+  "! <p class="shorttext synchronized">Regex pattern to detect comment lines in CDS sources</p>
+  "! Can be used for the following source types:
+  "! <ul>
+  "!   <li>DDLS</li>
+  "!   <li>DCLS</li>
+  "!   <li>DDLX</li>
+  "! </ul>
+  CONSTANTS c_cds_comment_regex TYPE string VALUE '^\s*(//|/\*|--)'.
+
   CONSTANTS:
-    "! Minium Objects in scope that are needed so parallel
-    "! processing will be used.
-    c_parl_proc_min_objects    TYPE i VALUE 100,
+    "! Id's for supported databases
+    BEGIN OF c_dbsys,
+      oracle TYPE sy-dbsys VALUE 'ORACLE',
+      ms_sql TYPE sy-dbsys VALUE 'MSSQL',
+      hana   TYPE sy-dbsys VALUE 'HDB',
+    END OF c_dbsys.
 
-    "! Default scope expiration in seconds. <br/>
-    "! A scope is therefore valid for the duration of the current search query
-    c_default_scope_expiration TYPE i VALUE 600,
-
-    "! Minimum package size for a single ADT request with parallel processing enabled
-    c_parl_proc_min_pack_size  TYPE i VALUE 500,
-
-    "! Maximum package size for a single ADT request with parallel processing enabled
-    c_parl_proc_max_pack_size  TYPE i VALUE 10000,
-
-    "! Type for Server Group (see RZ12)
-    c_group_type_server_group  TYPE rzlli_grpt VALUE 'S',
-
-    "! <p class="shorttext synchronized" lang="en">Regex pattern to detect comment lines in CDS sources</p>
-    "! Can be used for the following source types:
-    "! <ul>
-    "!   <li>DDLS</li>
-    "!   <li>DCLS</li>
-    "!   <li>DDLX</li>
-    "! </ul>
-    c_cds_comment_regex        TYPE string VALUE '^\s*(//|/\*|--)',
-
+  CONSTANTS:
     "! <p class="shorttext synchronized" lang="en">Matcher types</p>
     BEGIN OF c_matcher_type,
       substring   TYPE zif_adcoset_ty_global=>ty_matcher_type VALUE '1',
       posix_regex TYPE zif_adcoset_ty_global=>ty_matcher_type VALUE '2',
       "! Perl compatible regular expression pattern
       pcre        TYPE zif_adcoset_ty_global=>ty_matcher_type VALUE '3',
-    END OF c_matcher_type,
+    END OF c_matcher_type.
 
+  CONSTANTS:
     "! Type of a message
     BEGIN OF c_message_type,
       info    TYPE string VALUE 'INFO',
       warning TYPE string VALUE 'WARNING',
       error   TYPE string VALUE 'ERROR',
-    END OF c_message_type,
+    END OF c_message_type.
 
+  CONSTANTS:
     "! <p class="shorttext synchronized" lang="en">Names of code search parameters</p>
     BEGIN OF c_search_params,
       scope_id             TYPE string VALUE 'scopeId',
@@ -67,8 +77,9 @@ INTERFACE zif_adcoset_c_global
       max_objects          TYPE string VALUE 'maxObjects',
       tag_id               TYPE string VALUE 'tagId',
       tr_request           TYPE string VALUE 'transportRequest',
-    END OF c_search_params,
+    END OF c_search_params.
 
+  CONSTANTS:
     "! <p class="shorttext synchronized" lang="en">Include id's for class</p>
     BEGIN OF c_class_include_id,
       all                  TYPE string VALUE 'all',
@@ -80,20 +91,23 @@ INTERFACE zif_adcoset_c_global
       macros               TYPE string VALUE 'macros',
       local_definitions    TYPE string VALUE 'localDef',
       local_implementation TYPE string VALUE 'localImpl',
-    END OF c_class_include_id,
+    END OF c_class_include_id.
 
+  CONSTANTS:
     "! <p class="shorttext synchronized" lang="en">Include id's for function group</p>
     BEGIN OF c_fugr_include_id,
       all          TYPE string VALUE 'all',
       function     TYPE string VALUE 'func',
       non_function TYPE string VALUE 'nonFunc',
-    END OF c_fugr_include_id,
+    END OF c_fugr_include_id.
 
+  CONSTANTS:
     "! <p class="shorttext synchronized" lang="en">Constants for needed TADIR types</p>
     BEGIN OF c_tadir_type,
       package TYPE trobjtype VALUE 'DEVC',
-    END OF c_tadir_type,
+    END OF c_tadir_type.
 
+  CONSTANTS:
     "! <p class="shorttext synchronized" lang="en">Technical identifier for source code types</p>
     BEGIN OF c_source_code_type,
       class                 TYPE trobjtype VALUE 'CLAS',
@@ -106,8 +120,9 @@ INTERFACE zif_adcoset_c_global
       behavior_definition   TYPE trobjtype VALUE 'BDEF',
       simple_transformation TYPE trobjtype VALUE 'XSLT',
       function_group        TYPE trobjtype VALUE 'FUGR',
-    END OF c_source_code_type,
+    END OF c_source_code_type.
 
+  CONSTANTS:
     BEGIN OF c_source_code_limu_type,
       function_module         TYPE trobjtype VALUE 'FUNC',
       method                  TYPE trobjtype VALUE 'METH',
@@ -117,13 +132,15 @@ INTERFACE zif_adcoset_c_global
       class_protected_section TYPE trobjtype VALUE 'CPRO',
       class_private_section   TYPE trobjtype VALUE 'CPRI',
       class_include           TYPE trobjtype VALUE 'CINC',
-    END OF c_source_code_limu_type,
+    END OF c_source_code_limu_type.
 
+  CONSTANTS:
     BEGIN OF c_scope_type,
       universal_scope   TYPE zadcoset_scope_type VALUE 'US',
       transport_request TYPE zadcoset_scope_type VALUE 'TR',
-    END OF c_scope_type,
+    END OF c_scope_type.
 
+  CONSTANTS:
     BEGIN OF c_program_id,
       r3tr TYPE pgmid VALUE 'R3TR',
       limu TYPE pgmid VALUE 'LIMU',

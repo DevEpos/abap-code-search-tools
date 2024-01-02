@@ -2,6 +2,7 @@
 INTERFACE zif_adcoset_ty_global
   PUBLIC.
 
+  TYPES ty_generic_range TYPE RANGE OF string.
   TYPES ty_server_group TYPE rzlli_apcl.
   TYPES ty_package_name TYPE devclass.
   TYPES ty_package_names TYPE STANDARD TABLE OF devclass WITH EMPTY KEY.

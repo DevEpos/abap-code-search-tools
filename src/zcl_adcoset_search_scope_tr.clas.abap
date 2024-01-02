@@ -9,22 +9,30 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
       IMPORTING
         search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
 
-    METHODS zif_adcoset_search_scope~next_package           REDEFINITION.
-    METHODS zif_adcoset_search_scope~configure_package_size REDEFINITION.
-    METHODS zif_adcoset_search_scope~has_next_package       REDEFINITION.
+    METHODS zif_adcoset_search_scope~next_package REDEFINITION.
 
   PROTECTED SECTION.
     METHODS determine_count REDEFINITION.
-    METHODS init_from_db    REDEFINITION.
 
   PRIVATE SECTION.
-    "! Reader for packages of object scope
-    DATA scope_pack_reader TYPE REF TO lif_adbc_scope_obj_reader.
+    DATA native_scope_query TYPE REF TO zcl_adcoset_nsql_sscope_query.
 
-    METHODS init_package_reader.
     "! Enhance the type filter with corresponding LIMU types
     METHODS add_subobj_type_to_filter.
     METHODS resolve_tr_request.
+    METHODS init_native_scope_query.
+
+    "! Read Source Code Objects from Transport Requests
+    METHODS get_tr_objects
+      IMPORTING
+        max_rows      TYPE i
+      RETURNING
+        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
+
+    "! Creates native query for reading scope objects and count
+    METHODS create_native_query
+      RETURNING
+        VALUE(result) TYPE REF TO zcl_adcoset_nsql_sscope_query.
 ENDCLASS.
 
 
@@ -32,23 +40,22 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   METHOD constructor.
     super->constructor( ).
     search_ranges = search_scope-ranges.
-    init_package_reader( ).
     init( search_scope ).
   ENDMETHOD.
 
-  METHOD zif_adcoset_search_scope~has_next_package.
-    result = scope_pack_reader->has_more_packages( ).
-  ENDMETHOD.
-
   METHOD zif_adcoset_search_scope~next_package.
-    result = scope_pack_reader->read_next_package( ).
-    current_offset = scope_pack_reader->get_current_offset( ).
-  ENDMETHOD.
+    DATA(max_rows) = get_max_rows( ).
 
-  METHOD zif_adcoset_search_scope~configure_package_size.
-    super->zif_adcoset_search_scope~configure_package_size( max_objects    = max_objects
-                                                            max_task_count = max_task_count ).
-    scope_pack_reader->set_object_count( object_count ).
+    DATA(tr_objects) = get_tr_objects( max_rows ).
+    result = VALUE #( count   = lines( tr_objects )
+                      objects = NEW zcl_adcoset_tr_obj_processor( tr_objects    = tr_objects
+                                                                  search_ranges = search_ranges )->run( ) ).
+
+    current_offset = current_offset + result-count.
+
+    IF result-count < max_rows.
+      all_packages_read = abap_true.
+    ENDIF.
   ENDMETHOD.
 
   METHOD determine_count.
@@ -58,25 +65,41 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
       RETURN.
     ENDIF.
 
+    add_subobj_type_to_filter( ).
     resolve_tr_request( ).
     resolve_packages( ).
-    add_subobj_type_to_filter( ).
 
-    DATA(selection_limit) = COND i( WHEN max_objects > 0
-                                    THEN max_objects + 1
-                                    ELSE 0 ).
+    DATA(count_query) = create_native_query( ).
+    count_query->set_select( value    = `programid pgmid, ` &&
+                                        `objecttype obj_type, ` &&
+                                        `objectname obj_name`
+                             distinct = abap_true ).
 
-    object_count = scope_pack_reader->count_scope_objects( selection_limit ).
+    object_count = count_query->execute_cte_count( ).
 
-    IF object_count = selection_limit.
+    IF max_objects > 0 AND object_count > max_objects.
       object_count = max_objects.
       more_objects_in_scope = abap_true.
     ENDIF.
   ENDMETHOD.
 
-  METHOD init_from_db.
-    super->init_from_db( search_scope = search_scope ).
-    scope_pack_reader->set_object_count( object_count ).
+  METHOD get_tr_objects.
+    DATA tr_objects TYPE zif_adcoset_ty_global=>ty_std_tr_request_objects.
+
+    IF     search_ranges-object_type_range IS INITIAL
+       AND search_ranges-object_name_range IS INITIAL
+       AND search_ranges-tr_request_range  IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    init_native_scope_query( ).
+
+    native_scope_query->set_offset( current_offset ).
+    native_scope_query->set_limit( max_rows ).
+
+    IF native_scope_query->execute_query( REF #( tr_objects ) ).
+      result = tr_objects.
+    ENDIF.
   ENDMETHOD.
 
   METHOD add_subobj_type_to_filter.
@@ -136,15 +159,26 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
                                               ( sign = 'I' option = 'EQ' low = task ) ).
   ENDMETHOD.
 
-  METHOD init_package_reader.
-    " Fail safe if user somehow managed to get to this point
-    IF NOT zcl_adcoset_db_support_util=>is_db_supported( ).
-      MESSAGE a000(00) WITH |DB '{ sy-dbsys }' is not supported by ABAP Code Search|.
-    ENDIF.
+  METHOD init_native_scope_query.
+    CHECK native_scope_query IS INITIAL.
 
-    IF scope_pack_reader IS INITIAL.
-      scope_pack_reader = lcl_adbc_scope_reader_fac=>create_package_reader( search_range_provider = me
-                                                                            paging_provider       = me  ).
-    ENDIF.
+    native_scope_query = create_native_query( ).
+    native_scope_query->set_select( value    = `programid pgmid, ` &&
+                                               `objecttype obj_type, ` &&
+                                               `objectname obj_name`
+                                    cols     = VALUE #( ( 'PGMID' ) ( 'OBJ_TYPE' ) ( 'OBJ_NAME' ) )
+                                    distinct = abap_true ).
+    native_scope_query->set_order_by( `obj_name, pgmid, obj_type` ).
+  ENDMETHOD.
+
+  METHOD create_native_query.
+    result = NEW #( ).
+    result->set_from( 'ZADCOSET_TRSCO' ).
+    result->add_range_to_where( ranges        = search_ranges-object_type_range
+                                sql_fieldname = 'objecttype' ).
+    result->add_range_to_where( ranges        = search_ranges-object_name_range
+                                sql_fieldname = 'objectname' ).
+    result->add_range_to_where( ranges        = search_ranges-tr_request_range
+                                sql_fieldname = 'request' ).
   ENDMETHOD.
 ENDCLASS.

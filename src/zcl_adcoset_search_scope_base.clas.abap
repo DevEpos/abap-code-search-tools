@@ -5,9 +5,7 @@ CLASS zcl_adcoset_search_scope_base DEFINITION
 
   PUBLIC SECTION.
     INTERFACES zif_adcoset_search_scope
-      ABSTRACT METHODS next_package has_next_package.
-
-    INTERFACES zif_adcoset_paging_provider.
+      ABSTRACT METHODS next_package.
 
   PROTECTED SECTION.
     DATA search_ranges TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
@@ -50,7 +48,14 @@ CLASS zcl_adcoset_search_scope_base DEFINITION
       IMPORTING
         scope_id TYPE sysuuid_x16.
 
+    "! Resolves sub packages in current package filter and adds them
+    "! to the existing package filter
     METHODS resolve_packages.
+
+    "! Retrieves correct max rows number to restrict next package SELECT
+    METHODS get_max_rows
+      RETURNING
+        VALUE(result) TYPE i.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -69,11 +74,15 @@ CLASS zcl_adcoset_search_scope_base IMPLEMENTATION.
     result = object_count.
   ENDMETHOD.
 
+  METHOD zif_adcoset_search_scope~has_next_package.
+    result = xsdbool( all_packages_read = abap_false AND current_offset < object_count ).
+  ENDMETHOD.
+
   METHOD zif_adcoset_search_scope~more_objects_in_scope.
     result = more_objects_in_scope.
   ENDMETHOD.
 
-  METHOD zif_adcoset_search_sr_provider~get_scope_ranges.
+  method zif_adcoset_search_scope~get_scope_ranges.
     result = search_ranges.
   ENDMETHOD.
 
@@ -193,11 +202,7 @@ CLASS zcl_adcoset_search_scope_base IMPLEMENTATION.
     DELETE ADJACENT DUPLICATES FROM search_ranges-package_range COMPARING sign option low high.
   ENDMETHOD.
 
-  METHOD zif_adcoset_paging_provider~get_skip.
-    result = current_offset.
-  ENDMETHOD.
-
-  METHOD zif_adcoset_paging_provider~get_top.
+  METHOD get_max_rows.
     result = package_size.
     IF     current_offset IS INITIAL
        AND ( object_count < package_size OR package_size = 0 ).
