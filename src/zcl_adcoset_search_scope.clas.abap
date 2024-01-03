@@ -85,45 +85,53 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ENDIF.
 
     native_scope_query = NEW #( ).
-    native_scope_query->set_select( value = `obj.objecttype type, ` &&
-                                            `obj.objectname name, ` &&
-                                            `obj.owner, ` &&
-                                            `obj.developmentpackage package_name `
-                                    cols  = VALUE #( ( 'TYPE'  )
-                                                     ( 'NAME'  )
-                                                     ( 'OWNER'  )
-                                                     ( 'PACKAGE_NAME' ) ) ).
+    native_scope_query->set_select( cols        = VALUE #( tab_alias = 'obj'
+                                                           ( name = 'objecttype' alias = 'type' )
+                                                           ( name = 'objectname' alias = 'name' )
+                                                           ( name = 'owner' )
+                                                           ( name = 'developmentpackage' alias = 'package_name' ) )
+                                    target_cols = VALUE #( ( 'TYPE'  )
+                                                           ( 'NAME'  )
+                                                           ( 'OWNER'  )
+                                                           ( 'PACKAGE_NAME' ) ) ).
     DATA(from_clause) = `ZADCOSET_SRCDOBJ obj`.
     IF search_ranges-tag_id_range IS NOT INITIAL.
-      from_clause = from_clause &&
+      from_clause = from_clause && ` ` &&
         |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } tgobj | &&
         `ON  obj.objectname = tgobj.object_name ` &&
         `AND obj.objecttype = tgobj.object_type `.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
-      from_clause = from_clause &&
+      from_clause = from_clause && ` ` &&
         `INNER JOIN tdevc pack ON obj.developmentpackage = pack.devclass ` &&
         `INNER JOIN df14l appl ON pack.component = appl.fctr_id `.
     ENDIF.
 
     native_scope_query->set_from( from_clause ).
-    native_scope_query->set_order_by( `obj.programid` ).
+    native_scope_query->set_order_by( VALUE #( ( tab_alias = 'obj' name = 'programid' ) ) ).
 
-    native_scope_query->add_range_to_where( ranges        = search_ranges-object_type_range
-                                            sql_fieldname = 'obj.objecttype' ).
-    native_scope_query->add_range_to_where( ranges        = search_ranges-object_name_range
-                                            sql_fieldname = 'obj.objectname' ).
-    native_scope_query->add_range_to_where( ranges        = search_ranges-package_range
-                                            sql_fieldname = 'obj.developmentpackage' ).
-    native_scope_query->add_range_to_where( ranges        = search_ranges-owner_range
-                                            sql_fieldname = 'obj.owner' ).
-    native_scope_query->add_range_to_where( ranges        = search_ranges-created_on_range
-                                            sql_fieldname = 'obj.createddate' ).
-    native_scope_query->add_range_to_where( ranges        = search_ranges-tag_id_range
-                                            sql_fieldname = 'tgobj.tag_id' ).
-    native_scope_query->add_range_to_where( ranges        = search_ranges-appl_comp_range
-                                            sql_fieldname = 'appl.ps_posid' ).
+    native_scope_query->add_range_to_where( ranges   = search_ranges-object_type_range
+                                            col_info = VALUE #( tab_alias = 'obj'
+                                                                name      = 'objecttype' ) ).
+    native_scope_query->add_range_to_where( ranges   = search_ranges-object_name_range
+                                            col_info = VALUE #( tab_alias = 'obj'
+                                                                name      = 'objectname' ) ).
+    native_scope_query->add_range_to_where( ranges   = search_ranges-package_range
+                                            col_info = VALUE #( tab_alias = 'obj'
+                                                                name      = 'developmentpackage' ) ).
+    native_scope_query->add_range_to_where( ranges   = search_ranges-owner_range
+                                            col_info = VALUE #( tab_alias = 'obj'
+                                                                name      = 'owner' ) ).
+    native_scope_query->add_range_to_where( ranges   = search_ranges-created_on_range
+                                            col_info = VALUE #( tab_alias = 'obj'
+                                                                name      = 'createddate' ) ).
+    native_scope_query->add_range_to_where( ranges   = search_ranges-tag_id_range
+                                            col_info = VALUE #( tab_alias = 'tgobj'
+                                                                name      = 'tag_id' ) ).
+    native_scope_query->add_range_to_where( ranges   = search_ranges-appl_comp_range
+                                            col_info = VALUE #( tab_alias = 'appl'
+                                                                name      = 'ps_posid' ) ).
   ENDMETHOD.
 
   METHOD init_from_db.
