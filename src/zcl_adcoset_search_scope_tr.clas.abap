@@ -39,7 +39,6 @@ ENDCLASS.
 CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   METHOD constructor.
     super->constructor( ).
-    search_ranges = search_scope-ranges.
     init( search_scope ).
   ENDMETHOD.
 
@@ -70,9 +69,9 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     resolve_packages( ).
 
     DATA(count_query) = create_native_query( ).
-    count_query->set_select( value    = `programid pgmid, ` &&
-                                        `objecttype obj_type, ` &&
-                                        `objectname obj_name`
+    count_query->set_select( cols     = VALUE #( ( name = 'programid' alias = 'pgmid' )
+                                                 ( name = 'objecttype' alias = 'obj_type' )
+                                                 ( name = 'objectname' alias = 'obj_name' ) )
                              distinct = abap_true ).
 
     object_count = count_query->execute_cte_count( ).
@@ -163,22 +162,24 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     CHECK native_scope_query IS INITIAL.
 
     native_scope_query = create_native_query( ).
-    native_scope_query->set_select( value    = `programid pgmid, ` &&
-                                               `objecttype obj_type, ` &&
-                                               `objectname obj_name`
-                                    cols     = VALUE #( ( 'PGMID' ) ( 'OBJ_TYPE' ) ( 'OBJ_NAME' ) )
-                                    distinct = abap_true ).
-    native_scope_query->set_order_by( `obj_name, pgmid, obj_type` ).
+    native_scope_query->set_select( cols        = VALUE #( ( name = 'programid' alias = 'pgmid' )
+                                                           ( name = 'objecttype' alias = 'obj_type' )
+                                                           ( name = 'objectname' alias = 'obj_name' ) )
+                                    target_cols = VALUE #( ( 'PGMID' ) ( 'OBJ_TYPE' ) ( 'OBJ_NAME' ) )
+                                    distinct    = abap_true ).
+    native_scope_query->set_order_by( VALUE #( ( name = 'obj_name' )
+                                               ( name = 'pgmid' )
+                                               ( name = 'obj_type' ) ) ).
   ENDMETHOD.
 
   METHOD create_native_query.
     result = NEW #( ).
     result->set_from( 'ZADCOSET_TRSCO' ).
-    result->add_range_to_where( ranges        = search_ranges-object_type_range
-                                sql_fieldname = 'objecttype' ).
-    result->add_range_to_where( ranges        = search_ranges-object_name_range
-                                sql_fieldname = 'objectname' ).
-    result->add_range_to_where( ranges        = search_ranges-tr_request_range
-                                sql_fieldname = 'request' ).
+    result->add_range_to_where( ranges   = search_ranges-object_type_range
+                                col_info = VALUE #( name = 'objecttype' ) ).
+    result->add_range_to_where( ranges   = search_ranges-object_name_range
+                                col_info = VALUE #( name = 'objectname' ) ).
+    result->add_range_to_where( ranges   = search_ranges-tr_request_range
+                                col_info = VALUE #( name = 'request' ) ).
   ENDMETHOD.
 ENDCLASS.

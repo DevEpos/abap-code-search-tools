@@ -3,17 +3,41 @@ CLASS zcl_adcoset_nsql_sscope_query DEFINITION
   PUBLIC.
 
   PUBLIC SECTION.
-    METHODS constructor.
+    TYPES ty_sort_direction TYPE c LENGTH 1.
+
+    TYPES:
+      "! General column data to be used in WHERE or SELECT
+      BEGIN OF ty_col_info,
+        tab_alias TYPE string,
+        name      TYPE string,
+        alias     TYPE string,
+      END OF ty_col_info,
+      ty_col_infos TYPE STANDARD TABLE OF ty_col_info.
+
+    TYPES:
+      "! Column information for ORDER BY
+      BEGIN OF ty_order_by_info,
+        tab_alias TYPE string,
+        name      TYPE string,
+        direction TYPE ty_sort_direction,
+      END OF ty_order_by_info,
+      ty_order_by_infos TYPE STANDARD TABLE OF ty_order_by_info.
+
+    CONSTANTS:
+      BEGIN OF c_sort_dir,
+        ascending  TYPE ty_sort_direction VALUE '1',
+        descending TYPE ty_sort_direction VALUE '2',
+      END OF c_sort_dir.
 
     METHODS set_order_by
       IMPORTING
-        !value TYPE string.
+        order_cols TYPE ty_order_by_infos.
 
     METHODS set_select
       IMPORTING
-        !value    TYPE string
-        cols      TYPE adbc_column_tab OPTIONAL
-        !distinct TYPE abap_bool       OPTIONAL.
+        cols        TYPE ty_col_infos
+        target_cols TYPE adbc_column_tab OPTIONAL
+        !distinct   TYPE abap_bool       OPTIONAL.
 
     METHODS set_offset
       IMPORTING
@@ -31,9 +55,9 @@ CLASS zcl_adcoset_nsql_sscope_query DEFINITION
 
     METHODS add_range_to_where
       IMPORTING
-        !ranges       TYPE STANDARD TABLE
-        data_type     TYPE abap_typekind DEFAULT cl_abap_typedescr=>typekind_char
-        sql_fieldname TYPE string.
+        !ranges   TYPE STANDARD TABLE
+        data_type TYPE abap_typekind DEFAULT cl_abap_typedescr=>typekind_char
+        col_info  TYPE ty_col_info.
 
     METHODS has_where_cond
       RETURNING
@@ -53,6 +77,8 @@ CLASS zcl_adcoset_nsql_sscope_query DEFINITION
         VALUE(result) TYPE i.
 
   PROTECTED SECTION.
+
+  PRIVATE SECTION.
     DATA adbc_stmnt_cols TYPE adbc_column_tab.
     DATA select_clause TYPE string.
     DATA where_clause TYPE string.
@@ -91,7 +117,6 @@ CLASS zcl_adcoset_nsql_sscope_query DEFINITION
       RETURNING
         VALUE(result) TYPE string.
 
-  PRIVATE SECTION.
     METHODS get_paging
       RETURNING
         VALUE(result) TYPE string_table.
@@ -99,15 +124,20 @@ CLASS zcl_adcoset_nsql_sscope_query DEFINITION
     METHODS conv_tab_to_string
       IMPORTING
         !tab          TYPE string_table
+        sep           TYPE string DEFAULT ` `
       RETURNING
         VALUE(result) TYPE string.
+
+    METHODS conv_col_info_to_string
+      IMPORTING
+        col_info      TYPE ty_col_info
+      RETURNING
+        VALUE(result) TYPE string.
+
 ENDCLASS.
 
 
 CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
-  METHOD constructor.
-  ENDMETHOD.
-
   METHOD reset.
     CLEAR: from_clause,
            select_clause,
@@ -138,7 +168,31 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD set_order_by.
-    order_by_clause = |ORDER BY { value }|.
+    DATA order_parts TYPE string_table.
+
+    " default separators, currently valid for db systems
+    DATA(tab_field_sep) = `.`.
+
+    LOOP AT order_cols INTO DATA(col_info).
+      DATA(order_col) = ``.
+      IF col_info-tab_alias IS NOT INITIAL AND col_info-name IS NOT INITIAL.
+        order_col = col_info-tab_alias && tab_field_sep && col_info-name.
+      ELSE.
+        order_col = col_info-name.
+      ENDIF.
+
+      IF col_info-direction = c_sort_dir-ascending.
+        order_col = |{ order_col } ASC|.
+      ELSEIF col_info-direction = c_sort_dir-descending.
+        order_col = |{ order_col } DESC|.
+      ENDIF.
+
+      order_parts = VALUE #( BASE order_parts
+                             ( order_col ) ).
+    ENDLOOP.
+
+    order_by_clause = |ORDER BY { concat_lines_of( table = order_parts
+                                                   sep   = ',' ) }|.
   ENDMETHOD.
 
   METHOD has_where_cond.
@@ -146,6 +200,7 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD set_select.
+    DATA col_parts TYPE string_table.
     DATA select_parts TYPE string_table.
 
     select_parts = VALUE #( ( `SELECT` ) ).
@@ -154,12 +209,19 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
       APPEND `DISTINCT` TO select_parts.
     ENDIF.
 
-    APPEND value TO select_parts.
+    LOOP AT cols INTO DATA(col_info).
+      col_parts = VALUE #( BASE col_parts
+                           ( conv_col_info_to_string( col_info ) ) ).
+    ENDLOOP.
+
+    select_parts = VALUE #( BASE select_parts
+                            ( concat_lines_of( table = col_parts
+                                               sep   = ',' ) ) ).
 
     select_clause = concat_lines_of( table = select_parts
                                      sep   = ` ` ).
 
-    adbc_stmnt_cols = cols.
+    adbc_stmnt_cols = target_cols.
   ENDMETHOD.
 
   METHOD execute_query.
@@ -193,7 +255,7 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
   METHOD add_range_to_where.
     DATA(ranges_as_where) = conv_range_to_where( ranges        = ranges
                                                  data_type     = data_type
-                                                 sql_fieldname = sql_fieldname ).
+                                                 sql_fieldname = conv_col_info_to_string( col_info ) ).
 
     IF ranges_as_where IS INITIAL.
       RETURN.
@@ -222,7 +284,7 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_paging.
-    IF sy-dbsys = 'HDB'.
+    IF sy-dbsys = zif_adcoset_c_global=>c_dbsys-hana.
       result = VALUE #( ( limit_clause )
                         ( offset_clause ) ).
     ELSE.
@@ -295,6 +357,22 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
 
   METHOD conv_tab_to_string.
     result = to_upper( concat_lines_of( table = tab
-                                        sep   = ` ` ) ).
+                                        sep   = sep ) ).
+  ENDMETHOD.
+
+  METHOD conv_col_info_to_string.
+    " default separators, currently valid for db systems
+    DATA(tab_field_sep) = `.`.
+    DATA(field_alias_sep) = ` `.
+
+    result = col_info-tab_alias.
+    IF result IS NOT INITIAL.
+      result = result && tab_field_sep.
+    ENDIF.
+
+    result = result && col_info-name.
+    IF col_info-alias IS NOT INITIAL.
+      result = result && field_alias_sep && col_info-alias.
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.

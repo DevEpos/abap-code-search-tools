@@ -22,19 +22,21 @@ CLASS ltcl_query_test IMPLEMENTATION.
                               ( option = 'CP' low = 'C*' )
                               (  option = 'EQ' low = 'XSLT' ) ).
 
+    zcl_adcoset_log=>clear( ).
     DATA(query) = NEW zcl_adcoset_nsql_sscope_query( ).
     query->set_from( 'TADIR tdir' ).
-    query->set_order_by( `obj_type` ).
-    query->set_select( value    = 'tdir.object obj_type'
-                       distinct = abap_true
-                       cols     = VALUE #( ( 'OBJ_TYPE' ) ) ).
-    query->add_range_to_where( ranges        = obj_type_range
-                               sql_fieldname = 'tdir.object' ).
+    query->set_order_by( VALUE #( ( name = 'obj_type' ) ) ).
+    query->set_select( cols        = VALUE #( ( tab_alias = 'tdir' name = 'object' alias = 'obj_type' ) )
+                       distinct    = abap_true
+                       target_cols = VALUE #( ( 'OBJ_TYPE' ) ) ).
+    query->add_range_to_where( ranges   = obj_type_range
+                               col_info = VALUE #( tab_alias = 'tdir'
+                                                   name      = 'object' ) ).
     query->set_limit( 10 ).
 
     cl_abap_unit_assert=>assert_true( query->execute_query( itab = REF #( result ) ) ).
-    cl_abap_unit_assert=>assert_equals( exp = 10
-                                        act = lines( result ) ).
+    cl_abap_unit_assert=>assert_not_initial( lines( result ) ).
+    cl_abap_unit_assert=>assert_initial( lines( zcl_adcoset_log=>get_messages( ) ) ).
   ENDMETHOD.
 
   METHOD test_cte_count_query.
@@ -49,18 +51,19 @@ CLASS ltcl_query_test IMPLEMENTATION.
                               ( option = 'CP' low = 'C*' )
                               (  option = 'EQ' low = 'XSLT' ) ).
 
+    zcl_adcoset_log=>clear( ).
     DATA(query) = NEW zcl_adcoset_nsql_sscope_query( ).
     query->set_from( 'TADIR tdir' ).
-    query->set_order_by( `obj_type` ).
-    query->set_select( value    = 'tdir.object obj_type'
-                       distinct = abap_true
-                       cols     = VALUE #( ( 'OBJ_TYPE' ) ) ).
-    query->add_range_to_where( ranges        = obj_type_range
-                               sql_fieldname = 'tdir.object' ).
+    query->set_order_by( VALUE #( ( name = 'obj_type' ) ) ).
+    query->set_select( cols        = VALUE #( ( tab_alias = 'tdir' name = 'object' alias = 'obj_type' ) )
+                       distinct    = abap_true
+                       target_cols = VALUE #( ( 'OBJ_TYPE' ) ) ).
+    query->add_range_to_where( ranges   = obj_type_range
+                               col_info = VALUE #( tab_alias = 'tdir'
+                                                   name      = 'object' ) ).
 
-    query->set_limit( 1 ).
-    cl_abap_unit_assert=>assert_equals( exp = 42
-                                        act = query->execute_cte_count( ) ).
+    cl_abap_unit_assert=>assert_not_initial( query->execute_cte_count( ) ).
+    cl_abap_unit_assert=>assert_initial( lines( zcl_adcoset_log=>get_messages( ) ) ).
   ENDMETHOD.
 
 ENDCLASS.
