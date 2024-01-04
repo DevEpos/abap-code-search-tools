@@ -1,10 +1,10 @@
-@AbapCatalog.sqlViewName: 'ZADCOSET_SRCDOBJ'
+@AbapCatalog.sqlViewName: 'ZADCOSET_ISRCOBJ'
 @AbapCatalog.compiler.compareFilter: true
 @AbapCatalog.preserveKey: true
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Repository object for code search'
 
-define view ZADCOSET_SourceCodeObject
+define view ZADCOSET_I_SourceCodeObject
   as select from tadir
 {
   key pgmid      as ProgramId,

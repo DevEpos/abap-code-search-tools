@@ -95,7 +95,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD config_dyn_where_clauses.
-    dyn_from_clause = `ZADCOSET_SourceCodeObject AS obj `.
+    dyn_from_clause = `ZADCOSET_I_SourceCodeObject AS obj `.
 
     IF search_ranges-tag_id_range IS NOT INITIAL.
       tags_dyn_where_cond = `tgobj~tag_id IN @search_ranges-tag_id_range`.

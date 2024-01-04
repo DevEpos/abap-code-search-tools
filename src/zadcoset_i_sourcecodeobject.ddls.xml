@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <DDLS>
-    <DDLNAME>ZADCOSET_SOURCECODEOBJECT</DDLNAME>
+    <DDLNAME>ZADCOSET_I_SOURCECODEOBJECT</DDLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
     <DDTEXT>Repository object for code search</DDTEXT>
     <SOURCE_TYPE>V</SOURCE_TYPE>

@@ -73,7 +73,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
        SELECT DISTINCT programid  AS pgmid,
                        objecttype AS obj_type,
                        objectname AS obj_name
-         FROM zadcoset_transportsourcecodobj
+         FROM zadcoset_i_transportsrccodobj
          WHERE objecttype IN @search_ranges-object_type_range
            AND objectname IN @search_ranges-object_name_range
            AND request    IN @search_ranges-tr_request_range )
@@ -101,7 +101,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
                     developmentpackage AS package_name,
                     owner,
                     createddate        AS created_date
-      FROM zadcoset_transportsourcecodobj
+      FROM zadcoset_i_transportsrccodobj
       WHERE objecttype IN @search_ranges-object_type_range
         AND objectname IN @search_ranges-object_name_range
         AND request    IN @search_ranges-tr_request_range
