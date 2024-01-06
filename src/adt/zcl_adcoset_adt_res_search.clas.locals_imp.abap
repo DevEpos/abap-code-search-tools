@@ -18,8 +18,7 @@ CLASS lcl_search_query IMPLEMENTATION.
         result-messages = search_result-messages.
       CATCH zcx_adcoset_static_error INTO DATA(search_error).
         RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-          EXPORTING
-            previous = search_error.
+          EXPORTING previous = search_error.
     ENDTRY.
   ENDMETHOD.
 
@@ -101,8 +100,7 @@ CLASS lcl_search_query IMPLEMENTATION.
         CATCH zcx_adcoset_static_error INTO DATA(parse_error).
           " Safety precausion. If called from ADT the sequence is already validated
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              previous = parse_error.
+            EXPORTING previous = parse_error.
       ENDTRY.
     ENDIF.
   ENDMETHOD.
@@ -288,8 +286,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
                                                   ( LINES OF incl_match_objects ) ).
       ELSEIF     object_info-type               = zif_adcoset_c_global=>c_source_code_type-program
              AND search_result_object->matches IS NOT INITIAL.
-        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
-                                                  ( search_result_object->* ) ).
+        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects ( search_result_object->* ) ).
       ENDIF.
     ELSE.
       create_std_match_objects( search_result_object = search_result_object
@@ -301,7 +298,8 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
         IF cds_name_mapper->collect_entry( name = search_result_object->adt_main_object-name
                                            type = CONV #( search_result_object->adt_main_object-type(4) ) ).
-          main_objs_for_name_mapping = VALUE #( BASE main_objs_for_name_mapping ( REF #( added_result_obj->adt_main_object ) ) ).
+          main_objs_for_name_mapping = VALUE #( BASE main_objs_for_name_mapping
+                                                ( REF #( added_result_obj->adt_main_object ) ) ).
         ENDIF.
 
       ENDIF.
@@ -393,8 +391,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
       ENDLOOP.
 
       IF incl_search_result_object-matches IS NOT INITIAL.
-        result = VALUE #( BASE result
-                          ( incl_search_result_object ) ).
+        result = VALUE #( BASE result ( incl_search_result_object ) ).
       ENDIF.
 
     ENDLOOP.

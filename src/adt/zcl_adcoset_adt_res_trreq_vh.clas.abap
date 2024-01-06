@@ -212,11 +212,9 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
       value = to_upper( value ).
       CASE value.
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-workbench_request.
-          type_filter = VALUE #( BASE type_filter
-                                 ( sign = 'I' option = 'EQ' low = sctsc_type_workbench ) ).
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_workbench ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-dev_corr_task.
-          type_filter = VALUE #( BASE type_filter
-                                 ( sign = 'I' option = 'EQ' low = sctsc_type_correction ) ).
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_correction ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-piece_list.
           type_filter = VALUE #( BASE type_filter
                                  sign   = 'I'
@@ -226,11 +224,9 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
                                  ( low = sctsc_type_upgradelist )
                                  ( low = sctsc_type_patch ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-repair_task.
-          type_filter = VALUE #( BASE type_filter
-                                 ( sign = 'I' option = 'EQ' low = sctsc_type_repair ) ).
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_repair ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-transport_of_copies.
-          type_filter = VALUE #( BASE type_filter
-                                 ( sign = 'I' option = 'EQ' low = sctsc_type_transport ) ).
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_transport ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-relocation_request.
           type_filter = VALUE #( BASE type_filter
                                  sign   = 'I'
@@ -267,6 +263,8 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_generic_filter.
+    " TODO: parameter NAME is never used (ABAP cleaner)
+
     DATA values TYPE string_table.
 
     SPLIT values_str AT c_filter_val_sep INTO TABLE values.

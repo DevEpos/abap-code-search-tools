@@ -21,7 +21,7 @@ CLASS zcl_adcoset_search_scope_fac DEFINITION
   PRIVATE SECTION.
     CLASS-METHODS read_scope_type
       IMPORTING
-        scope_id          TYPE sysuuid_x16
+        scope_id      TYPE sysuuid_x16
       RETURNING
         VALUE(result) TYPE zadcoset_scope_type.
 ENDCLASS.

@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Resource for Search Scope Definition</p>
 CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
   PUBLIC
-  FINAL
-  INHERITING FROM cl_adt_rest_resource
+  INHERITING FROM cl_adt_rest_resource FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -125,8 +124,8 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     GET TIME STAMP FIELD current_time.
 
-    DELETE FROM zadcoset_csscope WHERE     created_by          = sy-uname
-                                       AND expiration_datetime < current_time.
+    DELETE FROM zadcoset_csscope WHERE created_by          = sy-uname
+                                   AND expiration_datetime < current_time.
   ENDMETHOD.
 
   METHOD parse_parameters.

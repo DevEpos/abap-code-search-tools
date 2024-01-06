@@ -233,10 +233,10 @@ CLASS zcl_adcoset_tr_obj_processor IMPLEMENTATION.
 
   METHOD handle_class_method.
     TRY.
-        add_subobject( main_object_name = class_name
-                       main_object_type = zif_adcoset_c_global=>c_source_code_type-class
-                       subobjects       = VALUE #(
-                           ( name = method_name type = zif_adcoset_c_global=>c_source_code_limu_type-method ) ) ).
+        add_subobject(
+            main_object_name = class_name
+            main_object_type = zif_adcoset_c_global=>c_source_code_type-class
+            subobjects       = VALUE #( ( name = method_name type = zif_adcoset_c_global=>c_source_code_limu_type-method ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
         add_result( limu_object_name = method_name
@@ -251,8 +251,7 @@ CLASS zcl_adcoset_tr_obj_processor IMPLEMENTATION.
         add_subobject(
             main_object_name = class_name
             main_object_type = zif_adcoset_c_global=>c_source_code_type-class
-            subobjects       = VALUE #(
-                ( name = class_incl_name type = zif_adcoset_c_global=>c_source_code_limu_type-class_include ) ) ).
+            subobjects       = VALUE #( ( name = class_incl_name type = zif_adcoset_c_global=>c_source_code_limu_type-class_include ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
         add_result( limu_object_name = class_incl_name
