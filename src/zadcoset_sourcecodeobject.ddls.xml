@@ -6,6 +6,7 @@
     <DDLNAME>ZADCOSET_SOURCECODEOBJECT</DDLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
     <DDTEXT>Repository object for code search</DDTEXT>
+    <SOURCE_TYPE>V</SOURCE_TYPE>
    </DDLS>
   </asx:values>
  </asx:abap>

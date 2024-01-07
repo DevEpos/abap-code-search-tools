@@ -6,6 +6,7 @@
     <DDLNAME>ZADCOSET_TRANSPORTSOURCECODOBJ</DDLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
     <DDTEXT>Rep. obj. of Tr. Request for Code Search</DDTEXT>
+    <SOURCE_TYPE>V</SOURCE_TYPE>
    </DDLS>
   </asx:values>
  </asx:abap>
