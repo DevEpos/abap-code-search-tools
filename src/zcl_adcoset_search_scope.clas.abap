@@ -17,44 +17,35 @@ CLASS zcl_adcoset_search_scope DEFINITION
 
   PRIVATE SECTION.
     CONSTANTS:
-      BEGIN OF cds_field_name,
+      BEGIN OF c_cds_field_name,
         programid          TYPE string VALUE 'programid',
         objecttype         TYPE string VALUE 'objecttype',
         objectname         TYPE string VALUE 'objectname',
         developmentpackage TYPE string VALUE 'developmentpackage',
         owner              TYPE string VALUE 'owner',
         createddate        TYPE string VALUE 'createddate',
-      END OF cds_field_name.
+      END OF c_cds_field_name.
     CONSTANTS:
-      BEGIN OF table_field_name,
+      BEGIN OF c_table_field_name,
         tag_id      TYPE string VALUE 'tag_id',
         ps_posid    TYPE string VALUE 'ps_posid',
         object_name TYPE string VALUE 'object_name',
         object_type TYPE string VALUE 'object_type',
         devclass    TYPE string VALUE 'devclass',
-        fctr_id     TYPE string VALUE 'fctr_id',
-        component   TYPE string VALUE 'component',
-      END OF table_field_name.
+      END OF c_table_field_name.
     CONSTANTS:
-      BEGIN OF field_alias,
-        name         TYPE string VALUE 'name',
-        type         TYPE string VALUE 'type',
-        package_name TYPE string VALUE 'package_name',
-      END OF field_alias.
+      BEGIN OF c_field_alias,
+        name         TYPE dbadbc_name VALUE 'NAME',
+        type         TYPE dbadbc_name VALUE 'TYPE',
+        package_name TYPE dbadbc_name VALUE 'PACKAGE_NAME',
+        owner        TYPE dbadbc_name VALUE 'OWNER',
+      END OF c_field_alias.
     CONSTANTS:
-      BEGIN OF tab_alias,
+      BEGIN OF c_tab_alias,
         obj   TYPE string VALUE 'obj',
         tgobj TYPE string VALUE 'tgobj',
         appl  TYPE string VALUE 'appl',
-        pack  TYPE string VALUE 'pack',
-      END OF tab_alias.
-    CONSTANTS:
-      BEGIN OF column_name,
-        obj_type     TYPE dbobject_d VALUE 'TYPE',
-        obj_name     TYPE dbobject_d VALUE 'NAME',
-        owner        TYPE dbobject_d VALUE 'OWNER',
-        package_name TYPE dbobject_d VALUE 'PACKAGE_NAME',
-      END OF column_name.
+      END OF c_tab_alias.
 
     DATA dyn_from_clause TYPE string.
     DATA tags_dyn_where_cond TYPE string.
@@ -126,53 +117,54 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     native_scope_query = NEW #( ).
     native_scope_query->set_select(
-        cols        = VALUE #( tab_alias = tab_alias-obj
-                               ( name = cds_field_name-objecttype alias = field_alias-type )
-                               ( name = cds_field_name-objectname alias = field_alias-name )
-                               ( name = cds_field_name-owner )
-                               ( name = cds_field_name-developmentpackage alias = field_alias-package_name ) )
-        target_cols = VALUE #( ( column_name-obj_type  )
-                               ( column_name-obj_name )
-                               ( column_name-owner  )
-                               ( column_name-package_name ) ) ).
-    DATA(from_clause) = `ZADCOSET_SRCDOBJ ` && tab_alias-obj && ` `.
+        cols        = VALUE #( tab_alias = c_tab_alias-obj
+                               ( name = c_cds_field_name-objecttype alias = c_field_alias-type )
+                               ( name = c_cds_field_name-objectname alias = c_field_alias-name )
+                               ( name = c_cds_field_name-owner )
+                               ( name = c_cds_field_name-developmentpackage alias = c_field_alias-package_name ) )
+        target_cols = VALUE #( ( c_field_alias-type  )
+                               ( c_field_alias-name )
+                               ( c_field_alias-owner  )
+                               ( c_field_alias-package_name ) ) ).
+
+    DATA(from_clause) = `ZADCOSET_SRCDOBJ obj`.
     IF search_ranges-tag_id_range IS NOT INITIAL.
       from_clause = from_clause && ` ` &&
-        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } | && tab_alias-tgobj &&
-        | ON { tab_alias-obj }.{ cds_field_name-objectname } = { tab_alias-tgobj }.{ table_field_name-object_name }| &&
-        | AND { tab_alias-obj }.{ cds_field_name-objecttype } = { tab_alias-tgobj }.{ table_field_name-object_type } |.
+        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } tgobj | &&
+        `ON  obj.objectname = tgobj.object_name ` &&
+        `AND obj.objecttype = tgobj.object_type `.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
       from_clause = from_clause && ` ` &&
-        | INNER JOIN tdevc { tab_alias-pack } ON { tab_alias-obj }.{ cds_field_name-developmentpackage } = { tab_alias-pack }.{ table_field_name-devclass } | &&
-        | INNER JOIN df14l { tab_alias-appl } ON { tab_alias-pack }.{ table_field_name-component } = { tab_alias-appl }.{ table_field_name-fctr_id } |.
+        `INNER JOIN tdevc pack ON obj.developmentpackage = pack.devclass ` &&
+        `INNER JOIN df14l appl ON pack.component = appl.fctr_id `.
     ENDIF.
 
     native_scope_query->set_from( from_clause ).
-    native_scope_query->set_order_by( VALUE #( ( tab_alias = tab_alias-obj name = cds_field_name-programid  ) ) ).
+    native_scope_query->set_order_by( VALUE #( ( tab_alias = c_tab_alias-obj name = c_cds_field_name-programid  ) ) ).
 
     native_scope_query->add_range_to_where( ranges   = search_ranges-object_type_range
-                                            col_info = VALUE #( tab_alias = tab_alias-obj
-                                                                name      = cds_field_name-objecttype ) ).
+                                            col_info = VALUE #( tab_alias = c_tab_alias-obj
+                                                                name      = c_cds_field_name-objecttype ) ).
     native_scope_query->add_range_to_where( ranges   = search_ranges-object_name_range
-                                            col_info = VALUE #( tab_alias = tab_alias-obj
-                                                                name      = cds_field_name-objectname ) ).
+                                            col_info = VALUE #( tab_alias = c_tab_alias-obj
+                                                                name      = c_cds_field_name-objectname ) ).
     native_scope_query->add_range_to_where( ranges   = search_ranges-package_range
-                                            col_info = VALUE #( tab_alias = tab_alias-obj
-                                                                name      = cds_field_name-developmentpackage ) ).
+                                            col_info = VALUE #( tab_alias = c_tab_alias-obj
+                                                                name      = c_cds_field_name-developmentpackage ) ).
     native_scope_query->add_range_to_where( ranges   = search_ranges-owner_range
-                                            col_info = VALUE #( tab_alias = tab_alias-obj
-                                                                name      = cds_field_name-owner ) ).
+                                            col_info = VALUE #( tab_alias = c_tab_alias-obj
+                                                                name      = c_cds_field_name-owner ) ).
     native_scope_query->add_range_to_where( ranges   = search_ranges-created_on_range
-                                            col_info = VALUE #( tab_alias = tab_alias-obj
-                                                                name      = cds_field_name-createddate ) ).
+                                            col_info = VALUE #( tab_alias = c_tab_alias-obj
+                                                                name      = c_cds_field_name-createddate ) ).
     native_scope_query->add_range_to_where( ranges   = search_ranges-tag_id_range
-                                            col_info = VALUE #( tab_alias = tab_alias-tgobj
-                                                                name      = table_field_name-tag_id ) ).
+                                            col_info = VALUE #( tab_alias = c_tab_alias-tgobj
+                                                                name      = c_table_field_name-tag_id ) ).
     native_scope_query->add_range_to_where( ranges   = search_ranges-appl_comp_range
-                                            col_info = VALUE #( tab_alias = tab_alias-appl
-                                                                name      = table_field_name-ps_posid ) ).
+                                            col_info = VALUE #( tab_alias = c_tab_alias-appl
+                                                                name      = c_table_field_name-ps_posid ) ).
   ENDMETHOD.
 
   METHOD init_from_db.
@@ -181,28 +173,28 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD config_dyn_where_clauses.
-    dyn_from_clause = `ZADCOSET_SRCDOBJ AS ` && tab_alias-obj && ` `.
+    dyn_from_clause = `ZADCOSET_SRCDOBJ AS obj `.
 
     IF search_ranges-tag_id_range IS NOT INITIAL.
-      tags_dyn_where_cond = tab_alias-tgobj && `~` && table_field_name-tag_id && ` IN @search_ranges-tag_id_range`.
+      tags_dyn_where_cond = `tgobj~tag_id in @search_ranges-tag_id_range`.
 
       " HINT: An object could be tagged twice and then it would appear
       "       more than once in the result -> this would result in possibly processing
       "       an object twice
       "       --> add group by clause if tags are supplied (possibly the only solution)
       dyn_from_clause = dyn_from_clause &&
-        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS { tab_alias-tgobj } | &&
-        | ON { tab_alias-obj }~{ cds_field_name-objectname } = { tab_alias-tgobj }~{ table_field_name-object_name } | &&
-        | AND { tab_alias-obj }~{ cds_field_name-objecttype } = { tab_alias-tgobj }~{ table_field_name-object_type } |.
+        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS tgobj | &&
+        `ON  obj~ObjectName = tgobj~object_name ` &&
+        `AND obj~ObjectType = tgobj~object_type `.
 
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
       dyn_from_clause = dyn_from_clause &&
-        | INNER JOIN tdevc AS { tab_alias-pack } | &&
-        | ON { tab_alias-obj }~{ table_field_name-devclass } = { tab_alias-pack }~{ table_field_name-devclass } | &&
-        | INNER JOIN df14l AS { tab_alias-appl } | &&
-        | ON { tab_alias-pack }~{ table_field_name-component } = { tab_alias-appl }~{ table_field_name-fctr_id } |.
+        `INNER JOIN tdevc AS pack ` &&
+        `ON obj~devclass = pack~devclass ` &&
+        `INNER JOIN df14l AS appl ` &&
+        `ON pack~component = appl~fctr_id `.
 
       appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
     ENDIF.

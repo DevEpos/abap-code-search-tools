@@ -15,6 +15,31 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
     METHODS determine_count REDEFINITION.
 
   PRIVATE SECTION.
+    CONSTANTS:
+      BEGIN OF c_cds_field_name,
+        request            TYPE string VALUE 'request',
+        programid          TYPE string VALUE 'programid',
+        objecttype         TYPE string VALUE 'objecttype',
+        objectname         TYPE string VALUE 'objectname',
+        developmentpackage TYPE string VALUE 'developmentpackage',
+        owner              TYPE string VALUE 'owner',
+        createddate        TYPE string VALUE 'createddate',
+      END OF c_cds_field_name.
+    CONSTANTS:
+      BEGIN OF c_table_field_name,
+        object_name TYPE string VALUE 'object_name',
+        object_type TYPE string VALUE 'object_type',
+        devclass    TYPE string VALUE 'devclass',
+      END OF c_table_field_name.
+    CONSTANTS:
+      BEGIN OF c_field_alias,
+        name         TYPE adbc_name VALUE 'NAME',
+        type         TYPE adbc_name VALUE 'TYPE',
+        package_name TYPE adbc_name VALUE 'PACKAGE_NAME',
+        owner        TYPE adbc_name VALUE 'OWNER',
+        pgmid        TYPE adbc_name VALUE 'PGMID',
+      END OF c_field_alias.
+
     DATA native_scope_query TYPE REF TO zcl_adcoset_nsql_sscope_query.
 
     "! Enhance the type filter with corresponding LIMU types
@@ -69,9 +94,9 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     resolve_packages( ).
 
     DATA(count_query) = create_native_query( ).
-    count_query->set_select( cols     = VALUE #( ( name = 'programid' alias = 'pgmid' )
-                                                 ( name = 'objecttype' alias = 'obj_type' )
-                                                 ( name = 'objectname' alias = 'obj_name' ) )
+    count_query->set_select( cols     = VALUE #( ( name = c_cds_field_name-programid alias = c_field_alias-pgmid )
+                                                 ( name = c_cds_field_name-objecttype alias = c_field_alias-type )
+                                                 ( name = c_cds_field_name-objectname alias = c_field_alias-name ) )
                              distinct = abap_true ).
 
     object_count = count_query->execute_cte_count( ).
@@ -162,24 +187,25 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
     CHECK native_scope_query IS INITIAL.
 
     native_scope_query = create_native_query( ).
-    native_scope_query->set_select( cols        = VALUE #( ( name = 'programid' alias = 'pgmid' )
-                                                           ( name = 'objecttype' alias = 'obj_type' )
-                                                           ( name = 'objectname' alias = 'obj_name' ) )
-                                    target_cols = VALUE #( ( 'PGMID' ) ( 'OBJ_TYPE' ) ( 'OBJ_NAME' ) )
-                                    distinct    = abap_true ).
-    native_scope_query->set_order_by( VALUE #( ( name = 'obj_name' )
-                                               ( name = 'pgmid' )
-                                               ( name = 'obj_type' ) ) ).
+    native_scope_query->set_select(
+        cols        = VALUE #( ( name = c_cds_field_name-programid alias = c_field_alias-pgmid )
+                               ( name = c_cds_field_name-objecttype alias = c_field_alias-type )
+                               ( name = c_cds_field_name-objectname alias = c_field_alias-name ) )
+        target_cols = VALUE #( ( c_field_alias-pgmid ) ( c_field_alias-type ) ( c_field_alias-name ) )
+        distinct    = abap_true ).
+    native_scope_query->set_order_by( VALUE #( ( name = c_field_alias-name )
+                                               ( name = c_field_alias-pgmid )
+                                               ( name = c_field_alias-type ) ) ).
   ENDMETHOD.
 
   METHOD create_native_query.
     result = NEW #( ).
     result->set_from( 'ZADCOSET_TRSCO' ).
     result->add_range_to_where( ranges   = search_ranges-object_type_range
-                                col_info = VALUE #( name = 'objecttype' ) ).
+                                col_info = VALUE #( name = c_cds_field_name-objecttype ) ).
     result->add_range_to_where( ranges   = search_ranges-object_name_range
-                                col_info = VALUE #( name = 'objectname' ) ).
+                                col_info = VALUE #( name = c_cds_field_name-objectname ) ).
     result->add_range_to_where( ranges   = search_ranges-tr_request_range
-                                col_info = VALUE #( name = 'request' ) ).
+                                col_info = VALUE #( name = c_cds_field_name-request ) ).
   ENDMETHOD.
 ENDCLASS.
