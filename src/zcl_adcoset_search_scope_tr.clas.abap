@@ -26,18 +26,13 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
         createddate        TYPE string VALUE 'createddate',
       END OF c_cds_field_name.
     CONSTANTS:
-      BEGIN OF c_table_field_name,
-        object_name TYPE string VALUE 'object_name',
-        object_type TYPE string VALUE 'object_type',
-        devclass    TYPE string VALUE 'devclass',
-      END OF c_table_field_name.
-    CONSTANTS:
       BEGIN OF c_field_alias,
-        name         TYPE adbc_name VALUE 'NAME',
-        type         TYPE adbc_name VALUE 'TYPE',
+        name         TYPE adbc_name VALUE 'OBJ_NAME',
+        type         TYPE adbc_name VALUE 'OBJ_TYPE',
         package_name TYPE adbc_name VALUE 'PACKAGE_NAME',
         owner        TYPE adbc_name VALUE 'OWNER',
         pgmid        TYPE adbc_name VALUE 'PGMID',
+        created_date TYPE adbc_name VALUE 'CREATED_DATE',
       END OF c_field_alias.
 
     DATA native_scope_query TYPE REF TO zcl_adcoset_nsql_sscope_query.
@@ -89,9 +84,9 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    add_subobj_type_to_filter( ).
     resolve_tr_request( ).
     resolve_packages( ).
+    add_subobj_type_to_filter( ).
 
     DATA(count_query) = create_native_query( ).
     count_query->set_select( cols     = VALUE #( ( name = c_cds_field_name-programid alias = c_field_alias-pgmid )
@@ -144,8 +139,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
             ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section )
             ( low =  zif_adcoset_c_global=>c_source_code_limu_type-class_public_section )
             ( low =  zif_adcoset_c_global=>c_source_code_limu_type-method ) ).
-      ENDIF.
-      IF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-function_group.
+      ELSEIF object_type_range->low = zif_adcoset_c_global=>c_source_code_type-function_group.
         IF object_type_range->sign = 'I'.
           subobject_type_ranges = VALUE #( BASE subobject_type_ranges
                                            sign   = 'I'
@@ -158,9 +152,8 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
                                            option = 'EQ'
                                            ( low =  zif_adcoset_c_global=>c_source_code_limu_type-function_module ) ).
         ENDIF.
-      ENDIF.
-      IF     object_type_range->low  = zif_adcoset_c_global=>c_source_code_type-program
-         AND object_type_range->sign = 'I'.
+      ELSEIF     object_type_range->low  = zif_adcoset_c_global=>c_source_code_type-program
+             AND object_type_range->sign = 'I'.
         subobject_type_ranges = VALUE #( BASE subobject_type_ranges
                                          sign   = 'I'
                                          option = 'EQ'
@@ -188,10 +181,18 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
     native_scope_query = create_native_query( ).
     native_scope_query->set_select(
-        cols        = VALUE #( ( name = c_cds_field_name-programid alias = c_field_alias-pgmid )
-                               ( name = c_cds_field_name-objecttype alias = c_field_alias-type )
-                               ( name = c_cds_field_name-objectname alias = c_field_alias-name ) )
-        target_cols = VALUE #( ( c_field_alias-pgmid ) ( c_field_alias-type ) ( c_field_alias-name ) )
+        cols        = VALUE #( ( name = c_cds_field_name-programid          alias = c_field_alias-pgmid )
+                               ( name = c_cds_field_name-objecttype         alias = c_field_alias-type )
+                               ( name = c_cds_field_name-objectname         alias = c_field_alias-name )
+                               ( name = c_cds_field_name-developmentpackage alias = c_field_alias-package_name )
+                               ( name = c_cds_field_name-owner              alias = c_field_alias-owner )
+                               ( name = c_cds_field_name-createddate        alias = c_field_alias-created_date ) )
+        target_cols = VALUE #( ( c_field_alias-pgmid )
+                               ( c_field_alias-type )
+                               ( c_field_alias-name )
+                               ( c_field_alias-package_name )
+                               ( c_field_alias-owner )
+                               ( c_field_alias-created_date ) )
         distinct    = abap_true ).
     native_scope_query->set_order_by( VALUE #( ( name = c_field_alias-name )
                                                ( name = c_field_alias-pgmid )
@@ -200,7 +201,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
   METHOD create_native_query.
     result = NEW #( ).
-    result->set_from( 'ZADCOSET_TRSCO' ).
+    result->set_from( 'ZADCOSET_ITRSCO' ).
     result->add_range_to_where( ranges   = search_ranges-object_type_range
                                 col_info = VALUE #( name = c_cds_field_name-objecttype ) ).
     result->add_range_to_where( ranges   = search_ranges-object_name_range

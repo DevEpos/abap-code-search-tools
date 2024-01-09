@@ -1,14 +1,14 @@
-@AbapCatalog.sqlViewName: 'ZADCOSET_TRSCO'
+@AbapCatalog.sqlViewName: 'ZADCOSET_ITRSCO'
 @AbapCatalog.compiler.CompareFilter: true
 @AbapCatalog.preserveKey: true
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Rep. obj. of Tr. Request for Code Search'
 
-define view ZADCOSET_TransportSourceCodObj
-  as select from e071                      as TransportObject
-    inner join   ZADCOSET_SourceCodeObject as SourceCodeObject on  TransportObject.pgmid    = SourceCodeObject.ProgramId
-                                                               and TransportObject.object   = SourceCodeObject.ObjectType
-                                                               and TransportObject.obj_name = SourceCodeObject.ObjectName
+define view ZADCOSET_I_TransportSrcCodObj
+  as select from e071                        as TransportObject
+    inner join   ZADCOSET_I_SourceCodeObject as SourceCodeObject on  TransportObject.pgmid    = SourceCodeObject.ProgramId
+                                                                 and TransportObject.object   = SourceCodeObject.ObjectType
+                                                                 and TransportObject.obj_name = SourceCodeObject.ObjectName
 {
   key trkorr   as Request,
       pgmid    as ProgramId,

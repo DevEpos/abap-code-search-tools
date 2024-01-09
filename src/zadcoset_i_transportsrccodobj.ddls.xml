@@ -3,10 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <DDLS>
-    <DDLNAME>ZADCOSET_SOURCECODEOBJECT</DDLNAME>
+    <DDLNAME>ZADCOSET_I_TRANSPORTSRCCODOBJ</DDLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
-    <DDTEXT>Repository object for code search</DDTEXT>
-    <SOURCE_TYPE>V</SOURCE_TYPE>
+    <DDTEXT>Rep. obj. of Tr. Request for Code Search</DDTEXT>
    </DDLS>
   </asx:values>
  </asx:abap>

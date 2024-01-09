@@ -145,4 +145,14 @@ INTERFACE zif_adcoset_c_global
       r3tr TYPE pgmid VALUE 'R3TR',
       limu TYPE pgmid VALUE 'LIMU',
     END OF c_program_id.
+
+  CONSTANTS:
+    BEGIN OF c_trkorr_type_vh,
+      workbench_request   TYPE string VALUE 'WORKBENCH_REQUEST',
+      piece_list          TYPE string VALUE 'PIECE_LIST',
+      relocation_request  TYPE string VALUE 'RELOCATION_REQUEST',
+      repair_task         TYPE string VALUE 'REPAIR_TASK',
+      dev_corr_task       TYPE string VALUE 'DEV_CORR_TASK',
+      transport_of_copies TYPE string VALUE 'TRANSPORT_OF_COPIES',
+    END OF c_trkorr_type_vh.
 ENDINTERFACE.

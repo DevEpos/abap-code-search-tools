@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Router for ABAP Code Search</p>
 CLASS zcl_adcoset_adt_disc_app DEFINITION
   PUBLIC
-  INHERITING FROM cl_adt_disc_res_app_base
-  FINAL
+  INHERITING FROM cl_adt_disc_res_app_base FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -21,25 +20,26 @@ CLASS zcl_adcoset_adt_disc_app DEFINITION
     METHODS register_resources    REDEFINITION.
 
   PRIVATE SECTION.
-    CONSTANTS:
-      c_search_uri                TYPE string VALUE '/codesearch',
-      c_settings_relative_uri     TYPE string VALUE '/settings',
-      c_search_scope_relative_uri TYPE string VALUE '/scope',
-      c_pattern_validator_rel_uri TYPE string VALUE '/validatepattern',
-      c_static_uri                TYPE string VALUE '/devepos/adt/cst',
-      c_root_scheme               TYPE string VALUE 'http://www.devepos.com/adt/cst',
-      c_root_rel_scheme           TYPE string VALUE 'http://www.devepos.com/adt/relations/cst',
+    CONSTANTS c_search_uri TYPE string VALUE '/codesearch'.
+    CONSTANTS c_settings_relative_uri TYPE string VALUE '/settings'.
+    CONSTANTS c_search_scope_relative_uri TYPE string VALUE '/scope'.
+    CONSTANTS c_pattern_validator_rel_uri TYPE string VALUE '/validatepattern'.
+    CONSTANTS c_static_uri TYPE string VALUE '/devepos/adt/cst'.
+    CONSTANTS c_root_scheme TYPE string VALUE 'http://www.devepos.com/adt/cst'.
+    CONSTANTS c_root_rel_scheme TYPE string VALUE 'http://www.devepos.com/adt/relations/cst'.
 
+    CONSTANTS:
       "! REST handler constants
       BEGIN OF c_handlers,
-        search               TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_SEARCH',
-        search_settings      TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_CONFIG',
-        search_scope         TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_SCOPE',
-        appl_comp_vh         TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_APPLC_VH',
-        server_group_vh      TYPE string VALUE 'ZCL_ADCOSET_RES_SERVER_GRP_VH',
-        plugin_features      TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_FEATURES',
-        pattern_validator    TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_PATTRNVAL',
-        transport_request_vh TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_TRREQ_VH',
+        search                TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_SEARCH',
+        search_settings       TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_CONFIG',
+        search_scope          TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_SCOPE',
+        appl_comp_vh          TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_APPLC_VH',
+        server_group_vh       TYPE string VALUE 'ZCL_ADCOSET_RES_SERVER_GRP_VH',
+        plugin_features       TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_FEATURES',
+        pattern_validator     TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_PATTRNVAL',
+        transport_request_vh  TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_TRREQ_VH',
+        transport_req_type_vh TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_TRTYPE_VH',
       END OF c_handlers.
 
     METHODS register_search_value_helps
@@ -160,5 +160,10 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
                                               description     = 'Transport Request value help'
                                               category_scheme = c_root_scheme
                                               category_term   = 'transportRequest' ).
+    registry->register_discoverable_resource( url             = '/transportRequestType'
+                                              handler_class   = c_handlers-transport_req_type_vh
+                                              description     = 'Transport Request Type value help'
+                                              category_scheme = c_root_scheme
+                                              category_term   = 'transportRequestType' ).
   ENDMETHOD.
 ENDCLASS.

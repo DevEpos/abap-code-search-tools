@@ -35,10 +35,10 @@ CLASS zcl_adcoset_search_scope DEFINITION
       END OF c_table_field_name.
     CONSTANTS:
       BEGIN OF c_field_alias,
-        name         TYPE dbadbc_name VALUE 'NAME',
-        type         TYPE dbadbc_name VALUE 'TYPE',
-        package_name TYPE dbadbc_name VALUE 'PACKAGE_NAME',
-        owner        TYPE dbadbc_name VALUE 'OWNER',
+        name         TYPE adbc_name VALUE 'NAME',
+        type         TYPE adbc_name VALUE 'TYPE',
+        package_name TYPE adbc_name VALUE 'PACKAGE_NAME',
+        owner        TYPE adbc_name VALUE 'OWNER',
       END OF c_field_alias.
     CONSTANTS:
       BEGIN OF c_tab_alias,
@@ -127,7 +127,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
                                ( c_field_alias-owner  )
                                ( c_field_alias-package_name ) ) ).
 
-    DATA(from_clause) = `ZADCOSET_SRCDOBJ obj`.
+    DATA(from_clause) = `ZADCOSET_ISRCOBJ obj`.
     IF search_ranges-tag_id_range IS NOT INITIAL.
       from_clause = from_clause && ` ` &&
         |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } tgobj | &&
@@ -173,7 +173,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD config_dyn_where_clauses.
-    dyn_from_clause = `ZADCOSET_SRCDOBJ AS obj `.
+    dyn_from_clause = `ZADCOSET_ISRCOBJ AS obj `.
 
     IF search_ranges-tag_id_range IS NOT INITIAL.
       tags_dyn_where_cond = `tgobj~tag_id in @search_ranges-tag_id_range`.
