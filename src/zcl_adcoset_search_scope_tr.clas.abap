@@ -54,10 +54,6 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD determine_count.
-    DATA(selection_limit) = COND i( WHEN max_objects > 0
-                                    THEN max_objects + 1
-                                    ELSE 0 ).
-
     IF     search_ranges-object_type_range IS INITIAL
        AND search_ranges-object_name_range IS INITIAL
        AND search_ranges-tr_request_range  IS INITIAL.
@@ -66,7 +62,6 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
 
     resolve_tr_request( ).
     resolve_packages( ).
-
     add_subobj_type_to_filter( ).
 
     WITH +e071_aggr AS (
@@ -79,10 +74,9 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
            AND request    IN @search_ranges-tr_request_range )
 
     SELECT COUNT(*) FROM +e071_aggr
-      INTO @object_count
-      UP TO @selection_limit ROWS.
+      INTO @object_count.
 
-    IF object_count = selection_limit.
+    IF max_objects > 0 AND object_count > max_objects.
       object_count = max_objects.
       more_objects_in_scope = abap_true.
     ENDIF.

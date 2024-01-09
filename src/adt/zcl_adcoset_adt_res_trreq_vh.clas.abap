@@ -314,10 +314,10 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
              tr_request~trstatus
         FROM e070 AS tr_request
              LEFT OUTER JOIN e07t AS text
-               ON tr_request~trkorr = text~trkorr
+               ON  tr_request~trkorr = text~trkorr
+               AND text~langu        = @sy-langu
         WHERE (    tr_request~trkorr     IN @name_filter
                 OR upper( text~as4text ) IN @text_filter )
-          AND text~langu                 = @sy-langu
           AND tr_request~as4user        IN @owner_filter
           AND tr_request~as4date        IN @changed_date_filter
           AND tr_request~trfunction     IN @type_filter
@@ -334,10 +334,10 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
              tr_request~trstatus
         FROM e070 AS tr_request
              LEFT OUTER JOIN e07t AS text
-               ON tr_request~trkorr = text~trkorr
+               ON  tr_request~trkorr = text~trkorr
+               AND text~langu        = @sy-langu
         WHERE (    tr_request~trkorr     IN @name_filter
                 OR upper( text~as4text ) IN @text_filter )
-          AND text~langu                 = @sy-langu
           AND tr_request~as4user        IN @owner_filter
           AND tr_request~trfunction     IN @type_filter
           " Exclude requests without source code objects

@@ -56,7 +56,6 @@ INTERFACE zif_adcoset_ty_global
   TYPES ty_tadir_object_infos_sorted TYPE SORTED TABLE OF ty_tadir_object_info WITH UNIQUE KEY type name.
 
   TYPES: BEGIN OF ty_tr_request_object,
-           trkorr       TYPE trkorr,
            pgmid        TYPE pgmid,
            obj_type     TYPE trobjtype,
            obj_name     TYPE trobj_name,
