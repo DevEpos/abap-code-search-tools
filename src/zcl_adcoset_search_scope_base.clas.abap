@@ -82,7 +82,7 @@ CLASS zcl_adcoset_search_scope_base IMPLEMENTATION.
     result = more_objects_in_scope.
   ENDMETHOD.
 
-  method zif_adcoset_search_scope~get_scope_ranges.
+  METHOD zif_adcoset_search_scope~get_scope_ranges.
     result = search_ranges.
   ENDMETHOD.
 
@@ -170,8 +170,7 @@ CLASS zcl_adcoset_search_scope_base IMPLEMENTATION.
     " only determine sub packages from ranges with option EQ
     LOOP AT search_ranges-package_range ASSIGNING <package_range> WHERE option = 'EQ'.
       IF <package_range>-sign = 'I'.
-        include_package_range = VALUE #( BASE include_package_range
-                                         ( <package_range> ) ).
+        include_package_range = VALUE #( BASE include_package_range ( <package_range> ) ).
       ELSEIF <package_range>-sign = 'E'.
         exclude_package_range = VALUE #( BASE exclude_package_range
                                          ( sign = 'I' option = 'EQ' low = <package_range>-low ) ).

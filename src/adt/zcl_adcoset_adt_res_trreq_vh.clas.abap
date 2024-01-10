@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized">Resource for Application Component value help</p>
+"! <p class="shorttext synchronized">Resource for Transport Request VH</p>
 CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
   PUBLIC
   INHERITING FROM cl_adt_res_named_items FINAL

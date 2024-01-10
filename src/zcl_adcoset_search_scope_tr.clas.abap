@@ -1,4 +1,4 @@
-"! <p class="shorttext synchronized">Search scope implementation</p>
+"! <p class="shorttext synchronized">Search scope for transport</p>
 CLASS zcl_adcoset_search_scope_tr DEFINITION
   PUBLIC
   INHERITING FROM zcl_adcoset_search_scope_base FINAL

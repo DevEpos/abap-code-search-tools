@@ -43,23 +43,23 @@ CLASS zcl_adcoset_tr_obj_processor DEFINITION
       IMPORTING
         section_include TYPE program
         class_incl_type TYPE trobjtype
-        class_name      TYPE sobj_name.
+        class_name      TYPE seoclsname.
 
     METHODS handle_class_private_section
       IMPORTING
-        class_name TYPE sobj_name.
+        class_name TYPE seoclsname.
 
     METHODS handle_class_protected_section
       IMPORTING
-        class_name TYPE sobj_name.
+        class_name TYPE seoclsname.
 
     METHODS handle_class_public_section
       IMPORTING
-        class_name TYPE sobj_name.
+        class_name TYPE seoclsname.
 
     METHODS handle_class_definition
       IMPORTING
-        class_name TYPE sobj_name.
+        class_name TYPE seoclsname.
 
     METHODS add_subobject
       IMPORTING
@@ -78,7 +78,7 @@ CLASS zcl_adcoset_tr_obj_processor DEFINITION
 
     METHODS add_result_cl_definition
       IMPORTING
-        class_name TYPE sobj_name.
+        class_name TYPE seoclsname.
 
     METHODS post_filter.
 
@@ -118,22 +118,22 @@ CLASS zcl_adcoset_tr_obj_processor IMPLEMENTATION.
         handle_function_module( limu_object-obj_name ).
       WHEN zif_adcoset_c_global=>c_source_code_limu_type-report_source_code.
         handle_report_source_code( limu_object-obj_name ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_definition.
+        handle_class_definition( cl_oo_classname_service=>get_clsname_by_include( |{ limu_object-obj_name }| ) ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_private_section.
+        handle_class_private_section( cl_oo_classname_service=>get_clsname_by_include( |{ limu_object-obj_name }| ) ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_public_section.
+        handle_class_public_section( cl_oo_classname_service=>get_clsname_by_include( |{ limu_object-obj_name }| ) ).
+      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section.
+        handle_class_protected_section(
+            cl_oo_classname_service=>get_clsname_by_include( |{ limu_object-obj_name }| ) ).
       WHEN zif_adcoset_c_global=>c_source_code_limu_type-method.
-        handle_class_method( class_name  = CONV #( limu_object-obj_name(30) )
-                             method_name = CONV #( limu_object-obj_name+30(30) ) ).
+        handle_class_method( class_name  = |{ limu_object-obj_name(30) }|
+                             method_name = |{ limu_object-obj_name+30(30) }| ).
       WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_include.
         handle_class_include(
             class_name      = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
             class_incl_name = limu_object-obj_name ).
-      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_private_section.
-        handle_class_private_section( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ).
-      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_public_section.
-        handle_class_public_section( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ).
-      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section.
-        handle_class_protected_section(
-            cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ).
-      WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_definition.
-        handle_class_definition( cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) ) ).
     ENDCASE.
   ENDMETHOD.
 
@@ -180,11 +180,11 @@ CLASS zcl_adcoset_tr_obj_processor IMPLEMENTATION.
         ( type       = zif_adcoset_c_global=>c_source_code_type-class
           name       = class_name
           subobjects = VALUE #( ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_public_section
-                                  name = cl_oo_classname_service=>get_pubsec_name( CONV #( class_name ) ) )
+                                  name = cl_oo_classname_service=>get_pubsec_name( class_name ) )
                                 ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_private_section
-                                  name = cl_oo_classname_service=>get_prisec_name( CONV #( class_name ) ) )
+                                  name = cl_oo_classname_service=>get_prisec_name( class_name ) )
                                 ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section
-                                  name = cl_oo_classname_service=>get_prosec_name( CONV #( class_name ) ) ) ) ) ).
+                                  name = cl_oo_classname_service=>get_prosec_name( class_name ) ) ) ) ).
   ENDMETHOD.
 
   METHOD add_subobject.
@@ -263,7 +263,7 @@ CLASS zcl_adcoset_tr_obj_processor IMPLEMENTATION.
 
   METHOD handle_class_section.
     TRY.
-        add_subobject( main_object_name = class_name
+        add_subobject( main_object_name = |{ class_name }|
                        main_object_type = zif_adcoset_c_global=>c_source_code_type-class
                        subobjects       = VALUE #( ( name = section_include
                                                      type = class_incl_type ) ) ).
@@ -271,40 +271,40 @@ CLASS zcl_adcoset_tr_obj_processor IMPLEMENTATION.
       CATCH cx_sy_itab_line_not_found.
         add_result( limu_object_name = CONV #( section_include )
                     limu_object_type = class_incl_type
-                    main_object_name = class_name
+                    main_object_name = |{ class_name }|
                     main_object_type = zif_adcoset_c_global=>c_source_code_type-class ).
     ENDTRY.
   ENDMETHOD.
 
   METHOD handle_class_private_section.
     handle_class_section( class_incl_type = zif_adcoset_c_global=>c_source_code_limu_type-class_private_section
-                          section_include = cl_oo_classname_service=>get_prisec_name( CONV #( class_name ) )
+                          section_include = cl_oo_classname_service=>get_prisec_name( class_name )
                           class_name      = class_name ).
   ENDMETHOD.
 
   METHOD handle_class_protected_section.
     handle_class_section( class_incl_type = zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section
-                          section_include = cl_oo_classname_service=>get_prosec_name( CONV #( class_name ) )
+                          section_include = cl_oo_classname_service=>get_prosec_name( class_name )
                           class_name      = class_name ).
   ENDMETHOD.
 
   METHOD handle_class_public_section.
     handle_class_section( class_incl_type = zif_adcoset_c_global=>c_source_code_limu_type-class_public_section
-                          section_include = cl_oo_classname_service=>get_pubsec_name( CONV #( class_name ) )
+                          section_include = cl_oo_classname_service=>get_pubsec_name( class_name )
                           class_name      = class_name ).
   ENDMETHOD.
 
   METHOD handle_class_definition.
     TRY.
         add_subobject(
-            main_object_name = class_name
+            main_object_name = |{ class_name }|
             main_object_type = zif_adcoset_c_global=>c_source_code_type-class
             subobjects       = VALUE #( ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_public_section
-                                          name = cl_oo_classname_service=>get_pubsec_name( CONV #( class_name ) ) )
+                                          name = cl_oo_classname_service=>get_pubsec_name( class_name ) )
                                         ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_private_section
-                                          name = cl_oo_classname_service=>get_prisec_name( CONV #( class_name ) ) )
+                                          name = cl_oo_classname_service=>get_prisec_name( class_name ) )
                                         ( type = zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section
-                                          name = cl_oo_classname_service=>get_prosec_name( CONV #( class_name ) ) ) ) ).
+                                          name = cl_oo_classname_service=>get_prosec_name( class_name ) ) ) ).
 
       CATCH cx_sy_itab_line_not_found.
         add_result_cl_definition( class_name = class_name ).

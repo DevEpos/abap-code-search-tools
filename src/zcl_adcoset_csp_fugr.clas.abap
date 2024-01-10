@@ -46,7 +46,6 @@ CLASS zcl_adcoset_csp_fugr DEFINITION
     METHODS assign_objects_to_matches
       IMPORTING
         unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
-        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         !include           TYPE ty_fugr_incl
       CHANGING
         all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
@@ -114,7 +113,6 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
           ENDIF.
 
           assign_objects_to_matches( EXPORTING unassigned_matches = matches
-                                               object             = object-info
                                                include            = <include>
                                      CHANGING  all_matches        = result ).
         CATCH zcx_adcoset_src_code_read ##NO_HANDLER.
@@ -164,8 +162,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         new_include-adt_type = c_include_types-include.
       ENDIF.
 
-      result = VALUE #( BASE result
-                        ( new_include ) ).
+      result = VALUE #( BASE result ( new_include ) ).
     ENDLOOP.
   ENDMETHOD.
 

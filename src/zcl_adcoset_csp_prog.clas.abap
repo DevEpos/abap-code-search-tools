@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Code Search Provider for Programs/Includes</p>
 CLASS zcl_adcoset_csp_prog DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

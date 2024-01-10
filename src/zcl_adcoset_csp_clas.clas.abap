@@ -48,7 +48,6 @@ CLASS zcl_adcoset_csp_clas DEFINITION
     METHODS assign_objects_to_matches
       IMPORTING
         unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
-        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         !include           TYPE ty_class_incl
       CHANGING
         all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
@@ -83,7 +82,6 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
 
           IF matches IS NOT INITIAL.
             assign_objects_to_matches( EXPORTING unassigned_matches = matches
-                                                 object             = object-info
                                                  include            = <include>
                                        CHANGING  all_matches        = result ).
           ENDIF.
@@ -98,18 +96,15 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     DATA(class_name) = CONV classname( name ).
 
     IF custom_settings-include_flags-public_section = abap_true.
-      result = VALUE #( BASE result
-                        ( name = cl_oo_classname_service=>get_pubsec_name( class_name ) ) ).
+      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_pubsec_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-protected_section = abap_true.
-      result = VALUE #( BASE result
-                        ( name = cl_oo_classname_service=>get_prosec_name( class_name ) ) ).
+      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_prosec_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-private_section = abap_true.
-      result = VALUE #( BASE result
-                        ( name = cl_oo_classname_service=>get_prisec_name( class_name ) ) ).
+      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_prisec_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-methods = abap_true.
@@ -118,31 +113,26 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
                                                         EXCEPTIONS class_not_existing = 1 ).
 
       SORT method_includes BY cpdkey-cpdname.
-      result = VALUE #( BASE result
-                        FOR method IN method_includes
+      result = VALUE #( BASE result FOR method IN method_includes
                         ( name        = method-incname
                           method_name = method-cpdkey-cpdname
                           adt_type    = c_include_types-method ) ).
     ENDIF.
 
     IF custom_settings-include_flags-local_def = abap_true.
-      result = VALUE #( BASE result
-                        ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) ) ).
+      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-local_impl = abap_true.
-      result = VALUE #( BASE result
-                        ( name = cl_oo_classname_service=>get_ccimp_name( class_name ) ) ).
+      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccimp_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-test = abap_true.
-      result = VALUE #( BASE result
-                        ( name = cl_oo_classname_service=>get_ccau_name( class_name ) ) ).
+      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccau_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-macro = abap_true.
-      result = VALUE #( BASE result
-                        ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) ) ).
+      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) ) ).
     ENDIF.
   ENDMETHOD.
 
