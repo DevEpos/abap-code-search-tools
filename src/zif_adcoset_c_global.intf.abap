@@ -19,7 +19,7 @@ INTERFACE zif_adcoset_c_global
   "! Type for Server Group (see RZ12)
   CONSTANTS c_group_type_server_group TYPE rzlli_grpt VALUE 'S'.
 
-  "! <p class="shorttext synchronized">Regex pattern to detect comment lines in CDS sources</p>
+  "! Regex pattern to detect comment lines in CDS sources
   "! Can be used for the following source types:
   "! <ul>
   "!   <li>DDLS</li>
@@ -29,7 +29,7 @@ INTERFACE zif_adcoset_c_global
   CONSTANTS c_cds_comment_regex TYPE string VALUE '^\s*(//|/\*|--)'.
 
   CONSTANTS:
-    "! <p class="shorttext synchronized" lang="en">Matcher types</p>
+    "! Id's for supported databases
     BEGIN OF c_matcher_type,
       substring   TYPE zif_adcoset_ty_global=>ty_matcher_type VALUE '1',
       posix_regex TYPE zif_adcoset_ty_global=>ty_matcher_type VALUE '2',
@@ -46,7 +46,7 @@ INTERFACE zif_adcoset_c_global
     END OF c_message_type.
 
   CONSTANTS:
-    "! <p class="shorttext synchronized" lang="en">Names of code search parameters</p>
+    "! Names of code search parameters
     BEGIN OF c_search_params,
       scope_id             TYPE string VALUE 'scopeId',
       scope_offset         TYPE string VALUE 'scopeOffset',
@@ -72,7 +72,7 @@ INTERFACE zif_adcoset_c_global
     END OF c_search_params.
 
   CONSTANTS:
-    "! <p class="shorttext synchronized" lang="en">Include id's for class</p>
+    "! Include id's for class
     BEGIN OF c_class_include_id,
       all                  TYPE string VALUE 'all',
       public_section       TYPE string VALUE 'pubSec',
@@ -86,7 +86,7 @@ INTERFACE zif_adcoset_c_global
     END OF c_class_include_id.
 
   CONSTANTS:
-    "! <p class="shorttext synchronized" lang="en">Include id's for function group</p>
+    "! Include id's for function group
     BEGIN OF c_fugr_include_id,
       all          TYPE string VALUE 'all',
       function     TYPE string VALUE 'func',
@@ -94,13 +94,13 @@ INTERFACE zif_adcoset_c_global
     END OF c_fugr_include_id.
 
   CONSTANTS:
-    "! <p class="shorttext synchronized" lang="en">Constants for needed TADIR types</p>
+    "! Constants for needed TADIR types
     BEGIN OF c_tadir_type,
       package TYPE trobjtype VALUE 'DEVC',
     END OF c_tadir_type.
 
   CONSTANTS:
-    "! <p class="shorttext synchronized" lang="en">Technical identifier for source code types</p>
+    "! Technical identifier for source code types
     BEGIN OF c_source_code_type,
       class                 TYPE trobjtype VALUE 'CLAS',
       interface             TYPE trobjtype VALUE 'INTF',
@@ -115,6 +115,7 @@ INTERFACE zif_adcoset_c_global
     END OF c_source_code_type.
 
   CONSTANTS:
+    "! Technical identifier subobject source code types
     BEGIN OF c_source_code_limu_type,
       function_module         TYPE trobjtype VALUE 'FUNC',
       method                  TYPE trobjtype VALUE 'METH',
@@ -127,18 +128,21 @@ INTERFACE zif_adcoset_c_global
     END OF c_source_code_limu_type.
 
   CONSTANTS:
+    "! Technical identifier for scope types
     BEGIN OF c_scope_type,
       universal_scope   TYPE zadcoset_scope_type VALUE 'US',
       transport_request TYPE zadcoset_scope_type VALUE 'TR',
     END OF c_scope_type.
 
   CONSTANTS:
+    "! program id types supported for transport request search
     BEGIN OF c_program_id,
       r3tr TYPE pgmid VALUE 'R3TR',
       limu TYPE pgmid VALUE 'LIMU',
     END OF c_program_id.
 
   CONSTANTS:
+    "! Value help for transport request type
     BEGIN OF c_trkorr_type_vh,
       workbench_request   TYPE string VALUE 'WORKBENCH_REQUEST',
       piece_list          TYPE string VALUE 'PIECE_LIST',
