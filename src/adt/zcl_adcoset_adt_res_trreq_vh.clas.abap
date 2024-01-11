@@ -93,7 +93,10 @@ CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
 ENDCLASS.
 
 
-CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
+
+CLASS ZCL_ADCOSET_ADT_RES_TRREQ_VH IMPLEMENTATION.
+
+
   METHOD constructor.
     super->constructor( ).
     excluded_types = VALUE #( sign   = 'I'
@@ -104,77 +107,26 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
                               ( low = sctsc_type_client ) ).
   ENDMETHOD.
 
-  METHOD get_named_items.
-    CLEAR: is_all_status_requested,
-           name_filter,
-           text_filter,
-           changed_date_filter,
-           owner_filter,
-           status_filter,
-           type_filter,
-           requests,
-           custom_filter_active.
 
-    parse_data_filter( filter = p_filter_data ).
-    get_name_filter( filter = p_filter_name ).
-    select_tr_requests( p_filter_max_item_count ).
-
-    p_named_item_list = convert_to_named_items( ).
-
-    p_filter_already_applied = abap_true.
-    p_named_item_list-total_item_count = lines( p_named_item_list-items ).
-  ENDMETHOD.
-
-  METHOD parse_data_filter.
-    DATA filters_encoded TYPE string_table.
-
-    IF filter IS INITIAL.
-      RETURN.
-    ENDIF.
-
-    SPLIT filter AT c_split_marker INTO TABLE filters_encoded.
-
-    LOOP AT filters_encoded INTO DATA(single_filter).
-      SPLIT single_filter AT '=' INTO DATA(name) DATA(val).
-      CASE name.
-        WHEN 'customFilter'.
-          custom_filter_active = abap_true.
-        WHEN 'changed'.
-          get_changed_date_filter( val ).
-        WHEN 'owner'.
-          get_generic_filter( EXPORTING name       = name
-                                        values_str = val
-                                        upper_case = abap_true
-                              CHANGING  range_tab  = owner_filter ).
-          transform_special_values( CHANGING user_filter = owner_filter ).
-        WHEN 'type'.
-          get_type_filter( val ).
-        WHEN 'status'.
-          get_status_filter( val ).
-      ENDCASE.
+  METHOD convert_to_named_items.
+    LOOP AT requests REFERENCE INTO DATA(request).
+      result-items = VALUE #(
+          BASE result-items
+          ( name        = request->trkorr
+            description = request->as4text
+            data        = 'isTask=' && SWITCH string( request->trfunction
+                                                      WHEN sctsc_type_correction OR
+                                                           sctsc_type_repair
+                                                      THEN c_true
+                                                      ELSE c_false ) &&
+                          c_split_marker &&
+                          'isReleased=' && SWITCH string( request->trstatus
+                                                          WHEN sctsc_state_notconfirmed OR sctsc_state_released
+                                                          THEN c_true
+                                                          ELSE c_false ) ) ).
     ENDLOOP.
-
-    IF is_all_status_requested = abap_true AND changed_date_filter IS INITIAL.
-      CLEAR is_all_status_requested.
-    ENDIF.
   ENDMETHOD.
 
-  METHOD get_name_filter.
-    IF filter IS INITIAL.
-      RETURN.
-    ENDIF.
-
-    DATA(l_name_filter) = to_upper( COND string( WHEN filter = '*' AND custom_filter_active = abap_true
-                                                 THEN |{ sy-sysid }K*|
-                                                 ELSE filter ) ).
-    DATA(l_text_filter) = COND string( WHEN filter = '*' AND custom_filter_active = abap_true
-                                       THEN |{ sy-sysid }K*|
-                                       ELSE filter ).
-    name_filter = VALUE #( ( sign   = 'I'
-                             option = 'CP'
-                             low    = l_name_filter ) ).
-    text_filter = VALUE #( ( sign = 'I' option = 'CP' low = l_text_filter ) ).
-  ENDMETHOD.
 
   METHOD get_changed_date_filter.
     DATA values TYPE string_table.
@@ -208,64 +160,6 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD get_type_filter.
-    DATA values TYPE string_table.
-
-    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
-
-    LOOP AT values INTO DATA(value).
-      value = to_upper( value ).
-      CASE value.
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-workbench_request.
-          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_workbench ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-dev_corr_task.
-          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_correction ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-piece_list.
-          type_filter = VALUE #( BASE type_filter
-                                 sign   = 'I'
-                                 option = 'EQ'
-                                 ( low = sctsc_type_objlist )
-                                 ( low = sctsc_type_projectlist )
-                                 ( low = sctsc_type_upgradelist )
-                                 ( low = sctsc_type_patch ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-repair_task.
-          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_repair ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-transport_of_copies.
-          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_transport ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-relocation_request.
-          type_filter = VALUE #( BASE type_filter
-                                 sign   = 'I'
-                                 option = 'EQ'
-                                 ( low = sctsc_type_relocation )
-                                 ( low = sctsc_type_relocation_devclass )
-                                 ( low = sctsc_type_relocation_objs ) ).
-      ENDCASE.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD get_status_filter.
-    DATA values TYPE string_table.
-
-    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
-
-    is_all_status_requested = xsdbool( lines( values ) = 2 ).
-
-    LOOP AT values INTO DATA(value).
-      value = to_lower( value ).
-      IF value = c_tr_status_ext-modifiable.
-        status_filter = VALUE #( BASE status_filter sign   = 'I'
-                                 option = 'EQ'
-                                 ( low = sctsc_state_changeable )
-                                 ( low = sctsc_state_protected  ) ).
-      ELSEIF value = c_tr_status_ext-released.
-        status_filter = VALUE #( BASE status_filter sign   = 'I'
-                                 option = 'EQ'
-                                 ( low = sctsc_state_export_started )
-                                 ( low = sctsc_state_notconfirmed )
-                                 ( low = sctsc_state_released ) ).
-      ENDIF.
-    ENDLOOP.
-  ENDMETHOD.
 
   METHOD get_generic_filter.
     " TODO: parameter NAME is never used (ABAP cleaner)
@@ -302,13 +196,142 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD transform_special_values.
-    LOOP AT user_filter REFERENCE INTO DATA(filter_row).
-      IF filter_row->low = 'ME'.
-        filter_row->low = sy-uname.
+
+  METHOD get_named_items.
+    CLEAR: is_all_status_requested,
+           name_filter,
+           text_filter,
+           changed_date_filter,
+           owner_filter,
+           status_filter,
+           type_filter,
+           requests,
+           custom_filter_active.
+
+    parse_data_filter( filter = p_filter_data ).
+    get_name_filter( filter = p_filter_name ).
+    select_tr_requests( p_filter_max_item_count ).
+
+    p_named_item_list = convert_to_named_items( ).
+
+    p_filter_already_applied = abap_true.
+    p_named_item_list-total_item_count = lines( p_named_item_list-items ).
+  ENDMETHOD.
+
+
+  METHOD get_name_filter.
+    IF filter IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    DATA(l_name_filter) = to_upper( COND string( WHEN filter = '*' AND custom_filter_active = abap_true
+                                                 THEN |{ sy-sysid }K*|
+                                                 ELSE filter ) ).
+    DATA(l_text_filter) = COND string( WHEN filter = '*' AND custom_filter_active = abap_true
+                                       THEN |{ sy-sysid }K*|
+                                       ELSE filter ).
+    name_filter = VALUE #( ( sign   = 'I'
+                             option = 'CP'
+                             low    = l_name_filter ) ).
+    text_filter = VALUE #( ( sign = 'I' option = 'CP' low = l_text_filter ) ).
+  ENDMETHOD.
+
+
+  METHOD get_status_filter.
+    DATA values TYPE string_table.
+
+    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
+
+    is_all_status_requested = xsdbool( lines( values ) = 2 ).
+
+    LOOP AT values INTO DATA(value).
+      value = to_lower( value ).
+      IF value = c_tr_status_ext-modifiable.
+        status_filter = VALUE #( BASE status_filter sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_state_changeable )
+                                 ( low = sctsc_state_protected  ) ).
+      ELSEIF value = c_tr_status_ext-released.
+        status_filter = VALUE #( BASE status_filter sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_state_export_started )
+                                 ( low = sctsc_state_notconfirmed )
+                                 ( low = sctsc_state_released ) ).
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
+
+
+  METHOD get_type_filter.
+    DATA values TYPE string_table.
+
+    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
+
+    LOOP AT values INTO DATA(value).
+      value = to_upper( value ).
+      CASE value.
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-workbench_request.
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_workbench ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-dev_corr_task.
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_correction ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-piece_list.
+          type_filter = VALUE #( BASE type_filter
+                                 sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_type_objlist )
+                                 ( low = sctsc_type_projectlist )
+                                 ( low = sctsc_type_upgradelist )
+                                 ( low = sctsc_type_patch ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-repair_task.
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_repair ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-transport_of_copies.
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_transport ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-relocation_request.
+          type_filter = VALUE #( BASE type_filter
+                                 sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_type_relocation )
+                                 ( low = sctsc_type_relocation_devclass )
+                                 ( low = sctsc_type_relocation_objs ) ).
+      ENDCASE.
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD parse_data_filter.
+    DATA filters_encoded TYPE string_table.
+
+    IF filter IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    SPLIT filter AT c_split_marker INTO TABLE filters_encoded.
+
+    LOOP AT filters_encoded INTO DATA(single_filter).
+      SPLIT single_filter AT '=' INTO DATA(name) DATA(val).
+      CASE name.
+        WHEN 'customFilter'.
+          custom_filter_active = abap_true.
+        WHEN 'changed'.
+          get_changed_date_filter( val ).
+        WHEN 'owner'.
+          get_generic_filter( EXPORTING name       = name
+                                        values_str = val
+                                        upper_case = abap_true
+                              CHANGING  range_tab  = owner_filter ).
+          transform_special_values( CHANGING user_filter = owner_filter ).
+        WHEN 'type'.
+          get_type_filter( val ).
+        WHEN 'status'.
+          get_status_filter( val ).
+      ENDCASE.
+    ENDLOOP.
+
+    IF is_all_status_requested = abap_true AND changed_date_filter IS INITIAL.
+      CLEAR is_all_status_requested.
+    ENDIF.
+  ENDMETHOD.
+
 
   METHOD select_tr_requests.
     IF    custom_filter_active = abap_false
@@ -356,22 +379,12 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD convert_to_named_items.
-    LOOP AT requests REFERENCE INTO DATA(request).
-      result-items = VALUE #(
-          BASE result-items
-          ( name        = request->trkorr
-            description = request->as4text
-            data        = 'isTask=' && SWITCH string( request->trfunction
-                                                      WHEN sctsc_type_correction OR
-                                                           sctsc_type_repair
-                                                      THEN c_true
-                                                      ELSE c_false ) &&
-                          c_split_marker &&
-                          'isReleased=' && SWITCH string( request->trstatus
-                                                          WHEN sctsc_state_notconfirmed OR sctsc_state_released
-                                                          THEN c_true
-                                                          ELSE c_false ) ) ).
+
+  METHOD transform_special_values.
+    LOOP AT user_filter REFERENCE INTO DATA(filter_row).
+      IF filter_row->low = 'ME'.
+        filter_row->low = sy-uname.
+      ENDIF.
     ENDLOOP.
   ENDMETHOD.
 ENDCLASS.

@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>ZCL_ADCOSET_ADT_RES_TRREQ_VH</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Resource for Application Component value help</DESCRIPT>
+    <DESCRIPT>Resource for Transport Request VH</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
