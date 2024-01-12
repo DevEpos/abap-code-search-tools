@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Resource for Search Scope Definition</p>
 CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
   PUBLIC
-  FINAL
-  INHERITING FROM cl_adt_rest_resource
+  INHERITING FROM cl_adt_rest_resource FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -98,19 +97,15 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
 ENDCLASS.
 
 
-
-CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
-
-
+CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
   METHOD delete_expired_scopes.
     DATA current_time TYPE timestampl.
 
     GET TIME STAMP FIELD current_time.
 
-    DELETE FROM zadcoset_csscope WHERE     created_by          = sy-uname
-                                       AND expiration_datetime < current_time.
+    DELETE FROM zadcoset_csscope WHERE created_by          = sy-uname
+                                   AND expiration_datetime < current_time.
   ENDMETHOD.
-
 
   METHOD determine_scope.
     DATA(scope) = zcl_adcoset_search_scope_fac=>create_scope( CORRESPONDING #( scope_ranges ) ).
@@ -122,7 +117,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
     scope_ext-object_count = scope->count( ).
   ENDMETHOD.
 
-
   METHOD extract_appl_comps.
     DATA(appl_comps) = to_upper( param_value ).
 
@@ -131,7 +125,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
                                 flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
                       IMPORTING range_table = scope_ranges-appl_comp_range ).
   ENDMETHOD.
-
 
   METHOD extract_created_dates.
     DATA dates TYPE string_table.
@@ -147,7 +140,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-
   METHOD extract_object_names.
     DATA(object_names) = to_upper( param_value ).
 
@@ -159,7 +151,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
       IMPORTING range_table = scope_ranges-object_name_range ).
   ENDMETHOD.
 
-
   METHOD extract_object_types.
     DATA(types) = to_upper( param_value ).
 
@@ -168,7 +159,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
                                 flags       = VALUE #( negation = abap_true )
                       IMPORTING range_table = scope_ranges-object_type_range ).
   ENDMETHOD.
-
 
   METHOD extract_owners.
     DATA(owners) = to_upper( param_value ).
@@ -183,7 +173,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-
   METHOD extract_packages.
     DATA(packages) = to_upper( param_value ).
 
@@ -192,7 +181,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
                                 flags       = VALUE #( negation = abap_true patterns = abap_true )
                       IMPORTING range_table = scope_ranges-package_range ).
   ENDMETHOD.
-
 
   METHOD extract_tag_ids.
     DATA ext_uuids TYPE string_table.
@@ -218,7 +206,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-
   METHOD extract_tr_requests.
     DATA(tr_request) = to_upper( param_value ).
 
@@ -227,7 +214,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
                                 flags       = VALUE #( negation = abap_true )
                       IMPORTING range_table = scope_ranges-tr_request_range ).
   ENDMETHOD.
-
 
   METHOD parse_parameters.
     LOOP AT scope_params ASSIGNING FIELD-SYMBOL(<param>).
@@ -263,7 +249,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-
   METHOD persist_scope.
     DATA(scope_db) = VALUE zadcoset_csscope( created_by = sy-uname ).
 
@@ -281,8 +266,7 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
           scope_ext-id.
       CATCH cx_uuid_error INTO DATA(uuid_error).
         RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-          EXPORTING
-            previous = uuid_error.
+          EXPORTING previous = uuid_error.
     ENDTRY.
 
     GET TIME STAMP FIELD scope_db-expiration_datetime.
@@ -291,7 +275,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
 
     INSERT zadcoset_csscope FROM scope_db.
   ENDMETHOD.
-
 
   METHOD post.
     DATA scope_params TYPE zif_adcoset_ty_adt_types=>ty_search_scope_params.
@@ -313,7 +296,6 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
       response->set_status( cl_rest_status_code=>gc_success_no_content ).
     ENDIF.
   ENDMETHOD.
-
 
   METHOD split_into_range.
     DATA tokens TYPE string_table.
@@ -341,8 +323,7 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
       IF token CA '*?'.
         IF flags-patterns = abap_false.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              text = |Parameter '{ filter_name }' does not support patterns|.
+            EXPORTING text = |Parameter '{ filter_name }' does not support patterns|.
         ENDIF.
         token = replace( val = token sub = '?' occ = 0  with = '+' ).
         <option> = 'CP'.
@@ -356,13 +337,11 @@ CLASS ZCL_ADCOSET_ADT_RES_CS_SCOPE IMPLEMENTATION.
       IF token(1) = '!'.
         IF flags-negation = abap_false.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              text = |Parameter '{ filter_name }' does not support negation!|.
+            EXPORTING text = |Parameter '{ filter_name }' does not support negation!|.
         ENDIF.
         IF length = 1.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-            EXPORTING
-              text = |No value provided after negation character '!' for Parameter '{ filter_name }'!|.
+            EXPORTING text = |No value provided after negation character '!' for Parameter '{ filter_name }'!|.
         ENDIF.
         <sign> = 'E'.
         token = token+1.

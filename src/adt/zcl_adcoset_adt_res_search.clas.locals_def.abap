@@ -27,14 +27,13 @@ CLASS lcl_search_query DEFINITION
         cx_adt_rest.
 
   PRIVATE SECTION.
-    DATA:
-      request TYPE REF TO if_adt_rest_request,
-      BEGIN OF matcher_config,
-        use_regex   TYPE abap_bool,
-        enable_pcre TYPE abap_bool,
-      END OF matcher_config,
-      read_packages TYPE abap_bool,
-      settings      TYPE zif_adcoset_ty_global=>ty_search_settings_external.
+    DATA request TYPE REF TO if_adt_rest_request.
+    DATA: BEGIN OF matcher_config,
+            use_regex   TYPE abap_bool,
+            enable_pcre TYPE abap_bool,
+          END OF matcher_config.
+    DATA read_packages TYPE abap_bool.
+    DATA settings TYPE zif_adcoset_ty_global=>ty_search_settings_external.
 
     METHODS get_matcher_type
       RETURNING

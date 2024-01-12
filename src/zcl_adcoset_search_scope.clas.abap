@@ -3,6 +3,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
   PUBLIC
   INHERITING FROM zcl_adcoset_search_scope_base FINAL
   CREATE PUBLIC.
+  "
 
   PUBLIC SECTION.
     METHODS constructor
@@ -176,7 +177,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     dyn_from_clause = `ZADCOSET_ISRCOBJ AS obj `.
 
     IF search_ranges-tag_id_range IS NOT INITIAL.
-      tags_dyn_where_cond = `tgobj~tag_id in @search_ranges-tag_id_range`.
+      tags_dyn_where_cond = `tgobj~tag_id IN @search_ranges-tag_id_range`.
 
       " HINT: An object could be tagged twice and then it would appear
       "       more than once in the result -> this would result in possibly processing
@@ -192,7 +193,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     IF search_ranges-appl_comp_range IS NOT INITIAL.
       dyn_from_clause = dyn_from_clause &&
         `INNER JOIN tdevc AS pack ` &&
-        `ON obj~devclass = pack~devclass ` &&
+        `ON obj~developmentpackage = pack~devclass ` &&
         `INNER JOIN df14l AS appl ` &&
         `ON pack~component = appl~fctr_id `.
 

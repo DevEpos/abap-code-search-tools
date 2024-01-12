@@ -25,12 +25,12 @@ union
 
 select from e071
 {
-  key trkorr                   as Request,
-      pgmid                    as ProgramId,
-      object                   as ObjectType,
-      obj_name                 as ObjectName,
-      ''                       as DevelopmentPackage,
-      ''                       as Owner,
+  key trkorr                  as Request,
+      pgmid                   as ProgramId,
+      object                  as ObjectType,
+      obj_name                as ObjectName,
+      ''                      as DevelopmentPackage,
+      ''                      as Owner,
       cast( '' as abap.dats ) as CreatedDate
 }
 where

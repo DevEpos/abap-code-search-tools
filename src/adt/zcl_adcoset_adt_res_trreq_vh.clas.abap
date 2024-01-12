@@ -61,7 +61,6 @@ CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
 
     METHODS get_generic_filter
       IMPORTING
-        !name      TYPE string
         values_str TYPE string
         upper_case TYPE abap_bool OPTIONAL
       CHANGING
@@ -93,10 +92,7 @@ CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
 ENDCLASS.
 
 
-
-CLASS ZCL_ADCOSET_ADT_RES_TRREQ_VH IMPLEMENTATION.
-
-
+CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
   METHOD constructor.
     super->constructor( ).
     excluded_types = VALUE #( sign   = 'I'
@@ -106,96 +102,6 @@ CLASS ZCL_ADCOSET_ADT_RES_TRREQ_VH IMPLEMENTATION.
                               ( low = sctsc_type_unclass_task )
                               ( low = sctsc_type_client ) ).
   ENDMETHOD.
-
-
-  METHOD convert_to_named_items.
-    LOOP AT requests REFERENCE INTO DATA(request).
-      result-items = VALUE #(
-          BASE result-items
-          ( name        = request->trkorr
-            description = request->as4text
-            data        = 'isTask=' && SWITCH string( request->trfunction
-                                                      WHEN sctsc_type_correction OR
-                                                           sctsc_type_repair
-                                                      THEN c_true
-                                                      ELSE c_false ) &&
-                          c_split_marker &&
-                          'isReleased=' && SWITCH string( request->trstatus
-                                                          WHEN sctsc_state_notconfirmed OR sctsc_state_released
-                                                          THEN c_true
-                                                          ELSE c_false ) ) ).
-    ENDLOOP.
-  ENDMETHOD.
-
-
-  METHOD get_changed_date_filter.
-    DATA values TYPE string_table.
-    DATA date_range_line LIKE LINE OF changed_date_filter.
-
-    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
-
-    LOOP AT values INTO DATA(value).
-      CLEAR date_range_line.
-
-      CASE value.
-        WHEN c_date_filters-since_yesterday.
-          date_range_line = VALUE #( sign   = 'I'
-                                     option = 'GE'
-                                     low    = sy-datum - 1 ).
-        WHEN c_date_filters-from_two_weeks_ago.
-          date_range_line = VALUE #( sign   = 'I'
-                                     option = 'GE'
-                                     low    = sy-datum - 14 ).
-        WHEN c_date_filters-from_four_weeks_ago.
-          date_range_line = VALUE #( sign   = 'I'
-                                     option = 'GE'
-                                     low    = sy-datum - 28 ).
-        WHEN c_date_filters-all.
-          CONTINUE.
-        WHEN OTHERS.
-          date_range_line = value.
-      ENDCASE.
-
-      APPEND date_range_line TO changed_date_filter.
-    ENDLOOP.
-  ENDMETHOD.
-
-
-  METHOD get_generic_filter.
-    " TODO: parameter NAME is never used (ABAP cleaner)
-
-    DATA values TYPE string_table.
-
-    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
-
-    LOOP AT values INTO DATA(value).
-      DATA(sign) = 'I'.
-      DATA(option) = 'EQ'.
-
-      IF upper_case = abap_true.
-        value = to_upper( value ).
-      ENDIF.
-
-      IF value CP '!*'.
-        value = value+1.
-        sign = 'E'.
-      ENDIF.
-
-      IF value CA '*'.
-        option = 'CP'.
-      ENDIF.
-
-      APPEND INITIAL LINE TO range_tab ASSIGNING FIELD-SYMBOL(<range_line>).
-      ASSIGN COMPONENT 'SIGN' OF STRUCTURE <range_line> TO FIELD-SYMBOL(<sign>).
-      ASSIGN COMPONENT 'OPTION' OF STRUCTURE <range_line> TO FIELD-SYMBOL(<option>).
-      ASSIGN COMPONENT 'LOW' OF STRUCTURE <range_line> TO FIELD-SYMBOL(<low>).
-
-      <sign> = sign.
-      <option> = option.
-      <low> = value.
-    ENDLOOP.
-  ENDMETHOD.
-
 
   METHOD get_named_items.
     CLEAR: is_all_status_requested,
@@ -218,86 +124,6 @@ CLASS ZCL_ADCOSET_ADT_RES_TRREQ_VH IMPLEMENTATION.
     p_named_item_list-total_item_count = lines( p_named_item_list-items ).
   ENDMETHOD.
 
-
-  METHOD get_name_filter.
-    IF filter IS INITIAL.
-      RETURN.
-    ENDIF.
-
-    DATA(l_name_filter) = to_upper( COND string( WHEN filter = '*' AND custom_filter_active = abap_true
-                                                 THEN |{ sy-sysid }K*|
-                                                 ELSE filter ) ).
-    DATA(l_text_filter) = COND string( WHEN filter = '*' AND custom_filter_active = abap_true
-                                       THEN |{ sy-sysid }K*|
-                                       ELSE filter ).
-    name_filter = VALUE #( ( sign   = 'I'
-                             option = 'CP'
-                             low    = l_name_filter ) ).
-    text_filter = VALUE #( ( sign = 'I' option = 'CP' low = l_text_filter ) ).
-  ENDMETHOD.
-
-
-  METHOD get_status_filter.
-    DATA values TYPE string_table.
-
-    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
-
-    is_all_status_requested = xsdbool( lines( values ) = 2 ).
-
-    LOOP AT values INTO DATA(value).
-      value = to_lower( value ).
-      IF value = c_tr_status_ext-modifiable.
-        status_filter = VALUE #( BASE status_filter sign   = 'I'
-                                 option = 'EQ'
-                                 ( low = sctsc_state_changeable )
-                                 ( low = sctsc_state_protected  ) ).
-      ELSEIF value = c_tr_status_ext-released.
-        status_filter = VALUE #( BASE status_filter sign   = 'I'
-                                 option = 'EQ'
-                                 ( low = sctsc_state_export_started )
-                                 ( low = sctsc_state_notconfirmed )
-                                 ( low = sctsc_state_released ) ).
-      ENDIF.
-    ENDLOOP.
-  ENDMETHOD.
-
-
-  METHOD get_type_filter.
-    DATA values TYPE string_table.
-
-    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
-
-    LOOP AT values INTO DATA(value).
-      value = to_upper( value ).
-      CASE value.
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-workbench_request.
-          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_workbench ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-dev_corr_task.
-          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_correction ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-piece_list.
-          type_filter = VALUE #( BASE type_filter
-                                 sign   = 'I'
-                                 option = 'EQ'
-                                 ( low = sctsc_type_objlist )
-                                 ( low = sctsc_type_projectlist )
-                                 ( low = sctsc_type_upgradelist )
-                                 ( low = sctsc_type_patch ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-repair_task.
-          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_repair ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-transport_of_copies.
-          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_transport ) ).
-        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-relocation_request.
-          type_filter = VALUE #( BASE type_filter
-                                 sign   = 'I'
-                                 option = 'EQ'
-                                 ( low = sctsc_type_relocation )
-                                 ( low = sctsc_type_relocation_devclass )
-                                 ( low = sctsc_type_relocation_objs ) ).
-      ENDCASE.
-    ENDLOOP.
-  ENDMETHOD.
-
-
   METHOD parse_data_filter.
     DATA filters_encoded TYPE string_table.
 
@@ -315,8 +141,7 @@ CLASS ZCL_ADCOSET_ADT_RES_TRREQ_VH IMPLEMENTATION.
         WHEN 'changed'.
           get_changed_date_filter( val ).
         WHEN 'owner'.
-          get_generic_filter( EXPORTING name       = name
-                                        values_str = val
+          get_generic_filter( EXPORTING values_str = val
                                         upper_case = abap_true
                               CHANGING  range_tab  = owner_filter ).
           transform_special_values( CHANGING user_filter = owner_filter ).
@@ -332,6 +157,22 @@ CLASS ZCL_ADCOSET_ADT_RES_TRREQ_VH IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+  METHOD get_name_filter.
+    IF filter IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    DATA(l_name_filter) = to_upper( COND string( WHEN filter = '*' AND custom_filter_active = abap_true
+                                                 THEN |{ sy-sysid }K*|
+                                                 ELSE filter ) ).
+    DATA(l_text_filter) = COND string( WHEN filter = '*' AND custom_filter_active = abap_true
+                                       THEN |{ sy-sysid }K*|
+                                       ELSE filter ).
+    name_filter = VALUE #( ( sign   = 'I'
+                             option = 'CP'
+                             low    = l_name_filter ) ).
+    text_filter = VALUE #( ( sign = 'I' option = 'CP' low = l_text_filter ) ).
+  ENDMETHOD.
 
   METHOD select_tr_requests.
     IF    custom_filter_active = abap_false
@@ -379,6 +220,148 @@ CLASS ZCL_ADCOSET_ADT_RES_TRREQ_VH IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+  METHOD convert_to_named_items.
+    LOOP AT requests REFERENCE INTO DATA(request).
+      result-items = VALUE #(
+          BASE result-items
+          ( name        = request->trkorr
+            description = request->as4text
+            data        = 'isTask=' && SWITCH string( request->trfunction
+                                                      WHEN sctsc_type_correction OR
+                                                           sctsc_type_repair
+                                                      THEN c_true
+                                                      ELSE c_false ) &&
+                          c_split_marker &&
+                          'isReleased=' && SWITCH string( request->trstatus
+                                                          WHEN sctsc_state_notconfirmed OR sctsc_state_released
+                                                          THEN c_true
+                                                          ELSE c_false ) ) ).
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD get_changed_date_filter.
+    DATA values TYPE string_table.
+    DATA date_range_line LIKE LINE OF changed_date_filter.
+
+    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
+
+    LOOP AT values INTO DATA(value).
+      CLEAR date_range_line.
+
+      CASE value.
+        WHEN c_date_filters-since_yesterday.
+          date_range_line = VALUE #( sign   = 'I'
+                                     option = 'GE'
+                                     low    = sy-datum - 1 ).
+        WHEN c_date_filters-from_two_weeks_ago.
+          date_range_line = VALUE #( sign   = 'I'
+                                     option = 'GE'
+                                     low    = sy-datum - 14 ).
+        WHEN c_date_filters-from_four_weeks_ago.
+          date_range_line = VALUE #( sign   = 'I'
+                                     option = 'GE'
+                                     low    = sy-datum - 28 ).
+        WHEN c_date_filters-all.
+          CONTINUE.
+        WHEN OTHERS.
+          date_range_line = value.
+      ENDCASE.
+
+      APPEND date_range_line TO changed_date_filter.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD get_type_filter.
+    DATA values TYPE string_table.
+
+    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
+
+    LOOP AT values INTO DATA(value).
+      value = to_upper( value ).
+      CASE value.
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-workbench_request.
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_workbench ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-dev_corr_task.
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_correction ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-piece_list.
+          type_filter = VALUE #( BASE type_filter
+                                 sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_type_objlist )
+                                 ( low = sctsc_type_projectlist )
+                                 ( low = sctsc_type_upgradelist )
+                                 ( low = sctsc_type_patch ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-repair_task.
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_repair ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-transport_of_copies.
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_transport ) ).
+        WHEN zif_adcoset_c_global=>c_trkorr_type_vh-relocation_request.
+          type_filter = VALUE #( BASE type_filter
+                                 sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_type_relocation )
+                                 ( low = sctsc_type_relocation_devclass )
+                                 ( low = sctsc_type_relocation_objs ) ).
+      ENDCASE.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD get_status_filter.
+    DATA values TYPE string_table.
+
+    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
+
+    is_all_status_requested = xsdbool( lines( values ) = 2 ).
+
+    LOOP AT values INTO DATA(value).
+      value = to_lower( value ).
+      IF value = c_tr_status_ext-modifiable.
+        status_filter = VALUE #( BASE status_filter sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_state_changeable )
+                                 ( low = sctsc_state_protected  ) ).
+      ELSEIF value = c_tr_status_ext-released.
+        status_filter = VALUE #( BASE status_filter sign   = 'I'
+                                 option = 'EQ'
+                                 ( low = sctsc_state_export_started )
+                                 ( low = sctsc_state_notconfirmed )
+                                 ( low = sctsc_state_released ) ).
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD get_generic_filter.
+    DATA values TYPE string_table.
+
+    SPLIT values_str AT c_filter_val_sep INTO TABLE values.
+
+    LOOP AT values INTO DATA(value).
+      DATA(sign) = 'I'.
+      DATA(option) = 'EQ'.
+
+      IF upper_case = abap_true.
+        value = to_upper( value ).
+      ENDIF.
+
+      IF value CP '!*'.
+        value = value+1.
+        sign = 'E'.
+      ENDIF.
+
+      IF value CA '*'.
+        option = 'CP'.
+      ENDIF.
+
+      APPEND INITIAL LINE TO range_tab ASSIGNING FIELD-SYMBOL(<range_line>).
+      ASSIGN COMPONENT 'SIGN' OF STRUCTURE <range_line> TO FIELD-SYMBOL(<sign>).
+      ASSIGN COMPONENT 'OPTION' OF STRUCTURE <range_line> TO FIELD-SYMBOL(<option>).
+      ASSIGN COMPONENT 'LOW' OF STRUCTURE <range_line> TO FIELD-SYMBOL(<low>).
+
+      <sign> = sign.
+      <option> = option.
+      <low> = value.
+    ENDLOOP.
+  ENDMETHOD.
 
   METHOD transform_special_values.
     LOOP AT user_filter REFERENCE INTO DATA(filter_row).

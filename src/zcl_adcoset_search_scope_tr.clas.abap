@@ -1,18 +1,16 @@
 "! <p class="shorttext synchronized">Search scope for transport</p>
-class ZCL_ADCOSET_SEARCH_SCOPE_TR definition
-  public
-  inheriting from ZCL_ADCOSET_SEARCH_SCOPE_BASE
-  final
-  create public .
+CLASS zcl_adcoset_search_scope_tr DEFINITION
+  PUBLIC
+  INHERITING FROM zcl_adcoset_search_scope_base FINAL
+  CREATE PUBLIC.
 
-public section.
+  PUBLIC SECTION.
+    METHODS constructor
+      IMPORTING
+        search_scope TYPE zif_adcoset_ty_global=>ty_search_scope.
 
-  methods CONSTRUCTOR
-    importing
-      !SEARCH_SCOPE type ZIF_ADCOSET_TY_GLOBAL=>TY_SEARCH_SCOPE .
+    METHODS zif_adcoset_search_scope~next_package REDEFINITION.
 
-  methods ZIF_ADCOSET_SEARCH_SCOPE~NEXT_PACKAGE
-    redefinition .
   PROTECTED SECTION.
     METHODS determine_count REDEFINITION.
 
@@ -58,10 +56,7 @@ public section.
 ENDCLASS.
 
 
-
-CLASS ZCL_ADCOSET_SEARCH_SCOPE_TR IMPLEMENTATION.
-
-
+CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   METHOD add_subobj_type_to_filter.
     " some R3TR object types are associated with LIMU types which can be included
     " in transport requests. These types are added to the filter criteria
@@ -106,12 +101,10 @@ CLASS ZCL_ADCOSET_SEARCH_SCOPE_TR IMPLEMENTATION.
                                                ( LINES OF subobject_type_ranges ) ).
   ENDMETHOD.
 
-
   METHOD constructor.
     super->constructor( ).
     init( search_scope ).
   ENDMETHOD.
-
 
   METHOD create_native_query.
     result = NEW #( ).
@@ -123,7 +116,6 @@ CLASS ZCL_ADCOSET_SEARCH_SCOPE_TR IMPLEMENTATION.
     result->add_range_to_where( ranges   = search_ranges-tr_request_range
                                 col_info = VALUE #( name = c_cds_field_name-request ) ).
   ENDMETHOD.
-
 
   METHOD determine_count.
     IF     search_ranges-object_type_range IS INITIAL
@@ -150,7 +142,6 @@ CLASS ZCL_ADCOSET_SEARCH_SCOPE_TR IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-
   METHOD get_tr_objects.
     DATA tr_objects TYPE zif_adcoset_ty_global=>ty_std_tr_request_objects.
 
@@ -169,7 +160,6 @@ CLASS ZCL_ADCOSET_SEARCH_SCOPE_TR IMPLEMENTATION.
       result = tr_objects.
     ENDIF.
   ENDMETHOD.
-
 
   METHOD init_native_scope_query.
     CHECK native_scope_query IS INITIAL.
@@ -194,7 +184,6 @@ CLASS ZCL_ADCOSET_SEARCH_SCOPE_TR IMPLEMENTATION.
                                                ( name = c_field_alias-type ) ) ).
   ENDMETHOD.
 
-
   METHOD resolve_tr_request.
     CHECK search_ranges-tr_request_range IS NOT INITIAL.
 
@@ -205,7 +194,6 @@ CLASS ZCL_ADCOSET_SEARCH_SCOPE_TR IMPLEMENTATION.
     search_ranges-tr_request_range = VALUE #( BASE search_ranges-tr_request_range FOR task IN tr_tasks
                                               ( sign = 'I' option = 'EQ' low = task ) ).
   ENDMETHOD.
-
 
   METHOD zif_adcoset_search_scope~next_package.
     DATA(max_rows) = get_max_rows( ).
