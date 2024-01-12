@@ -3,7 +3,6 @@ CLASS zcl_adcoset_search_scope DEFINITION
   PUBLIC
   INHERITING FROM zcl_adcoset_search_scope_base FINAL
   CREATE PUBLIC.
-  "
 
   PUBLIC SECTION.
     METHODS constructor
@@ -89,17 +88,18 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     config_dyn_where_clauses( ).
     resolve_packages( ).
 
-    DATA(selection_limit) = COND i( WHEN max_objects > 0
-                                    THEN max_objects + 1
-                                    ELSE 0 ).
+    DATA(selection_limit) = COND i(
+        WHEN max_objects > 0
+        THEN max_objects + 1
+        ELSE 0 ).
 
     SELECT COUNT(*)
       FROM (dyn_from_clause)
       WHERE (tags_dyn_where_cond)
-        AND obj~objecttype IN @search_ranges-object_type_range
-        AND obj~objectname IN @search_ranges-object_name_range
+        AND obj~objecttype  IN @search_ranges-object_type_range
+        AND obj~objectname  IN @search_ranges-object_name_range
         AND obj~developmentpackage IN @search_ranges-package_range
-        AND obj~owner IN @search_ranges-owner_range
+        AND obj~owner       IN @search_ranges-owner_range
         AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
       INTO @object_count
@@ -108,6 +108,38 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     IF object_count = selection_limit.
       object_count = max_objects.
       more_objects_in_scope = abap_true.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD init_from_db.
+    super->init_from_db( search_scope = search_scope  ).
+    config_dyn_where_clauses( ).
+  ENDMETHOD.
+
+  METHOD config_dyn_where_clauses.
+    dyn_from_clause = `ZADCOSET_ISRCOBJ AS obj `.
+
+    IF search_ranges-tag_id_range IS NOT INITIAL.
+      tags_dyn_where_cond = `tgobj~tag_id IN @search_ranges-tag_id_range`.
+
+      " HINT: An object could be tagged twice and then it would appear
+      "       more than once in the result -> this would result in possibly processing
+      "       an object twice
+      "       --> add group by clause if tags are supplied (possibly the only solution)
+      dyn_from_clause = dyn_from_clause &&
+        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS tgobj | &&
+        `ON  obj~ObjectName = tgobj~object_name ` &&
+        `AND obj~ObjectType = tgobj~object_type `.
+    ENDIF.
+
+    IF search_ranges-appl_comp_range IS NOT INITIAL.
+      dyn_from_clause = dyn_from_clause &&
+        `INNER JOIN tdevc AS pack ` &&
+        `ON obj~DevelopmentPackage = pack~devclass ` &&
+        `INNER JOIN df14l AS appl ` &&
+        `ON pack~component = appl~fctr_id `.
+
+      appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
     ENDIF.
   ENDMETHOD.
 
@@ -166,38 +198,5 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     native_scope_query->add_range_to_where( ranges   = search_ranges-appl_comp_range
                                             col_info = VALUE #( tab_alias = c_tab_alias-appl
                                                                 name      = c_table_field_name-ps_posid ) ).
-  ENDMETHOD.
-
-  METHOD init_from_db.
-    super->init_from_db( search_scope = search_scope  ).
-    config_dyn_where_clauses( ).
-  ENDMETHOD.
-
-  METHOD config_dyn_where_clauses.
-    dyn_from_clause = `ZADCOSET_ISRCOBJ AS obj `.
-
-    IF search_ranges-tag_id_range IS NOT INITIAL.
-      tags_dyn_where_cond = `tgobj~tag_id IN @search_ranges-tag_id_range`.
-
-      " HINT: An object could be tagged twice and then it would appear
-      "       more than once in the result -> this would result in possibly processing
-      "       an object twice
-      "       --> add group by clause if tags are supplied (possibly the only solution)
-      dyn_from_clause = dyn_from_clause &&
-        |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS tgobj | &&
-        `ON  obj~ObjectName = tgobj~object_name ` &&
-        `AND obj~ObjectType = tgobj~object_type `.
-
-    ENDIF.
-
-    IF search_ranges-appl_comp_range IS NOT INITIAL.
-      dyn_from_clause = dyn_from_clause &&
-        `INNER JOIN tdevc AS pack ` &&
-        `ON obj~developmentpackage = pack~devclass ` &&
-        `INNER JOIN df14l AS appl ` &&
-        `ON pack~component = appl~fctr_id `.
-
-      appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
-    ENDIF.
   ENDMETHOD.
 ENDCLASS.
