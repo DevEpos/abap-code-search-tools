@@ -61,7 +61,6 @@ CLASS zcl_adcoset_adt_res_trreq_vh DEFINITION
 
     METHODS get_generic_filter
       IMPORTING
-        !name      TYPE string
         values_str TYPE string
         upper_case TYPE abap_bool OPTIONAL
       CHANGING
@@ -142,8 +141,7 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
         WHEN 'changed'.
           get_changed_date_filter( val ).
         WHEN 'owner'.
-          get_generic_filter( EXPORTING name       = name
-                                        values_str = val
+          get_generic_filter( EXPORTING values_str = val
                                         upper_case = abap_true
                               CHANGING  range_tab  = owner_filter ).
           transform_special_values( CHANGING user_filter = owner_filter ).
@@ -169,6 +167,71 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
                                low    = l_filter ) ).
       text_filter = VALUE #( ( sign = 'I' option = 'CP' low = l_filter ) ).
     ENDIF.
+  ENDMETHOD.
+
+  METHOD select_tr_requests.
+    IF    custom_filter_active = abap_false
+       OR ( custom_filter_active = abap_true AND is_all_status_requested = abap_false ).
+      SELECT tr_request~trkorr,
+             text~as4text,
+             tr_request~trfunction,
+             tr_request~trstatus
+        FROM e070 AS tr_request
+             LEFT OUTER JOIN e07t AS text
+               ON  tr_request~trkorr = text~trkorr
+               AND text~langu        = @sy-langu
+        WHERE (    tr_request~trkorr     IN @name_filter
+                OR upper( text~as4text ) IN @text_filter )
+          AND tr_request~as4user        IN @owner_filter
+          AND tr_request~as4date        IN @changed_date_filter
+          AND tr_request~trfunction     IN @type_filter
+          " Exclude requests without source code objects
+          AND tr_request~trfunction NOT IN @excluded_types
+          AND tr_request~trstatus       IN @status_filter
+        ORDER BY tr_request~trkorr
+        INTO TABLE @requests
+        UP TO @max_item_count ROWS.
+    ELSE.
+      SELECT tr_request~trkorr,
+             text~as4text,
+             tr_request~trfunction,
+             tr_request~trstatus
+        FROM e070 AS tr_request
+             LEFT OUTER JOIN e07t AS text
+               ON  tr_request~trkorr = text~trkorr
+               AND text~langu        = @sy-langu
+        WHERE (    tr_request~trkorr     IN @name_filter
+                OR upper( text~as4text ) IN @text_filter )
+          AND tr_request~as4user        IN @owner_filter
+          AND tr_request~trfunction     IN @type_filter
+          " Exclude requests without source code objects
+          AND tr_request~trfunction NOT IN @excluded_types
+          AND (    tr_request~trstatus IN ( @sctsc_state_changeable, @sctsc_state_protected )
+                OR (     tr_request~trstatus IN ( @sctsc_state_released, @sctsc_state_notconfirmed, @sctsc_state_export_started )
+                     AND tr_request~as4date  IN @changed_date_filter ) )
+        ORDER BY tr_request~trkorr
+        INTO TABLE @requests
+        UP TO @max_item_count ROWS.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD convert_to_named_items.
+    LOOP AT requests REFERENCE INTO DATA(request).
+      result-items = VALUE #(
+          BASE result-items
+          ( name        = request->trkorr
+            description = request->as4text
+            data        = 'isTask=' && SWITCH string( request->trfunction
+                                                      WHEN sctsc_type_correction OR
+                                                           sctsc_type_repair
+                                                      THEN c_true
+                                                      ELSE c_false ) &&
+                          c_split_marker &&
+                          'isReleased=' && SWITCH string( request->trstatus
+                                                          WHEN sctsc_state_notconfirmed OR sctsc_state_released
+                                                          THEN c_true
+                                                          ELSE c_false ) ) ).
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD get_changed_date_filter.
@@ -263,8 +326,6 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_generic_filter.
-    " TODO: parameter NAME is never used (ABAP cleaner)
-
     DATA values TYPE string_table.
 
     SPLIT values_str AT c_filter_val_sep INTO TABLE values.
@@ -302,71 +363,6 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
       IF filter_row->low = 'ME'.
         filter_row->low = sy-uname.
       ENDIF.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD select_tr_requests.
-    IF    custom_filter_active = abap_false
-       OR ( custom_filter_active = abap_true AND is_all_status_requested = abap_false ).
-      SELECT tr_request~trkorr,
-             text~as4text,
-             tr_request~trfunction,
-             tr_request~trstatus
-        FROM e070 AS tr_request
-             LEFT OUTER JOIN e07t AS text
-               ON  tr_request~trkorr = text~trkorr
-               AND text~langu        = @sy-langu
-        WHERE (    tr_request~trkorr     IN @name_filter
-                OR upper( text~as4text ) IN @text_filter )
-          AND tr_request~as4user        IN @owner_filter
-          AND tr_request~as4date        IN @changed_date_filter
-          AND tr_request~trfunction     IN @type_filter
-          " Exclude requests without source code objects
-          AND tr_request~trfunction NOT IN @excluded_types
-          AND tr_request~trstatus       IN @status_filter
-        ORDER BY tr_request~trkorr
-        INTO TABLE @requests
-        UP TO @max_item_count ROWS.
-    ELSE.
-      SELECT tr_request~trkorr,
-             text~as4text,
-             tr_request~trfunction,
-             tr_request~trstatus
-        FROM e070 AS tr_request
-             LEFT OUTER JOIN e07t AS text
-               ON  tr_request~trkorr = text~trkorr
-               AND text~langu        = @sy-langu
-        WHERE (    tr_request~trkorr     IN @name_filter
-                OR upper( text~as4text ) IN @text_filter )
-          AND tr_request~as4user        IN @owner_filter
-          AND tr_request~trfunction     IN @type_filter
-          " Exclude requests without source code objects
-          AND tr_request~trfunction NOT IN @excluded_types
-          AND (    tr_request~trstatus IN ( @sctsc_state_changeable, @sctsc_state_protected )
-                OR (     tr_request~trstatus IN ( @sctsc_state_released, @sctsc_state_notconfirmed, @sctsc_state_export_started )
-                     AND tr_request~as4date  IN @changed_date_filter ) )
-        ORDER BY tr_request~trkorr
-        INTO TABLE @requests
-        UP TO @max_item_count ROWS.
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD convert_to_named_items.
-    LOOP AT requests REFERENCE INTO DATA(request).
-      result-items = VALUE #(
-          BASE result-items
-          ( name        = request->trkorr
-            description = request->as4text
-            data        = 'isTask=' && SWITCH string( request->trfunction
-                                                      WHEN sctsc_type_correction OR
-                                                           sctsc_type_repair
-                                                      THEN c_true
-                                                      ELSE c_false ) &&
-                          c_split_marker &&
-                          'isReleased=' && SWITCH string( request->trstatus
-                                                          WHEN sctsc_state_notconfirmed OR sctsc_state_released
-                                                          THEN c_true
-                                                          ELSE c_false ) ) ).
     ENDLOOP.
   ENDMETHOD.
 ENDCLASS.

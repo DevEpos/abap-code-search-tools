@@ -37,5 +37,4 @@ INTERFACE zif_adcoset_search_scope
   METHODS get_scope_ranges DEFAULT IGNORE
     RETURNING
       VALUE(result) TYPE zif_adcoset_ty_global=>ty_search_scope_ranges.
-
 ENDINTERFACE.

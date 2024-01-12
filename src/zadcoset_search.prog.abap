@@ -270,7 +270,7 @@ CLASS lcl_report IMPLEMENTATION.
         run_search( ).
 
         IF results IS INITIAL.
-          MESSAGE |No matches found, Searched Objects: { search_count NUMBER = USER }, Duration: { duration }| TYPE 'S'.
+          MESSAGE |No matches found, Processed Objects: { search_count NUMBER = USER }, Duration: { duration }| TYPE 'S'.
         ELSE.
           display_results( ).
         ENDIF.
@@ -325,7 +325,7 @@ CLASS lcl_report IMPLEMENTATION.
         salv->get_functions( )->set_default( ).
         salv->get_selections( )->set_selection_mode( if_salv_c_selection_mode=>row_column ).
         salv->get_display_settings( )->set_list_header(
-            |Search Results { lines( results ) NUMBER = USER }, Searched Objects: { search_count NUMBER = USER }, Duration: { duration }| ).
+            |Search Results { lines( results ) NUMBER = USER }, Processed Objects: { search_count NUMBER = USER }, Duration: { duration }| ).
 
         SET HANDLER on_link_click FOR salv->get_event( ).
 

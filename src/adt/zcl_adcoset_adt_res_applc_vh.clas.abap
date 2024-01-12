@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Resource for Application Component value help</p>
 CLASS zcl_adcoset_adt_res_applc_vh DEFINITION
   PUBLIC
-  INHERITING FROM cl_adt_res_named_items
-  FINAL
+  INHERITING FROM cl_adt_res_named_items FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -22,7 +21,7 @@ CLASS zcl_adcoset_adt_res_applc_vh IMPLEMENTATION.
       lt_appl_comp_name_range = VALUE #( ( sign = 'I' option = 'CP' low = to_upper( p_filter_name ) ) ).
     ENDIF.
 
-    SELECT ps_posid AS name,
+    SELECT ps_posid  AS name,
            text~name AS description
       FROM df14l AS comp
            LEFT OUTER JOIN df14t AS text
