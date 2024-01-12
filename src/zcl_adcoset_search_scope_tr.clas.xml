@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>ZCL_ADCOSET_SEARCH_SCOPE_TR</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Search scope for transport</DESCRIPT>
+    <DESCRIPT>Search scope for transport request</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

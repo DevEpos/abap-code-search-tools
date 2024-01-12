@@ -98,6 +98,27 @@ ENDCLASS.
 
 
 CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
+  METHOD post.
+    DATA scope_params TYPE zif_adcoset_ty_adt_types=>ty_search_scope_params.
+
+    delete_expired_scopes( ).
+
+    request->get_body_data( EXPORTING content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_params_ch( )
+                            IMPORTING data            = scope_params ).
+
+    parse_parameters( scope_params ).
+    determine_scope( ).
+
+    IF scope_ext-object_count > 0.
+      persist_scope( ).
+
+      response->set_body_data( content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_ch( )
+                               data            = scope_ext ).
+    ELSE.
+      response->set_status( cl_rest_status_code=>gc_success_no_content ).
+    ENDIF.
+  ENDMETHOD.
+
   METHOD delete_expired_scopes.
     DATA current_time TYPE timestampl.
 
@@ -105,6 +126,40 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     DELETE FROM zadcoset_csscope WHERE created_by          = sy-uname
                                    AND expiration_datetime < current_time.
+  ENDMETHOD.
+
+  METHOD parse_parameters.
+    LOOP AT scope_params ASSIGNING FIELD-SYMBOL(<param>).
+
+      CASE <param>-name.
+
+        WHEN zif_adcoset_c_global=>c_search_params-owner.
+          extract_owners( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-package.
+          extract_packages( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-appl_comp.
+          extract_appl_comps( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-object_type.
+          extract_object_types( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-object_name.
+          extract_object_names( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-created_date.
+          extract_created_dates( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-tag_id.
+          extract_tag_ids( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-tr_request.
+          extract_tr_requests( <param>-value ).
+
+      ENDCASE.
+
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD determine_scope.
@@ -117,13 +172,31 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
     scope_ext-object_count = scope->count( ).
   ENDMETHOD.
 
-  METHOD extract_appl_comps.
-    DATA(appl_comps) = to_upper( param_value ).
+  METHOD persist_scope.
+    DATA(scope_db) = VALUE zadcoset_csscope( created_by = sy-uname ).
 
-    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-appl_comp
-                                input       = appl_comps
-                                flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
-                      IMPORTING range_table = scope_ranges-appl_comp_range ).
+    scope_db-scope_type = COND #( WHEN scope_ranges-tr_request_range IS NOT INITIAL
+                                  THEN zif_adcoset_c_global=>c_scope_type-transport_request
+                                  ELSE zif_adcoset_c_global=>c_scope_type-universal_scope ).
+
+    CALL TRANSFORMATION id
+         SOURCE data = scope_ranges
+         RESULT XML scope_db-ranges_data.
+
+    TRY.
+        scope_ext-id = cl_system_uuid=>create_uuid_x16_static( ).
+        scope_db-id =
+          scope_ext-id.
+      CATCH cx_uuid_error INTO DATA(uuid_error).
+        RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
+          EXPORTING previous = uuid_error.
+    ENDTRY.
+
+    GET TIME STAMP FIELD scope_db-expiration_datetime.
+    scope_db-expiration_datetime = cl_abap_tstmp=>add( tstmp = scope_db-expiration_datetime
+                                                       secs  = zif_adcoset_c_global=>c_default_scope_expiration ).
+
+    INSERT zadcoset_csscope FROM scope_db.
   ENDMETHOD.
 
   METHOD extract_created_dates.
@@ -138,6 +211,15 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
       <created_range> = <date>.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD extract_appl_comps.
+    DATA(appl_comps) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-appl_comp
+                                input       = appl_comps
+                                flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
+                      IMPORTING range_table = scope_ranges-appl_comp_range ).
   ENDMETHOD.
 
   METHOD extract_object_names.
@@ -213,88 +295,6 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
                                 input       = tr_request
                                 flags       = VALUE #( negation = abap_true )
                       IMPORTING range_table = scope_ranges-tr_request_range ).
-  ENDMETHOD.
-
-  METHOD parse_parameters.
-    LOOP AT scope_params ASSIGNING FIELD-SYMBOL(<param>).
-
-      CASE <param>-name.
-
-        WHEN zif_adcoset_c_global=>c_search_params-owner.
-          extract_owners( <param>-value ).
-
-        WHEN zif_adcoset_c_global=>c_search_params-package.
-          extract_packages( <param>-value ).
-
-        WHEN zif_adcoset_c_global=>c_search_params-appl_comp.
-          extract_appl_comps( <param>-value ).
-
-        WHEN zif_adcoset_c_global=>c_search_params-object_type.
-          extract_object_types( <param>-value ).
-
-        WHEN zif_adcoset_c_global=>c_search_params-object_name.
-          extract_object_names( <param>-value ).
-
-        WHEN zif_adcoset_c_global=>c_search_params-created_date.
-          extract_created_dates( <param>-value ).
-
-        WHEN zif_adcoset_c_global=>c_search_params-tag_id.
-          extract_tag_ids( <param>-value ).
-
-        WHEN zif_adcoset_c_global=>c_search_params-tr_request.
-          extract_tr_requests( <param>-value ).
-
-      ENDCASE.
-
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD persist_scope.
-    DATA(scope_db) = VALUE zadcoset_csscope( created_by = sy-uname ).
-
-    scope_db-scope_type = COND #( WHEN scope_ranges-tr_request_range IS NOT INITIAL
-                                  THEN zif_adcoset_c_global=>c_scope_type-transport_request
-                                  ELSE zif_adcoset_c_global=>c_scope_type-universal_scope ).
-
-    CALL TRANSFORMATION id
-         SOURCE data = scope_ranges
-         RESULT XML scope_db-ranges_data.
-
-    TRY.
-        scope_ext-id = cl_system_uuid=>create_uuid_x16_static( ).
-        scope_db-id =
-          scope_ext-id.
-      CATCH cx_uuid_error INTO DATA(uuid_error).
-        RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
-          EXPORTING previous = uuid_error.
-    ENDTRY.
-
-    GET TIME STAMP FIELD scope_db-expiration_datetime.
-    scope_db-expiration_datetime = cl_abap_tstmp=>add( tstmp = scope_db-expiration_datetime
-                                                       secs  = zif_adcoset_c_global=>c_default_scope_expiration ).
-
-    INSERT zadcoset_csscope FROM scope_db.
-  ENDMETHOD.
-
-  METHOD post.
-    DATA scope_params TYPE zif_adcoset_ty_adt_types=>ty_search_scope_params.
-
-    delete_expired_scopes( ).
-
-    request->get_body_data( EXPORTING content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_params_ch( )
-                            IMPORTING data            = scope_params ).
-
-    parse_parameters( scope_params ).
-    determine_scope( ).
-
-    IF scope_ext-object_count > 0.
-      persist_scope( ).
-
-      response->set_body_data( content_handler = zcl_adcoset_adt_ch_factory=>create_search_scope_ch( )
-                               data            = scope_ext ).
-    ELSE.
-      response->set_status( cl_rest_status_code=>gc_success_no_content ).
-    ENDIF.
   ENDMETHOD.
 
   METHOD split_into_range.

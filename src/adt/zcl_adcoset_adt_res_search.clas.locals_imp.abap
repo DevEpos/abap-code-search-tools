@@ -286,8 +286,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
                                                   ( LINES OF incl_match_objects ) ).
       ELSEIF     object_info-type               = zif_adcoset_c_global=>c_source_code_type-program
              AND search_result_object->matches IS NOT INITIAL.
-        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
-                                                  ( search_result_object->* ) ).
+        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects ( search_result_object->* ) ).
       ENDIF.
     ELSE.
       create_std_match_objects( search_result_object = search_result_object
@@ -392,8 +391,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
       ENDLOOP.
 
       IF incl_search_result_object-matches IS NOT INITIAL.
-        result = VALUE #( BASE result
-                          ( incl_search_result_object ) ).
+        result = VALUE #( BASE result ( incl_search_result_object ) ).
       ENDIF.
 
     ENDLOOP.
