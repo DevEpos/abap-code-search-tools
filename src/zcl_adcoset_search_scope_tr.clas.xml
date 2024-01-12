@@ -12,6 +12,18 @@
     <UNICODE>X</UNICODE>
     <WITH_UNIT_TESTS>X</WITH_UNIT_TESTS>
    </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CMPNAME>ADD_SUBOBJ_TYPE_TO_FILTER</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Enhance the type filter with corresponding LIMU types</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GET_TR_OBJECTS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Read Source Code Objects from Transport Requests</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
 </abapGit>
