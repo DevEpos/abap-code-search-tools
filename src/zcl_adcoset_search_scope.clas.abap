@@ -31,11 +31,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
-    DATA(max_rows) = package_size.
-    IF     current_offset IS INITIAL
-       AND ( object_count < package_size OR package_size = 0 ).
-      max_rows = object_count.
-    ENDIF.
+    DATA(max_rows) = get_max_rows( ).
 
     SELECT obj~objecttype         AS type,
            obj~objectname         AS name,
@@ -74,8 +70,8 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     SELECT COUNT(*)
       FROM (dyn_from_clause)
       WHERE (tags_dyn_where_cond)
-        AND obj~objecttype IN @search_ranges-object_type_range
-        AND obj~objectname IN @search_ranges-object_name_range
+        AND obj~objecttype  IN @search_ranges-object_type_range
+        AND obj~objectname  IN @search_ranges-object_name_range
         AND obj~developmentpackage IN @search_ranges-package_range
         AND obj~owner       IN @search_ranges-owner_range
         AND obj~createddate IN @search_ranges-created_on_range
