@@ -35,11 +35,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_search_scope~next_package.
-    DATA(max_rows) = package_size.
-    IF     current_offset IS INITIAL
-       AND ( object_count < package_size OR package_size = 0 ).
-      max_rows = object_count.
-    ENDIF.
+    DATA(max_rows) = get_max_rows( ).
 
     DATA(tr_objects) = get_tr_objects( max_rows ).
     result = VALUE #( count   = lines( tr_objects )

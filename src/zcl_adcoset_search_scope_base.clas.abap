@@ -48,8 +48,16 @@ CLASS zcl_adcoset_search_scope_base DEFINITION
       IMPORTING
         scope_id TYPE sysuuid_x16.
 
+    "! Resolves sub packages in current package filter and adds them
+    "! to the existing package filter
     METHODS resolve_packages.
 
+    "! Retrieves correct max rows number to restrict next package SELECT
+    METHODS get_max_rows
+      RETURNING
+        VALUE(result) TYPE i.
+
+  PRIVATE SECTION.
 ENDCLASS.
 
 
@@ -191,5 +199,13 @@ CLASS zcl_adcoset_search_scope_base IMPLEMENTATION.
                                         low
                                         high.
     DELETE ADJACENT DUPLICATES FROM search_ranges-package_range COMPARING sign option low high.
+  ENDMETHOD.
+
+  METHOD get_max_rows.
+    result = package_size.
+    IF     current_offset IS INITIAL
+       AND ( object_count < package_size OR package_size = 0 ).
+      result = object_count.
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.
