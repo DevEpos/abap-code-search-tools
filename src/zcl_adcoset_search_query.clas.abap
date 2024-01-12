@@ -40,7 +40,6 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
 
       DATA(package) = scope->next_package( ).
       LOOP AT package-objects ASSIGNING FIELD-SYMBOL(<object>).
-
         TRY.
             DATA(source_code_provider) = zcl_adcoset_csp_factory=>get_search_provider(
                                              type            = <object>-type
