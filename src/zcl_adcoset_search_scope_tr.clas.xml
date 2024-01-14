@@ -24,14 +24,6 @@
      <DESCRIPT>Read Source Code Objects from Transport Requests</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
-   <DESCRIPTIONS_SUB>
-    <SEOSUBCOTX>
-     <CMPNAME>GET_TR_OBJECTS</CMPNAME>
-     <SCONAME>MAX_ROWS</SCONAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Maximum number of rows to be read</DESCRIPT>
-    </SEOSUBCOTX>
-   </DESCRIPTIONS_SUB>
   </asx:values>
  </asx:abap>
 </abapGit>

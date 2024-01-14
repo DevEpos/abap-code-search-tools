@@ -302,6 +302,9 @@ CLASS lcl_report IMPLEMENTATION.
             WHEN 'MAIN_INCLUDE'.
               <col>-r_column->set_technical( ).
 
+            WHEN 'ADT_INCLUDE_TYPE'.
+              <col>-r_column->set_medium_text( 'ADT Include Type' ).
+
             WHEN 'START_LINE'.
               <col>-r_column->set_medium_text( 'Start Line' ).
 
