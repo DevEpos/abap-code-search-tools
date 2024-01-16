@@ -51,8 +51,13 @@ INTERFACE zif_adcoset_ty_global
       owner        TYPE responsibl,
       package_name TYPE devclass,
     END OF ty_tadir_object_info.
-  TYPES ty_tadir_object_infos TYPE STANDARD TABLE OF ty_tadir_object_info WITH EMPTY KEY.
   TYPES ty_tadir_object_infos_sorted TYPE SORTED TABLE OF ty_tadir_object_info WITH UNIQUE KEY type name.
+  TYPES:
+    BEGIN OF ty_subobject,
+      type TYPE trobjtype,
+      name TYPE seocpdname,
+    END OF ty_subobject.
+  TYPES ty_subobjects_sorted TYPE SORTED TABLE OF ty_subobject WITH UNIQUE KEY type name.
   TYPES:
     BEGIN OF ty_tr_request_object,
       pgmid        TYPE pgmid,
@@ -85,7 +90,7 @@ INTERFACE zif_adcoset_ty_global
   TYPES: "! Tadir object with corresponding subobjects
          BEGIN OF ty_tadir_object.
            INCLUDE TYPE ty_tadir_object_info AS info.
-  TYPES    subobjects TYPE ty_tadir_object_infos_sorted.
+  TYPES    subobjects TYPE ty_subobjects_sorted.
   TYPES  END OF ty_tadir_object.
   "! Table of tadir object with corresponding subobjects
   TYPES ty_tadir_objects TYPE STANDARD TABLE OF ty_tadir_object WITH EMPTY KEY.

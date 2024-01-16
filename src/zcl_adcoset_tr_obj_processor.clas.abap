@@ -65,7 +65,7 @@ CLASS zcl_adcoset_tr_obj_processor DEFINITION
       IMPORTING
         main_object_name TYPE sobj_name
         main_object_type TYPE trobjtype
-        subobjects       TYPE zif_adcoset_ty_global=>ty_tadir_object_infos
+        subobjects       TYPE zif_adcoset_ty_global=>ty_subobjects_sorted
       RAISING
         cx_sy_itab_line_not_found.
 
@@ -125,11 +125,10 @@ CLASS zcl_adcoset_tr_obj_processor IMPLEMENTATION.
       WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_public_section.
         handle_class_public_section( cl_oo_classname_service=>get_clsname_by_include( |{ limu_object-obj_name }| ) ).
       WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_protected_section.
-        handle_class_protected_section(
-            cl_oo_classname_service=>get_clsname_by_include( |{ limu_object-obj_name }| ) ).
+        handle_class_protected_section( cl_oo_classname_service=>get_clsname_by_include( |{ limu_object-obj_name }| ) ).
       WHEN zif_adcoset_c_global=>c_source_code_limu_type-method.
         handle_class_method( class_name  = |{ limu_object-obj_name(30) }|
-                             method_name = |{ limu_object-obj_name+30(30) }| ).
+                             method_name = |{ limu_object-obj_name+30(61) }| ).
       WHEN zif_adcoset_c_global=>c_source_code_limu_type-class_include.
         handle_class_include(
             class_name      = cl_oo_classname_service=>get_clsname_by_include( CONV #( limu_object-obj_name ) )
@@ -166,12 +165,11 @@ CLASS zcl_adcoset_tr_obj_processor IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD add_result.
-    objects = VALUE #(
-        BASE objects
-        ( type       = main_object_type
-          name       = main_object_name
-          subobjects = VALUE zif_adcoset_ty_global=>ty_tadir_object_infos( ( type = limu_object_type
-                                                                             name = limu_object_name ) ) ) ).
+    objects = VALUE #( BASE objects
+                       ( type       = main_object_type
+                         name       = main_object_name
+                         subobjects = VALUE zif_adcoset_ty_global=>ty_subobjects_sorted( ( type = limu_object_type
+                                                                                           name = limu_object_name ) ) ) ).
   ENDMETHOD.
 
   METHOD add_result_cl_definition.
