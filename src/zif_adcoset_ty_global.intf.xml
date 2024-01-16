@@ -81,11 +81,6 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Table of tadir object with corresponding subobjects</DESCRIPT>
     </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CMPNAME>TY_TADIR_OBJECT_INFOS</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Table of tadir object with corresponding subobjects</DESCRIPT>
-    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
