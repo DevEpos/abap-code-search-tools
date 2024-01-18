@@ -69,9 +69,9 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
 
     LOOP AT class_includes ASSIGNING FIELD-SYMBOL(<include>).
 
-      IF NOT (    object-subobjects IS INITIAL
-               OR line_exists( object-subobjects[ name = <include>-method_name ] )
-               OR line_exists( object-subobjects[ name = <include>-name ] ) ).
+      IF NOT (    object-limu_objects IS INITIAL
+               OR line_exists( object-limu_objects[ name = <include>-method_name ] )
+               OR line_exists( object-limu_objects[ name = <include>-name ] ) ).
         CONTINUE.
       ENDIF.
 

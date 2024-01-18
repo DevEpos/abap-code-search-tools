@@ -1,5 +1,4 @@
 @AbapCatalog.sqlViewName: 'ZADCOSET_ISRCOBJ'
-@AbapCatalog.compiler.CompareFilter: true
 @AbapCatalog.preserveKey: true
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Repository object for code search'
