@@ -1,5 +1,4 @@
 @AbapCatalog.sqlViewName: 'ZADCOSET_ITRSCO'
-@AbapCatalog.compiler.compareFilter: true
 @AbapCatalog.preserveKey: true
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Rep. obj. of Tr. Request for Code Search'
@@ -10,25 +9,25 @@ define view ZADCOSET_I_TransportSrcCodObj
                                                                  and TransportObject.object   = SourceCodeObject.ObjectType
                                                                  and TransportObject.obj_name = SourceCodeObject.ObjectName
 {
-  key trkorr   as Request,
-      pgmid    as ProgramId,
-      object   as ObjectType,
-      obj_name as ObjectName,
-      DevelopmentPackage,
-      Owner,
-      CreatedDate
+  key TransportObject.trkorr   as Request,
+  key TransportObject.pgmid    as ProgramId,
+  key TransportObject.object   as ObjectType,
+  key TransportObject.obj_name as ObjectName,
+      SourceCodeObject.DevelopmentPackage,
+      SourceCodeObject.Owner,
+      SourceCodeObject.CreatedDate
 }
 where
-  obj_name not like '______________________________VC'
+  TransportObject.obj_name not like '______________________________VC'
 
 union
 
 select from e071
 {
   key trkorr                  as Request,
-      pgmid                   as ProgramId,
-      object                  as ObjectType,
-      obj_name                as ObjectName,
+  key pgmid                   as ProgramId,
+  key object                  as ObjectType,
+  key obj_name                as ObjectName,
       ''                      as DevelopmentPackage,
       ''                      as Owner,
       cast( '' as abap.dats ) as CreatedDate

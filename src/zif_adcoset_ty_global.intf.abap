@@ -50,13 +50,13 @@ INTERFACE zif_adcoset_ty_global
       owner        TYPE responsibl,
       package_name TYPE devclass,
     END OF ty_tadir_object_info.
-  TYPES ty_tadir_object_infos_sorted TYPE SORTED TABLE OF ty_tadir_object_info WITH UNIQUE KEY type name.
+  TYPES ty_tadir_object_infos_srt TYPE SORTED TABLE OF ty_tadir_object_info WITH UNIQUE KEY type name.
   TYPES:
-    BEGIN OF ty_subobject,
+    BEGIN OF ty_limu_object,
       type TYPE trobjtype,
       name TYPE seocpdname,
-    END OF ty_subobject.
-  TYPES ty_subobjects_sorted TYPE SORTED TABLE OF ty_subobject WITH UNIQUE KEY type name.
+    END OF ty_limu_object.
+  TYPES ty_limu_objects_srt TYPE SORTED TABLE OF ty_limu_object WITH UNIQUE KEY type name.
   TYPES:
     BEGIN OF ty_tr_request_object,
       pgmid        TYPE pgmid,
@@ -66,7 +66,7 @@ INTERFACE zif_adcoset_ty_global
       owner        TYPE responsibl,
       created_date TYPE creationdt,
     END OF ty_tr_request_object.
-  TYPES ty_tr_request_objects TYPE SORTED TABLE OF ty_tr_request_object WITH UNIQUE KEY pgmid obj_type obj_name.
+  TYPES ty_tr_request_objects_srt TYPE SORTED TABLE OF ty_tr_request_object WITH UNIQUE KEY pgmid obj_type obj_name.
   TYPES:
     BEGIN OF ty_object,
       name TYPE sobj_name,
@@ -85,11 +85,11 @@ INTERFACE zif_adcoset_ty_global
       tag_id_range      TYPE RANGE OF sysuuid_x16,
       tr_request_range  TYPE RANGE OF trkorr,
     END OF ty_search_scope_ranges.
-  TYPES: "! Tadir object with corresponding subobjects
-         BEGIN OF ty_tadir_object.
-           INCLUDE TYPE ty_tadir_object_info AS info.
-  TYPES    subobjects TYPE ty_subobjects_sorted.
-  TYPES  END OF ty_tadir_object.
+  "! Tadir object with corresponding subobjects
+  TYPES BEGIN OF ty_tadir_object.
+          INCLUDE TYPE ty_tadir_object_info AS info.
+  TYPES   limu_objects TYPE ty_limu_objects_srt.
+  TYPES END OF ty_tadir_object.
   "! Table of tadir object with corresponding subobjects
   TYPES ty_tadir_objects TYPE STANDARD TABLE OF ty_tadir_object WITH EMPTY KEY.
   TYPES:
@@ -222,24 +222,24 @@ INTERFACE zif_adcoset_ty_global
       patterns      TYPE ty_patterns,
       pcre_settings TYPE ty_pcre_regex_settings,
     END OF ty_pattern_config.
-  TYPES: "! Internal code search settings
-         BEGIN OF ty_search_settings_int.
-           INCLUDE TYPE ty_search_settings AS basic_settings.
-           INCLUDE TYPE ty_pattern_config AS pattern_config.
-  TYPES    custom_settings TYPE ty_custom_search_settings.
-  TYPES    is_adt          TYPE abap_bool.
-  TYPES  END OF ty_search_settings_int.
-  TYPES: "! External settings for code search API
-         BEGIN OF ty_search_settings_external.
-           INCLUDE TYPE ty_search_settings_int AS internal_settings.
-  TYPES    parallel_processing TYPE ty_parl_processing.
-  TYPES    search_scope        TYPE ty_search_scope.
-  TYPES  END OF ty_search_settings_external.
-  TYPES: "! Defines search package for parallel search
-         BEGIN OF ty_search_package.
-           INCLUDE TYPE ty_search_settings_int AS settings.
-  TYPES    scope_package TYPE ty_scope_package.
-  TYPES  END OF ty_search_package.
+  "! Internal code search settings
+  TYPES BEGIN OF ty_search_settings_int.
+          INCLUDE TYPE ty_search_settings AS basic_settings.
+          INCLUDE TYPE ty_pattern_config AS pattern_config.
+  TYPES   custom_settings TYPE ty_custom_search_settings.
+  TYPES   is_adt          TYPE abap_bool.
+  TYPES END OF ty_search_settings_int.
+  "! External settings for code search API
+  TYPES BEGIN OF ty_search_settings_external.
+          INCLUDE TYPE ty_search_settings_int AS internal_settings.
+  TYPES   parallel_processing TYPE ty_parl_processing.
+  TYPES   search_scope        TYPE ty_search_scope.
+  TYPES END OF ty_search_settings_external.
+  "! Defines search package for parallel search
+  TYPES BEGIN OF ty_search_package.
+          INCLUDE TYPE ty_search_settings_int AS settings.
+  TYPES   scope_package TYPE ty_scope_package.
+  TYPES END OF ty_search_package.
   TYPES:
     BEGIN OF ty_search_package_result,
       result_objects         TYPE ty_search_result_objects,

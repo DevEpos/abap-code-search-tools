@@ -82,7 +82,7 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     ENDIF.
 
     DATA(includes) = get_fugr_includes( fugr_include_prefix ).
-    IF object-subobjects IS NOT INITIAL.
+    IF object-limu_objects IS NOT INITIAL.
       mixin_function_names( EXPORTING fugr_program_name = fugr_include
                             CHANGING  includes          = includes ).
       function_names_loaded = abap_true.
@@ -94,9 +94,9 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
 
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include>).
 
-      IF NOT (    object-subobjects IS INITIAL
-               OR line_exists( object-subobjects[ name = <include>-func_name ] )
-               OR line_exists( object-subobjects[ name = <include>-name ] ) ).
+      IF NOT (    object-limu_objects IS INITIAL
+               OR line_exists( object-limu_objects[ name = <include>-func_name ] )
+               OR line_exists( object-limu_objects[ name = <include>-name ] ) ).
         CONTINUE.
       ENDIF.
 

@@ -20,7 +20,7 @@ CLASS zcl_adcoset_search_scope_tr DEFINITION
       IMPORTING
         max_rows      TYPE i
       RETURNING
-        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tr_request_objects.
+        VALUE(result) TYPE zif_adcoset_ty_global=>ty_tr_request_objects_srt.
 
     "! Enhance the type filter with corresponding LIMU types
     METHODS add_subobj_type_to_filter.
