@@ -32,12 +32,12 @@ CLASS zcl_adcoset_tr_obj_processor DEFINITION
     METHODS handle_class_method
       IMPORTING
         class_name  TYPE sobj_name
-        method_name TYPE seocpdname.
+        method_name TYPE zif_adcoset_ty_global=>ty_limu_obj_name.
 
     METHODS handle_class_include
       IMPORTING
         class_name      TYPE sobj_name
-        class_incl_name TYPE seocpdname.
+        class_incl_name TYPE zif_adcoset_ty_global=>ty_limu_obj_name.
 
     METHODS handle_class_section
       IMPORTING
@@ -71,7 +71,7 @@ CLASS zcl_adcoset_tr_obj_processor DEFINITION
 
     METHODS add_result
       IMPORTING
-        limu_object_name TYPE seocpdname
+        limu_object_name TYPE zif_adcoset_ty_global=>ty_limu_obj_name
         limu_object_type TYPE trobjtype
         main_object_name TYPE sobj_name
         main_object_type TYPE trobjtype.
