@@ -17,6 +17,7 @@ INTERFACE zif_adcoset_ty_global
   TYPES ty_duration_in_micros TYPE p LENGTH 12 DECIMALS 2.
   "! Type for DDLX Source name (not available on 7.40)
   TYPES ty_ddlxname TYPE progname.
+  TYPES ty_limu_obj_name TYPE c LENGTH 61.
   TYPES:
     BEGIN OF ty_message,
       type        TYPE string,
@@ -54,7 +55,7 @@ INTERFACE zif_adcoset_ty_global
   TYPES:
     BEGIN OF ty_limu_object,
       type TYPE trobjtype,
-      name TYPE seocpdname,
+      name TYPE ty_limu_obj_name,
     END OF ty_limu_object.
   TYPES ty_limu_objects_srt TYPE SORTED TABLE OF ty_limu_object WITH UNIQUE KEY type name.
   TYPES:
