@@ -103,7 +103,7 @@ CLASS zcl_adcoset_search_scope_tr IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_tr_objects.
-    DATA tr_objects TYPE zif_adcoset_ty_global=>ty_std_tr_request_objects.
+    DATA tr_objects TYPE zif_adcoset_ty_global=>ty_tr_request_objects_std.
 
     IF     search_ranges-object_type_range IS INITIAL
        AND search_ranges-object_name_range IS INITIAL
