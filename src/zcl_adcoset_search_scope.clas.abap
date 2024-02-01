@@ -68,7 +68,6 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     init_native_scope_query( ).
     native_scope_query->set_limit( max_rows ).
-
     native_scope_query->set_offset( current_offset ).
 
     IF NOT native_scope_query->execute_query( REF #( result-objects ) ).
