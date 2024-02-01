@@ -50,7 +50,6 @@ CLASS zcl_adcoset_search_scope DEFINITION
     DATA dyn_from_clause TYPE string.
     DATA tags_dyn_where_cond TYPE string.
     DATA appl_comp_dyn_where_cond TYPE string.
-
     DATA native_scope_query TYPE REF TO zcl_adcoset_nsql_sscope_query.
 
     METHODS config_dyn_where_clauses.
@@ -69,6 +68,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     init_native_scope_query( ).
     native_scope_query->set_limit( max_rows ).
+
     native_scope_query->set_offset( current_offset ).
 
     IF NOT native_scope_query->execute_query( REF #( result-objects ) ).

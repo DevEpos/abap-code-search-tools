@@ -4,7 +4,7 @@
 @EndUserText.label: 'Repository object for code search'
 
 define view ZADCOSET_I_SourceCodeObject
-    as select from tadir
+  as select from tadir
 {
   key pgmid      as ProgramId,
   key object     as ObjectType,
