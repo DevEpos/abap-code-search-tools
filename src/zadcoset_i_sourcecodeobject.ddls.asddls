@@ -3,7 +3,7 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Repository object for code search'
 
-define view ZADCOSET_I_SourceCodeObject   
+define view ZADCOSET_I_SourceCodeObject
     as select from tadir
 {
   key pgmid      as ProgramId,

@@ -88,10 +88,9 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     config_dyn_where_clauses( ).
     resolve_packages( ).
 
-    DATA(selection_limit) = COND i(
-        WHEN max_objects > 0
-        THEN max_objects + 1
-        ELSE 0 ).
+    DATA(selection_limit) = COND i( WHEN max_objects > 0
+                                    THEN max_objects + 1
+                                    ELSE 0 ).
 
     SELECT COUNT(*)
       FROM (dyn_from_clause)
