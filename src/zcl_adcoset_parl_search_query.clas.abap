@@ -46,8 +46,8 @@ CLASS zcl_adcoset_parl_search_query IMPLEMENTATION.
     LOOP AT <package_result>-result_objects REFERENCE INTO DATA(result_object).
       INSERT result_object->* INTO TABLE search_results.
       IF sy-subrc <> 0.
-        DATA(existing_object) = REF #( search_results[ object-name = result_object->object-name
-                                                       object-type = result_object->object-type ] ).
+        DATA(existing_object) = REF #( search_results[ object_info-name = result_object->object_info-name
+                                                       object_info-type = result_object->object_info-type ] ).
         INSERT LINES OF result_object->text_matches INTO TABLE existing_object->text_matches.
       ENDIF.
     ENDLOOP.

@@ -12,22 +12,24 @@ CLASS zcl_adcoset_csp_clas DEFINITION
         custom_settings TYPE zif_adcoset_ty_global=>ty_clas_cs_settings.
 
   PRIVATE SECTION.
-    CONSTANTS: BEGIN OF c_include_types,
-                 method TYPE string VALUE 'CLAS/OM',
-                 include TYPE string VALUE 'CLAS/I',
-               END OF c_include_types.
+    CONSTANTS:
+      BEGIN OF c_include_types,
+        method TYPE string VALUE 'CLAS/OM',
+        include TYPE string VALUE 'CLAS/I',
+      END OF c_include_types.
 
-    CONSTANTS: BEGIN OF c_section_texts,
-                 main_source       TYPE string VALUE `Main Source`,
-                 locals_def        TYPE string VALUE `Local Type Definitions`,
-                 local_impl        TYPE string VALUE `Local Class Implementation`,
-                 macros            TYPE string VALUE `Macros`,
-                 test_cls          TYPE string VALUE `Local Test Classes`,
-                 public_section    TYPE string VALUE 'Public Section',
-                 protected_section TYPE string VALUE 'Protected Section',
-                 private_section   TYPE string VALUE 'Private Section',
-                 method            TYPE string VALUE `Method `,
-               END OF c_section_texts.
+    CONSTANTS:
+      BEGIN OF c_section_texts,
+        main_source       TYPE string VALUE `Main Source`,
+        locals_def        TYPE string VALUE `Local Type Definitions`,
+        local_impl        TYPE string VALUE `Local Class Implementation`,
+        macros            TYPE string VALUE `Macros`,
+        test_cls          TYPE string VALUE `Local Test Classes`,
+        public_section    TYPE string VALUE 'Public Section',
+        protected_section TYPE string VALUE 'Protected Section',
+        private_section   TYPE string VALUE 'Private Section',
+        method            TYPE string VALUE `Method `,
+      END OF c_section_texts.
 
     TYPES:
       BEGIN OF ty_class_incl,

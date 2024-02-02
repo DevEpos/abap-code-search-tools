@@ -379,7 +379,7 @@ CLASS lcl_report IMPLEMENTATION.
     DATA(search_result) = zcl_adcoset_search_engine=>get_instance( )->search_code( search_config ).
 
     LOOP AT search_result-results ASSIGNING FIELD-SYMBOL(<result_object>).
-      DATA(flat_match) = CORRESPONDING ty_search_match( <result_object>-object
+      DATA(flat_match) = CORRESPONDING ty_search_match( <result_object>-object_info
         MAPPING object_name = name
                 object_type = type ).
 

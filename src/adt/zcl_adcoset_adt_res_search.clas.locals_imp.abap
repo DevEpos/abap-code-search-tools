@@ -239,18 +239,18 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
       TRY.
           DATA(search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
-                                                 parent_uri      = get_package_uri( <raw_result>-object-package_name )
-                                                 adt_main_object = VALUE #( name  = <raw_result>-object-name
-                                                                            owner = <raw_result>-object-owner ) ).
+              parent_uri      = get_package_uri( <raw_result>-object_info-package_name )
+              adt_main_object = VALUE #( name  = <raw_result>-object_info-name
+                                         owner = <raw_result>-object_info-owner ) ).
 
-          DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj( type = <raw_result>-object-type
-                                                                     name = <raw_result>-object-name ).
+          DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj( type = <raw_result>-object_info-type
+                                                                     name = <raw_result>-object_info-name ).
 
           search_result_object-uri = adt_ref-uri.
           search_result_object-adt_main_object-type = adt_ref-type.
 
           create_match_objects( search_result_object = REF #( search_result_object )
-                                object_info          = CORRESPONDING #( <raw_result>-object )
+                                object_info          = <raw_result>-object_info
                                 raw_matches          = <raw_result>-text_matches ).
 
         CATCH zcx_adcoset_static_error ##NEEDED.
@@ -311,7 +311,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
     DATA read_packages TYPE STANDARD TABLE OF ty_package.
 
     packages_to_read = VALUE #( FOR <res_obj> IN raw_result-results
-                                ( package_name = <res_obj>-object-package_name ) ).
+                                ( package_name = <res_obj>-object_info-package_name ) ).
     SORT packages_to_read.
     DELETE ADJACENT DUPLICATES FROM packages_to_read.
 
