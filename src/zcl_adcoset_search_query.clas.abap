@@ -76,12 +76,12 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD insert_matches.
-    INSERT VALUE #( object       = object-info
+    INSERT VALUE #( object_info  = object-info
                     text_matches = matches
                     match_count  = lines( matches ) ) INTO TABLE search_results.
     IF sy-subrc <> 0.
-      DATA(existing_result) = REF #( search_results[ object-name = object-name
-                                                     object-type = object-type ] ).
+      DATA(existing_result) = REF #( search_results[ object_info-name = object-name
+                                                     object_info-type = object-type ] ).
       existing_result->match_count  = existing_result->match_count + lines( matches ).
       existing_result->text_matches = VALUE #( BASE existing_result->text_matches ( LINES OF matches ) ).
     ENDIF.

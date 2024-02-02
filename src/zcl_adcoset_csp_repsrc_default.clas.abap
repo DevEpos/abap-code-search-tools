@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Default search provider for repository source code search</p>
 CLASS zcl_adcoset_csp_repsrc_default DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -13,7 +12,7 @@ CLASS zcl_adcoset_csp_repsrc_default DEFINITION
   PRIVATE SECTION.
     METHODS get_include
       IMPORTING
-        !object       TYPE zif_adcoset_ty_global=>ty_tadir_object_info
+        object_info   TYPE zif_adcoset_ty_global=>ty_tadir_object_info
       RETURNING
         VALUE(result) TYPE progname.
 ENDCLASS.
@@ -48,7 +47,7 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
   METHOD get_include.
     DATA include_suffix TYPE string.
 
-    CASE object-type.
+    CASE object_info-type.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-interface.
         include_suffix = 'IU'.
@@ -60,12 +59,12 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
         include_suffix = 'XT'.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-type_group.
-        result = |%_C{ object-name }|.
+        result = |%_C{ object_info-name }|.
 
     ENDCASE.
 
     IF result IS INITIAL AND include_suffix IS NOT INITIAL.
-      result = object-name.
+      result = object_info-name.
       TRANSLATE result(30) USING ' ='.
       result+30 = include_suffix.
     ENDIF.
