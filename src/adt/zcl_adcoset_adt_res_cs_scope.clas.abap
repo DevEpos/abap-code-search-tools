@@ -199,49 +199,6 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
     INSERT zadcoset_csscope FROM scope_db.
   ENDMETHOD.
 
-  METHOD extract_created_dates.
-    DATA dates TYPE string_table.
-
-    DATA(dates_list) = param_value.
-
-    SPLIT dates_list AT c_value_separator INTO TABLE dates.
-
-    LOOP AT dates ASSIGNING FIELD-SYMBOL(<date>).
-      APPEND INITIAL LINE TO scope_ranges-created_on_range ASSIGNING FIELD-SYMBOL(<created_range>).
-
-      <created_range> = <date>.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD extract_appl_comps.
-    DATA(appl_comps) = to_upper( param_value ).
-
-    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-appl_comp
-                                input       = appl_comps
-                                flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
-                      IMPORTING range_table = scope_ranges-appl_comp_range ).
-  ENDMETHOD.
-
-  METHOD extract_object_names.
-    DATA(object_names) = to_upper( param_value ).
-
-    split_into_range(
-      EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_name
-                input       = object_names
-                separator   = ` `
-                flags       = VALUE #( negation = abap_true patterns = abap_true auto_prefix_matching = abap_true )
-      IMPORTING range_table = scope_ranges-object_name_range ).
-  ENDMETHOD.
-
-  METHOD extract_object_types.
-    DATA(types) = to_upper( param_value ).
-
-    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_type
-                                input       = types
-                                flags       = VALUE #( negation = abap_true )
-                      IMPORTING range_table = scope_ranges-object_type_range ).
-  ENDMETHOD.
-
   METHOD extract_owners.
     DATA(owners) = to_upper( param_value ).
 
@@ -262,6 +219,49 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
                                 input       = packages
                                 flags       = VALUE #( negation = abap_true patterns = abap_true )
                       IMPORTING range_table = scope_ranges-package_range ).
+  ENDMETHOD.
+
+  METHOD extract_appl_comps.
+    DATA(appl_comps) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-appl_comp
+                                input       = appl_comps
+                                flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
+                      IMPORTING range_table = scope_ranges-appl_comp_range ).
+  ENDMETHOD.
+
+  METHOD extract_object_types.
+    DATA(types) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_type
+                                input       = types
+                                flags       = VALUE #( negation = abap_true )
+                      IMPORTING range_table = scope_ranges-object_type_range ).
+  ENDMETHOD.
+
+  METHOD extract_object_names.
+    DATA(object_names) = to_upper( param_value ).
+
+    split_into_range(
+      EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_name
+                input       = object_names
+                separator   = ` `
+                flags       = VALUE #( negation = abap_true patterns = abap_true auto_prefix_matching = abap_true )
+      IMPORTING range_table = scope_ranges-object_name_range ).
+  ENDMETHOD.
+
+  METHOD extract_created_dates.
+    DATA dates TYPE string_table.
+
+    DATA(dates_list) = param_value.
+
+    SPLIT dates_list AT c_value_separator INTO TABLE dates.
+
+    LOOP AT dates ASSIGNING FIELD-SYMBOL(<date>).
+      APPEND INITIAL LINE TO scope_ranges-created_on_range ASSIGNING FIELD-SYMBOL(<created_range>).
+
+      <created_range> = <date>.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD extract_tag_ids.
