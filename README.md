@@ -27,14 +27,14 @@ Searches Code in ABAP sources like
 
 The objects can be filtered by the following criteria: 
 
-- Object Name
-- Object Type
-- Owner
-- Development Package
-- Application Component
-- Created Date
-- Transport Task/Request
-- Tags
+- [X] Object Name
+- [X] Object Type
+- [X] Owner
+- [X] Development Package
+- [X] Application Component
+- [X] Created Date
+- [X] Transport Task/Request
+- [X] Tags
 
 The search is done entirely via ABAP (as opposed to the ADT Source Search). There is an option to run the search in parallel for better performance
 
