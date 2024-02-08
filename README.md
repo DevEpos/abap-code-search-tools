@@ -25,6 +25,17 @@ Searches Code in ABAP sources like
 - [X] Behavior Definitions (BDEV)
 - [X] Simple Transformations (XSLT)
 
+The objects can be filtered by the following criteria: 
+
+- Object Name
+- Object Type
+- Owner
+- Development Package
+- Application Component
+- Created Date
+- Transport Task/Request
+- Tags
+
 The search is done entirely via ABAP (as opposed to the ADT Source Search). There is an option to run the search in parallel for better performance
 
 ### Search features
