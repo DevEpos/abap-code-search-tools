@@ -12,13 +12,13 @@ Legend
 2024-02-16 v1.5.0
 -------------------
 
-+ Search in objects assigned to a choosen Transport Request/Task (#10)
++ Search in objects assigned to a chosen Transport Request/Task (#22)
 
 
 2023-12-05 v1.4.0
 -------------------
 
-+ Adds support for MSSQL (#14)
++ Adds support for MSSQL (#16)
 
 
 2023-09-19 v1.3.1
