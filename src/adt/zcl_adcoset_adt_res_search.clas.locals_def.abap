@@ -27,14 +27,13 @@ CLASS lcl_search_query DEFINITION
         cx_adt_rest.
 
   PRIVATE SECTION.
-    DATA:
-      request TYPE REF TO if_adt_rest_request,
-      BEGIN OF matcher_config,
-        use_regex   TYPE abap_bool,
-        enable_pcre TYPE abap_bool,
-      END OF matcher_config,
-      read_packages TYPE abap_bool,
-      settings      TYPE zif_adcoset_ty_global=>ty_search_settings_external.
+    DATA request TYPE REF TO if_adt_rest_request.
+    DATA: BEGIN OF matcher_config,
+            use_regex   TYPE abap_bool,
+            enable_pcre TYPE abap_bool,
+          END OF matcher_config.
+    DATA read_packages TYPE abap_bool.
+    DATA settings TYPE zif_adcoset_ty_global=>ty_search_settings_external.
 
     METHODS get_matcher_type
       RETURNING
@@ -103,20 +102,20 @@ CLASS lcl_result_converter DEFINITION
     METHODS add_main_object_ref
       IMPORTING
         search_result_object TYPE REF TO zif_adcoset_ty_adt_types=>ty_code_search_object
-        object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object
+        object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         raw_match            TYPE zif_adcoset_ty_global=>ty_search_match.
 
     METHODS create_match_objects
       IMPORTING
         search_result_object TYPE REF TO zif_adcoset_ty_adt_types=>ty_code_search_object
-        object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object
+        object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         raw_matches          TYPE zif_adcoset_ty_global=>ty_search_matches
       RAISING
         zcx_adcoset_static_error.
 
     METHODS create_match_object_ref
       IMPORTING
-        object_info   TYPE zif_adcoset_ty_global=>ty_tadir_object
+        object_info   TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         !match        TYPE zif_adcoset_ty_global=>ty_search_match
       RETURNING
         VALUE(result) TYPE sadt_object_reference
@@ -128,7 +127,7 @@ CLASS lcl_result_converter DEFINITION
     METHODS create_incl_match_objects
       IMPORTING
         parent_search_result_object TYPE zif_adcoset_ty_adt_types=>ty_code_search_object
-        object_info                 TYPE zif_adcoset_ty_global=>ty_tadir_object
+        object_info                 TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         raw_matches                 TYPE zif_adcoset_ty_global=>ty_search_matches
       RETURNING
         VALUE(result)               TYPE zif_adcoset_ty_adt_types=>ty_code_search_objects.
@@ -136,7 +135,7 @@ CLASS lcl_result_converter DEFINITION
     METHODS create_std_match_objects
       IMPORTING
         search_result_object TYPE REF TO zif_adcoset_ty_adt_types=>ty_code_search_object
-        object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object
+        object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object_info
         raw_matches          TYPE zif_adcoset_ty_global=>ty_search_matches
       RAISING
         zcx_adcoset_static_error.
