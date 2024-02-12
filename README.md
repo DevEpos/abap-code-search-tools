@@ -66,7 +66,8 @@ A certain part of the implementation for the ABAP releases 7.40 and 7.50 uses `A
 Only the following databases are supported at the moment:
 
 - Oracle
-- HANA
+- SAP HANA
+- Microsoft SQL Server
 
 ## Necessary Authorizations
 
