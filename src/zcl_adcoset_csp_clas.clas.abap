@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Search Provider for Classes</p>
 CLASS zcl_adcoset_csp_clas DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -17,8 +16,9 @@ CLASS zcl_adcoset_csp_clas DEFINITION
       BEGIN OF c_include_types,
         method TYPE string VALUE 'CLAS/OM',
         include TYPE string VALUE 'CLAS/I',
-      END OF c_include_types,
+      END OF c_include_types.
 
+    CONSTANTS:
       BEGIN OF c_section_texts,
         main_source       TYPE string VALUE `Main Source`,
         locals_def        TYPE string VALUE `Local Type Definitions`,
@@ -50,7 +50,6 @@ CLASS zcl_adcoset_csp_clas DEFINITION
     METHODS assign_objects_to_matches
       IMPORTING
         unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
-        !object            TYPE zif_adcoset_ty_global=>ty_tadir_object
         !include           TYPE ty_class_incl
       CHANGING
         all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
@@ -63,19 +62,28 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_adcoset_code_search_prov~search.
+    DATA searched_sources_count TYPE i.
+
     DATA(class_includes) = get_class_includes( name = object-name ).
     IF class_includes IS INITIAL.
       RETURN.
     ENDIF.
 
     LOOP AT class_includes ASSIGNING FIELD-SYMBOL(<include>).
+
+      IF NOT (    object-limu_objects IS INITIAL
+               OR line_exists( object-limu_objects[ name = <include>-method_name ] )
+               OR line_exists( object-limu_objects[ name = <include>-name ] ) ).
+        CONTINUE.
+      ENDIF.
+
+      searched_sources_count = searched_sources_count + 1.
       TRY.
           DATA(source_code) = src_code_reader->get_source_code( name = <include>-name ).
           DATA(matches) = src_code_searcher->search( source_code = source_code ).
 
           IF matches IS NOT INITIAL.
             assign_objects_to_matches( EXPORTING unassigned_matches = matches
-                                                 object             = object
                                                  include            = <include>
                                        CHANGING  all_matches        = result ).
           ENDIF.
@@ -83,7 +91,7 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
       ENDTRY.
     ENDLOOP.
 
-    zcl_adcoset_search_protocol=>increase_searchd_sources_count( lines( class_includes ) ).
+    zcl_adcoset_search_protocol=>increase_searchd_sources_count( searched_sources_count ).
   ENDMETHOD.
 
   METHOD get_class_includes.
@@ -107,8 +115,7 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
                                                         EXCEPTIONS class_not_existing = 1 ).
 
       SORT method_includes BY cpdkey-cpdname.
-      result = VALUE #( BASE result
-                        FOR method IN method_includes
+      result = VALUE #( BASE result FOR method IN method_includes
                         ( name        = method-incname
                           method_name = method-cpdkey-cpdname
                           adt_type    = c_include_types-method ) ).

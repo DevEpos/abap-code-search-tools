@@ -2,6 +2,10 @@
 INTERFACE zif_adcoset_search_scope
   PUBLIC.
 
+  CONSTANTS c_min_parl_package_size TYPE i VALUE 10.
+  CONSTANTS c_max_parl_package_size TYPE i VALUE 2500.
+  CONSTANTS c_serial_package_size TYPE i VALUE 10000.
+
   "! <p class="shorttext synchronized">Retrieves number of objects in scope</p>
   METHODS count
     RETURNING
@@ -10,7 +14,7 @@ INTERFACE zif_adcoset_search_scope
   "! <p class="shorttext synchronized">Retrieves the next package of objects in scope</p>
   METHODS next_package
     RETURNING
-      VALUE(result) TYPE zif_adcoset_ty_global=>ty_tadir_objects.
+      VALUE(result) TYPE zif_adcoset_ty_global=>ty_scope_package.
 
   "! <p class="shorttext synchronized">Returns 'X' if another package exists</p>
   METHODS has_next_package

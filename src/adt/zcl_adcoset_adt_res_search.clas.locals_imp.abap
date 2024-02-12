@@ -239,18 +239,18 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
       TRY.
           DATA(search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
-                                                 parent_uri      = get_package_uri( <raw_result>-object-package_name )
-                                                 adt_main_object = VALUE #( name  = <raw_result>-object-name
-                                                                            owner = <raw_result>-object-owner ) ).
+              parent_uri      = get_package_uri( <raw_result>-object_info-package_name )
+              adt_main_object = VALUE #( name  = <raw_result>-object_info-name
+                                         owner = <raw_result>-object_info-owner ) ).
 
-          DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj( type = <raw_result>-object-type
-                                                                     name = <raw_result>-object-name ).
+          DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj( type = <raw_result>-object_info-type
+                                                                     name = <raw_result>-object_info-name ).
 
           search_result_object-uri = adt_ref-uri.
           search_result_object-adt_main_object-type = adt_ref-type.
 
           create_match_objects( search_result_object = REF #( search_result_object )
-                                object_info          = <raw_result>-object
+                                object_info          = <raw_result>-object_info
                                 raw_matches          = <raw_result>-text_matches ).
 
         CATCH zcx_adcoset_static_error ##NEEDED.
@@ -286,8 +286,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
                                                   ( LINES OF incl_match_objects ) ).
       ELSEIF     object_info-type               = zif_adcoset_c_global=>c_source_code_type-program
              AND search_result_object->matches IS NOT INITIAL.
-        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
-                                                  ( search_result_object->* ) ).
+        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects ( search_result_object->* ) ).
       ENDIF.
     ELSE.
       create_std_match_objects( search_result_object = search_result_object
@@ -299,7 +298,8 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
         IF cds_name_mapper->collect_entry( name = search_result_object->adt_main_object-name
                                            type = CONV #( search_result_object->adt_main_object-type(4) ) ).
-          main_objs_for_name_mapping = VALUE #( BASE main_objs_for_name_mapping ( REF #( added_result_obj->adt_main_object ) ) ).
+          main_objs_for_name_mapping = VALUE #( BASE main_objs_for_name_mapping
+                                                ( REF #( added_result_obj->adt_main_object ) ) ).
         ENDIF.
 
       ENDIF.
@@ -311,7 +311,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
     DATA read_packages TYPE STANDARD TABLE OF ty_package.
 
     packages_to_read = VALUE #( FOR <res_obj> IN raw_result-results
-                                ( package_name = <res_obj>-object-package_name ) ).
+                                ( package_name = <res_obj>-object_info-package_name ) ).
     SORT packages_to_read.
     DELETE ADJACENT DUPLICATES FROM packages_to_read.
 
@@ -391,8 +391,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
       ENDLOOP.
 
       IF incl_search_result_object-matches IS NOT INITIAL.
-        result = VALUE #( BASE result
-                          ( incl_search_result_object ) ).
+        result = VALUE #( BASE result ( incl_search_result_object ) ).
       ENDIF.
 
     ENDLOOP.

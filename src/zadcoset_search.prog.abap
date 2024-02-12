@@ -27,6 +27,7 @@ DATA: BEGIN OF scope_vars,
         appl_comp   TYPE df14l-ps_posid,
         created_on  TYPE tadir-created_on,
         owner       TYPE tadir-author,
+        tr_request  TYPE trkorr,
       END OF scope_vars.
 
 SELECTION-SCREEN BEGIN OF BLOCK pattern WITH FRAME TITLE TEXT-b01.
@@ -42,7 +43,8 @@ SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
     s_auth FOR scope_vars-owner,
     s_crtd FOR scope_vars-created_on,
     s_pack FOR scope_vars-package,
-    s_appl FOR scope_vars-appl_comp.
+    s_appl FOR scope_vars-appl_comp,
+    s_trrq FOR scope_vars-tr_request.
   PARAMETERS:
     p_typal TYPE abap_bool RADIOBUTTON GROUP rb1 DEFAULT 'X' USER-COMMAND obj_type_sel,
     p_typsp TYPE abap_bool RADIOBUTTON GROUP rb1.
@@ -271,7 +273,7 @@ CLASS lcl_report IMPLEMENTATION.
         run_search( ).
 
         IF results IS INITIAL.
-          MESSAGE |No matches found, Searched Objects: { search_count NUMBER = USER }, Duration: { duration }| TYPE 'S'.
+          MESSAGE |No matches found, Processed Objects: { search_count NUMBER = USER }, Duration: { duration }| TYPE 'S'.
         ELSE.
           display_results( ).
         ENDIF.
@@ -303,6 +305,9 @@ CLASS lcl_report IMPLEMENTATION.
             WHEN 'MAIN_INCLUDE'.
               <col>-r_column->set_technical( ).
 
+            WHEN 'ADT_INCLUDE_TYPE'.
+              <col>-r_column->set_medium_text( 'ADT Include Type' ).
+
             WHEN 'START_LINE'.
               <col>-r_column->set_medium_text( 'Start Line' ).
 
@@ -326,7 +331,7 @@ CLASS lcl_report IMPLEMENTATION.
         salv->get_functions( )->set_default( ).
         salv->get_selections( )->set_selection_mode( if_salv_c_selection_mode=>row_column ).
         salv->get_display_settings( )->set_list_header(
-            |Search Results { lines( results ) NUMBER = USER }, Searched Objects: { search_count NUMBER = USER }, Duration: { duration }| ).
+            |Search Results { lines( results ) NUMBER = USER }, Processed Objects: { search_count NUMBER = USER }, Duration: { duration }| ).
 
         SET HANDLER on_link_click FOR salv->get_event( ).
 
@@ -361,6 +366,7 @@ CLASS lcl_report IMPLEMENTATION.
                                         created_on_range  = s_crtd[]
                                         owner_range       = s_auth[]
                                         package_range     = s_pack[]
+                                        tr_request_range  = s_trrq[]
                                         max_objects       = p_maxo ) ).
 
     IF p_regex = abap_true.
@@ -376,7 +382,7 @@ CLASS lcl_report IMPLEMENTATION.
     DATA(search_result) = zcl_adcoset_search_engine=>get_instance( )->search_code( search_config ).
 
     LOOP AT search_result-results ASSIGNING FIELD-SYMBOL(<result_object>).
-      DATA(flat_match) = CORRESPONDING ty_search_match( <result_object>-object
+      DATA(flat_match) = CORRESPONDING ty_search_match( <result_object>-object_info
         MAPPING object_name = name
                 object_type = type ).
 

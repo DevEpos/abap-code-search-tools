@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Resource for Search Scope Definition</p>
 CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
   PUBLIC
-  FINAL
-  INHERITING FROM cl_adt_rest_resource
+  INHERITING FROM cl_adt_rest_resource FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -72,6 +71,12 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
       IMPORTING
         param_value TYPE string.
 
+    METHODS extract_tr_requests
+      IMPORTING
+        param_value TYPE string
+      RAISING
+        cx_adt_rest.
+
     METHODS split_into_range
       IMPORTING
         filter_name TYPE string
@@ -119,8 +124,8 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     GET TIME STAMP FIELD current_time.
 
-    DELETE FROM zadcoset_csscope WHERE     created_by          = sy-uname
-                                       AND expiration_datetime < current_time.
+    DELETE FROM zadcoset_csscope WHERE created_by          = sy-uname
+                                   AND expiration_datetime < current_time.
   ENDMETHOD.
 
   METHOD parse_parameters.
@@ -148,6 +153,10 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
         WHEN zif_adcoset_c_global=>c_search_params-tag_id.
           extract_tag_ids( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-tr_request.
+          extract_tr_requests( <param>-value ).
+
       ENDCASE.
 
     ENDLOOP.
@@ -165,6 +174,10 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
   METHOD persist_scope.
     DATA(scope_db) = VALUE zadcoset_csscope( created_by = sy-uname ).
+
+    scope_db-scope_type = COND #( WHEN scope_ranges-tr_request_range IS NOT INITIAL
+                                  THEN zif_adcoset_c_global=>c_scope_type-transport_request
+                                  ELSE zif_adcoset_c_global=>c_scope_type-universal_scope ).
 
     CALL TRANSFORMATION id
          SOURCE data = scope_ranges
@@ -273,6 +286,15 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
         CATCH cx_uuid_error.
       ENDTRY.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD extract_tr_requests.
+    DATA(tr_request) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-tr_request
+                                input       = tr_request
+                                flags       = VALUE #( negation = abap_true )
+                      IMPORTING range_table = scope_ranges-tr_request_range ).
   ENDMETHOD.
 
   METHOD split_into_range.

@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Default search provider for string sources</p>
 CLASS zcl_adcoset_csp_strsrc_default DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Code Search Provider for Programs/Includes</p>
 CLASS zcl_adcoset_csp_prog DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -20,13 +19,13 @@ CLASS zcl_adcoset_csp_prog DEFINITION
       IMPORTING
         src_code_reader   TYPE REF TO zif_adcoset_src_code_reader
         src_code_searcher TYPE REF TO zif_adcoset_src_code_searcher
-        !object           TYPE zif_adcoset_ty_global=>ty_tadir_object
+        object_info       TYPE zif_adcoset_ty_global=>ty_tadir_object_info
       RETURNING
         VALUE(result)     TYPE zif_adcoset_ty_global=>ty_search_matches.
 
     METHODS get_include_infos
       IMPORTING
-        !object       TYPE zif_adcoset_ty_global=>ty_tadir_object
+        object_info   TYPE zif_adcoset_ty_global=>ty_tadir_object_info
       RETURNING
         VALUE(result) TYPE ty_prognames.
 
@@ -57,7 +56,7 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
           result = VALUE #( BASE result
                             ( LINES OF search_dependent_includes( src_code_reader   = src_code_reader
                                                                   src_code_searcher = src_code_searcher
-                                                                  object            = object ) ) ).
+                                                                  object_info       = object-info ) ) ).
         ENDIF.
       CATCH zcx_adcoset_src_code_read.
     ENDTRY.
@@ -67,16 +66,16 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
 
   METHOD get_include_infos.
     CALL FUNCTION 'RS_GET_ALL_INCLUDES'
-      EXPORTING  program    = object-name
+      EXPORTING  program    = object_info-name
       TABLES     includetab = result
       EXCEPTIONS OTHERS     = 1.
   ENDMETHOD.
 
   METHOD search_dependent_includes.
-    LOOP AT get_include_infos( object ) ASSIGNING FIELD-SYMBOL(<include>).
+    LOOP AT get_include_infos( object_info ) ASSIGNING FIELD-SYMBOL(<include>).
       TRY.
           DATA(source) = src_code_reader->get_source_code( name = <include>
-                                                           type = object-type ).
+                                                           type = object_info-type ).
 
           DATA(matches) = src_code_searcher->search( source ).
 
@@ -111,4 +110,3 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
     result = COND #( WHEN sy-subrc = 0 AND is_fugr_include = abap_true THEN 'FUGR/I' ELSE 'PROG/I' ).
   ENDMETHOD.
 ENDCLASS.
-

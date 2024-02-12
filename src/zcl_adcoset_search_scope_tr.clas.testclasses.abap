@@ -11,7 +11,7 @@ ENDCLASS.
 
 CLASS ltcl_unit IMPLEMENTATION.
   METHOD test_native_sql_builder.
-    DATA(cut) = NEW zcl_adcoset_search_scope(
+    DATA(cut) = NEW ZCL_ADCOSET_SEARCH_SCOPE_TR(
                         search_scope = VALUE #( object_name_range = VALUE #( ( sign = 'I' option = 'CP' low = 'CL_*' ) )
                                                 object_type_range = VALUE #( option = 'EQ'
                                                                              ( sign = 'I' low = 'CLAS' )
