@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Utility for handling patterns</p>
 CLASS zcl_adcoset_pattern_util DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -90,8 +89,14 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
                            c_pattern_ctrl_sequence-match_start && `|` &&
                            c_pattern_ctrl_sequence-match_end && `|` &&
                            c_pattern_ctrl_sequence-exclude.
-    ctrl_sequences_regex = replace( val = ctrl_sequences_regex sub = '(' with = '\(' occ = 0 ).
-    ctrl_sequences_regex = replace( val = ctrl_sequences_regex sub = ')' with = '\)' occ = 0 ).
+    ctrl_sequences_regex = replace( val  = ctrl_sequences_regex
+                                    sub  = '('
+                                    with = '\('
+                                    occ  = 0 ).
+    ctrl_sequences_regex = replace( val  = ctrl_sequences_regex
+                                    sub  = ')'
+                                    with = '\)'
+                                    occ  = 0 ).
     any_ctrl_sequence_regex = |({ ctrl_sequences_regex })|.
     ctrl_sequences_regex = |^({ ctrl_sequences_regex })+|.
   ENDMETHOD.
@@ -112,7 +117,8 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
     LOOP AT patterns INTO DATA(pattern).
       parse_pattern( CHANGING pattern = pattern ).
 
-      result = VALUE #( BASE result ( pattern ) ).
+      result = VALUE #( BASE result
+                        ( pattern ) ).
 
       IF is_sequence_found = abap_false AND pattern-flags IS NOT INITIAL.
         is_sequence_found = abap_true.
@@ -143,10 +149,14 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
       ENDIF.
     ENDIF.
 
-    DATA(ctrl_sequence) = substring( val = pattern-content len = grouped_match-length ).
-    pattern-content = substring( val = pattern-content off = grouped_match-length ).
+    DATA(ctrl_sequence) = substring( val = pattern-content
+                                     len = grouped_match-length ).
+    pattern-content = substring( val = pattern-content
+                                 off = grouped_match-length ).
 
-    DATA(ctrl_sequence_count) = count( val = ctrl_sequence regex = any_ctrl_sequence_regex case = abap_true ).
+    DATA(ctrl_sequence_count) = count( val   = ctrl_sequence
+                                       regex = any_ctrl_sequence_regex
+                                       case  = abap_true ).
     IF ctrl_sequence_count > 1.
       pattern-flags = parse_sequences( ctrl_sequence ).
     ELSE.
@@ -248,7 +258,8 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
     DATA(rest_sequence) = ctrl_sequence.
 
     WHILE rest_sequence IS NOT INITIAL.
-      DATA(closing_bracket) = find( val = rest_sequence sub = ')' ) + 1.
+      DATA(closing_bracket) = find( val = rest_sequence
+                                    sub = ')' ) + 1.
       DATA(sequence) = rest_sequence(closing_bracket).
       result = result BIT-OR ctrl_flag_to_sequence_map[ control_sequence = sequence ]-flag.
       rest_sequence = rest_sequence+closing_bracket.

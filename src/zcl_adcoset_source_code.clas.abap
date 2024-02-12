@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Represents source code</p>
 CLASS zcl_adcoset_source_code DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

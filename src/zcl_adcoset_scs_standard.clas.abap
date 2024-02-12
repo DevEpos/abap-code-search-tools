@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Standard Source Code Searcher</p>
 CLASS zcl_adcoset_scs_standard DEFINITION
   PUBLIC
-  INHERITING FROM zcl_adcoset_scs_base
-  FINAL
+  INHERITING FROM zcl_adcoset_scs_base FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -49,7 +48,8 @@ CLASS zcl_adcoset_scs_standard IMPLEMENTATION.
 
       " not all matchers found a match so quit further searching
       IF enhanced_matches IS NOT INITIAL.
-        result = VALUE #( BASE result ( LINES OF enhanced_matches ) ).
+        result = VALUE #( BASE result
+                          ( LINES OF enhanced_matches ) ).
       ELSEIF match_all = abap_true.
         CLEAR result.
         RETURN.

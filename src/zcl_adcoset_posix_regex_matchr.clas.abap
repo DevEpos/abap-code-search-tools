@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Matcher for POSIX standard regular expressions</p>
 CLASS zcl_adcoset_posix_regex_matchr DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

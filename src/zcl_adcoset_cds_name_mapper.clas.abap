@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Maps technical to display name of Core Data Services</p>
 CLASS zcl_adcoset_cds_name_mapper DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -45,9 +44,11 @@ ENDCLASS.
 CLASS zcl_adcoset_cds_name_mapper IMPLEMENTATION.
   METHOD collect_entry.
     IF type = zif_adcoset_c_global=>c_source_code_type-data_definition.
-      ddlname_range = VALUE #( BASE ddlname_range ( sign = 'I' option = 'EQ' low = name ) ).
+      ddlname_range = VALUE #( BASE ddlname_range
+                               ( sign = 'I' option = 'EQ' low = name ) ).
     ELSEIF type = zif_adcoset_c_global=>c_source_code_type-behavior_definition.
-      bdefname_range = VALUE #( BASE bdefname_range ( sign = 'I' option = 'EQ' low = name ) ).
+      bdefname_range = VALUE #( BASE bdefname_range
+                                ( sign = 'I' option = 'EQ' low = name ) ).
     ELSE.
       RETURN.
     ENDIF.
@@ -74,16 +75,16 @@ CLASS zcl_adcoset_cds_name_mapper IMPLEMENTATION.
       SELECT dep~ddlname,
              stob~strucobjn_raw AS entity_name
         FROM ddldependency AS dep
-          INNER JOIN dd02b AS stob
-            ON dep~objectname = stob~strucobjn
-        WHERE ddlname IN @ddlname_range
-          AND objecttype = 'STOB'
-          AND state = 'A'
+               INNER JOIN
+                 dd02b AS stob ON dep~objectname = stob~strucobjn
+        WHERE ddlname    IN @ddlname_range
+          AND objecttype  = 'STOB'
+          AND state       = 'A'
         INTO CORRESPONDING FIELDS OF TABLE @ddl2entity_map.
     ENDIF.
 
     IF bdefname_range IS NOT INITIAL.
-      SELECT strucobjn AS ddlname,
+      SELECT strucobjn     AS ddlname,
              strucobjn_raw AS entity_name
         FROM dd02b
         WHERE strucobjn IN @bdefname_range

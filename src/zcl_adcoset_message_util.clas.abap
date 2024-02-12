@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Utility for message handling</p>
 CLASS zcl_adcoset_message_util DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Factory for ADT links</p>
 CLASS zcl_adcoset_adt_obj_factory DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.

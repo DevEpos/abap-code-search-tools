@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Source code reader for metadata extensions</p>
 CLASS zcl_adcoset_scr_ddlx DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -59,7 +58,7 @@ CLASS zcl_adcoset_scr_ddlx IMPLEMENTATION.
     SELECT SINGLE source
       FROM (c_ddlx_tabname)
       WHERE ddlxname = @ddlx_name
-        AND version = 'A' " only active source
+        AND version  = 'A' " only active source
       INTO @result.
 
     IF sy-subrc <> 0 OR result IS INITIAL.

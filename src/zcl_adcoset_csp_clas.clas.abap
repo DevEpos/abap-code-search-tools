@@ -98,15 +98,18 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     DATA(class_name) = CONV classname( name ).
 
     IF custom_settings-include_flags-public_section = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_pubsec_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_pubsec_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-protected_section = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_prosec_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_prosec_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-private_section = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_prisec_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_prisec_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-methods = abap_true.
@@ -122,19 +125,23 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     ENDIF.
 
     IF custom_settings-include_flags-local_def = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_ccdef_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-local_impl = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccimp_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_ccimp_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-test = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccau_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_ccau_name( class_name ) ) ).
     ENDIF.
 
     IF custom_settings-include_flags-macro = abap_true.
-      result = VALUE #( BASE result ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) ) ).
+      result = VALUE #( BASE result
+                        ( name = cl_oo_classname_service=>get_ccmac_name( class_name ) ) ).
     ENDIF.
   ENDMETHOD.
 

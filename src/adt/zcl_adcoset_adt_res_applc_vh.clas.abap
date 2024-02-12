@@ -24,10 +24,10 @@ CLASS zcl_adcoset_adt_res_applc_vh IMPLEMENTATION.
     SELECT ps_posid  AS name,
            text~name AS description
       FROM df14l AS comp
-           LEFT OUTER JOIN df14t AS text
-             ON  comp~fctr_id  = text~fctr_id
-             AND comp~as4local = text~as4local
-             AND text~langu    = @sy-langu
+             LEFT OUTER JOIN
+               df14t AS text ON  comp~fctr_id  = text~fctr_id
+                             AND comp~as4local = text~as4local
+                             AND text~langu    = @sy-langu
       WHERE comp~as4local  = 'A'
         AND comp~ps_posid IN @lt_appl_comp_name_range
       ORDER BY comp~ps_posid

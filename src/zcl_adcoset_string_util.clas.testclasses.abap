@@ -1,7 +1,6 @@
 *"* use this source file for your ABAP unit test classes
-CLASS ltcl_abap_unit DEFINITION FINAL FOR TESTING
-  DURATION SHORT
-  RISK LEVEL HARMLESS.
+CLASS ltcl_abap_unit DEFINITION FINAL
+  FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
 
   PRIVATE SECTION.
     CONSTANTS c_lf_regex TYPE string VALUE `^\n|[^\r]\n`.
@@ -33,8 +32,8 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
     cl_abap_unit_assert=>assert_not_initial( act = indexes
                                              msg = 'No indexes were determined' ).
 
-    cl_abap_unit_assert=>assert_equals( act = lines( indexes )
-                                        exp = 3
+    cl_abap_unit_assert=>assert_equals( exp = 3
+                                        act = lines( indexes )
                                         msg = 'Number of determined indexes does not match' ).
 
     DATA(length) = REDUCE i(
@@ -42,8 +41,8 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
       FOR line IN source_table
       NEXT n = n + strlen( line ) + line_feed_length ) - line_feed_length.
 
-    cl_abap_unit_assert=>assert_equals( act = strlen( source_text )
-                                        exp = length
+    cl_abap_unit_assert=>assert_equals( exp = length
+                                        act = strlen( source_text )
                                         msg = 'Length of transform string is false' ).
   ENDMETHOD.
 
@@ -59,8 +58,9 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
     DATA(adjusted_text) = zcl_adcoset_string_util=>adjust_line_endings( text      = text
                                                                         line_feed = |\n| ).
 
-    cl_abap_unit_assert=>assert_equals( act = find( val = adjusted_text sub = |\r\n| )
-                                        exp = -1 ).
+    cl_abap_unit_assert=>assert_equals( exp = -1
+                                        act = find( val = adjusted_text
+                                                    sub = |\r\n| ) ).
   ENDMETHOD.
 
   METHOD test_adjust_line_endings2.
@@ -75,8 +75,9 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
     DATA(adjusted_text) = zcl_adcoset_string_util=>adjust_line_endings( text      = text
                                                                         line_feed = |\r\n| ).
 
-    cl_abap_unit_assert=>assert_equals( act = find( val = adjusted_text regex = c_lf_regex )
-                                        exp = -1 ).
+    cl_abap_unit_assert=>assert_equals( exp = -1
+                                        act = find( val   = adjusted_text
+                                                    regex = c_lf_regex ) ).
   ENDMETHOD.
 
   METHOD test_adjust_line_endings3.
@@ -91,7 +92,8 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
     DATA(adjusted_text) = zcl_adcoset_string_util=>adjust_line_endings( text      = text
                                                                         line_feed = |\r\n| ).
 
-    cl_abap_unit_assert=>assert_equals( act = find( val = adjusted_text regex = c_lf_regex )
-                                        exp = -1 ).
+    cl_abap_unit_assert=>assert_equals( exp = -1
+                                        act = find( val   = adjusted_text
+                                                    regex = c_lf_regex ) ).
   ENDMETHOD.
 ENDCLASS.

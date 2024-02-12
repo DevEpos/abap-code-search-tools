@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Factory for creating source code readers</p>
 CLASS zcl_adcoset_scr_factory DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

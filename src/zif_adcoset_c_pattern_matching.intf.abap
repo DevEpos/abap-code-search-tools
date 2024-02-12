@@ -11,8 +11,9 @@ INTERFACE zif_adcoset_c_pattern_matching
       match_start    TYPE string VALUE '(#m-start)',
       match_end      TYPE string VALUE '(#m-end)',
       exclude        TYPE string VALUE '(#exclude)',
-    END OF c_pattern_ctrl_sequence,
+    END OF c_pattern_ctrl_sequence.
 
+  CONSTANTS:
     "! Control sequence flags
     BEGIN OF c_pattern_ctrl_flag,
       boundary_start TYPE zif_adcoset_ty_global=>ty_control_flags VALUE '00000001',

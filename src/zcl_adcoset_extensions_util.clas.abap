@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Utility to test extension availability</p>
 CLASS zcl_adcoset_extensions_util DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -19,13 +18,12 @@ CLASS zcl_adcoset_extensions_util DEFINITION
     CONSTANTS c_tgobj_tab_v2 TYPE tabname VALUE 'ZABAPTAGS_TGOBJN'.
     CONSTANTS c_tgobj_tab_v1 TYPE tabname VALUE 'ZABAPTAGS_TGOBJ'.
 
-    TYPES:
-      BEGIN OF ty_field_config,
-        fieldname TYPE fieldname,
-        rollname  TYPE rollname,
-      END OF ty_field_config,
-      ty_field_configs TYPE STANDARD TABLE OF ty_field_config WITH EMPTY KEY,
-      ty_table_fields  TYPE STANDARD TABLE OF dd03p WITH EMPTY KEY.
+    TYPES: BEGIN OF ty_field_config,
+             fieldname TYPE fieldname,
+             rollname  TYPE rollname,
+           END OF ty_field_config,
+           ty_field_configs TYPE STANDARD TABLE OF ty_field_config WITH EMPTY KEY.
+    TYPES ty_table_fields TYPE STANDARD TABLE OF dd03p WITH EMPTY KEY.
 
     CLASS-DATA abap_tags_available TYPE abap_bool VALUE abap_undefined.
     CLASS-DATA current_tgobj_tabname TYPE tabname.

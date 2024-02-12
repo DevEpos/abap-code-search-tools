@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Factory to create matchers</p>
 CLASS zcl_adcoset_matcher_factory DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.

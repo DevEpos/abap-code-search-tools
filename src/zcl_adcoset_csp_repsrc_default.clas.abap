@@ -35,7 +35,8 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
 
         LOOP AT src_code_searcher->search( source ) ASSIGNING FIELD-SYMBOL(<match>).
           <match>-include = include_name.
-          result = VALUE #( BASE result ( <match> ) ).
+          result = VALUE #( BASE result
+                            ( <match> ) ).
         ENDLOOP.
 
       CATCH zcx_adcoset_src_code_read.

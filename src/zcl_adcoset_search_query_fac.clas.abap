@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Factory for creating search queries</p>
 CLASS zcl_adcoset_search_query_fac DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.

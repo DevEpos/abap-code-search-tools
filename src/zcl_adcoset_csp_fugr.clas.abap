@@ -162,7 +162,8 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
         new_include-adt_type = c_include_types-include.
       ENDIF.
 
-      result = VALUE #( BASE result ( new_include ) ).
+      result = VALUE #( BASE result
+                        ( new_include ) ).
     ENDLOOP.
   ENDMETHOD.
 

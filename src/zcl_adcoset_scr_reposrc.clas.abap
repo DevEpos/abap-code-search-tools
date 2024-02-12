@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Source code reader for objects stored in TRDIR</p>
 CLASS zcl_adcoset_scr_reposrc DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -44,12 +43,11 @@ CLASS zcl_adcoset_scr_reposrc IMPLEMENTATION.
       source = VALUE #( ( source_text ) ).
     ENDIF.
 
-    result = NEW zcl_adcoset_source_code(
-                     source        = source
-                     line_indexes  = indexes
-                     comment_regex = COND #(
-                       WHEN type = zif_adcoset_c_global=>c_source_code_type-behavior_definition
-                       THEN c_bdef_comment_regex
-                       ELSE c_default_comment_regex ) ).
+    result = NEW zcl_adcoset_source_code( source        = source
+                                          line_indexes  = indexes
+                                          comment_regex = COND #(
+                                            WHEN type = zif_adcoset_c_global=>c_source_code_type-behavior_definition
+                                            THEN c_bdef_comment_regex
+                                            ELSE c_default_comment_regex ) ).
   ENDMETHOD.
 ENDCLASS.

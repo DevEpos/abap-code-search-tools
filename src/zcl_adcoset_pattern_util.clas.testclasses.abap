@@ -1,7 +1,6 @@
 *"* use this source file for your ABAP unit test classes
-CLASS ltcl_abap_unit DEFINITION FINAL FOR TESTING
-  DURATION SHORT
-  RISK LEVEL HARMLESS.
+CLASS ltcl_abap_unit DEFINITION FINAL
+  FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
 
   PRIVATE SECTION.
     METHODS test_valid_sequence1   FOR TESTING.
@@ -31,7 +30,8 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
 
     TRY.
         DATA(valid_patterns) = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
-        cl_abap_unit_assert=>assert_equals( exp = lines( patterns ) act = lines( valid_patterns ) ).
+        cl_abap_unit_assert=>assert_equals( exp = lines( patterns )
+                                            act = lines( valid_patterns ) ).
         cl_abap_unit_assert=>assert_true(
             act = xsdbool( valid_patterns[ 3 ]-flags BIT-AND zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-boundary_end =
                            zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-boundary_end ) ).
@@ -48,7 +48,8 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
 
     TRY.
         DATA(valid_patterns) = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
-        cl_abap_unit_assert=>assert_equals( exp = lines( patterns ) act = lines( valid_patterns ) ).
+        cl_abap_unit_assert=>assert_equals( exp = lines( patterns )
+                                            act = lines( valid_patterns ) ).
       CATCH zcx_adcoset_static_error INTO DATA(error).
         cl_abap_unit_assert=>fail( msg = error->get_text( ) ).
     ENDTRY.
@@ -62,7 +63,8 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
 
     TRY.
         DATA(valid_patterns) = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
-        cl_abap_unit_assert=>assert_equals( exp = lines( patterns ) act = lines( valid_patterns ) ).
+        cl_abap_unit_assert=>assert_equals( exp = lines( patterns )
+                                            act = lines( valid_patterns ) ).
       CATCH zcx_adcoset_static_error INTO DATA(error).
         cl_abap_unit_assert=>fail( msg = error->get_text( ) ).
     ENDTRY.
@@ -76,7 +78,8 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
 
     TRY.
         DATA(valid_patterns) = zcl_adcoset_pattern_util=>parse_pattern_sequence( patterns ).
-        cl_abap_unit_assert=>assert_equals( exp = lines( patterns ) act = lines( valid_patterns ) ).
+        cl_abap_unit_assert=>assert_equals( exp = lines( patterns )
+                                            act = lines( valid_patterns ) ).
       CATCH zcx_adcoset_static_error INTO DATA(error).
         cl_abap_unit_assert=>fail( msg = error->get_text( ) ).
     ENDTRY.

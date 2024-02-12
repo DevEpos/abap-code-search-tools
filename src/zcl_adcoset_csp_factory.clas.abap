@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Factory for retrieving code search providers</p>
 CLASS zcl_adcoset_csp_factory DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.

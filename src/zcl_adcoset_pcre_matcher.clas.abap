@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Matcher for PCRE</p>
 CLASS zcl_adcoset_pcre_matcher DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -66,7 +65,8 @@ CLASS zcl_adcoset_pcre_matcher IMPLEMENTATION.
       " prefixed to the pattern it will not be removed and single line mode will
       " still be active
       IF settings-single_line_mode_enabled = abap_true.
-        IF find( val = l_pattern sub = c_pcre_options-single_line_on ) <= 0.
+        IF find( val = l_pattern
+                 sub = c_pcre_options-single_line_on ) <= 0.
           l_pattern = c_pcre_options-single_line_on && l_pattern.
         ENDIF.
       ENDIF.

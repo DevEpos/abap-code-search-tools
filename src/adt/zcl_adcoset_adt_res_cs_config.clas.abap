@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Resource to handle user specific settings of Code Search</p>
 CLASS zcl_adcoset_adt_res_cs_config DEFINITION
   PUBLIC
-  INHERITING FROM cl_adt_rest_resource
-  FINAL
+  INHERITING FROM cl_adt_rest_resource FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -48,8 +47,7 @@ CLASS zcl_adcoset_adt_res_cs_config IMPLEMENTATION.
     ENDIF.
 
     IF settings-parallel_server_group IS NOT INITIAL.
-      SELECT SINGLE @abap_true
-        FROM rzllitab
+      SELECT SINGLE @abap_true FROM rzllitab
         WHERE classname = @settings-parallel_server_group
           AND grouptype = @zif_adcoset_c_global=>c_group_type_server_group
         INTO @DATA(group_exists).

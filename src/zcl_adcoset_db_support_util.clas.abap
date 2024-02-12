@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Utility for DB Support</p>
 CLASS zcl_adcoset_db_support_util DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

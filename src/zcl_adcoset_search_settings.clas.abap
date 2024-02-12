@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Access to search settings stored on the server</p>
 CLASS zcl_adcoset_search_settings DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -16,8 +15,7 @@ CLASS zcl_adcoset_search_settings IMPLEMENTATION.
   METHOD get_settings.
     " as the default settings correspond to an empty entry sy-subrc <> 0 does
     " have to be handled
-    SELECT SINGLE *
-      FROM zadcoset_csset
+    SELECT SINGLE * FROM zadcoset_csset
       WHERE uname = @sy-uname
       INTO CORRESPONDING FIELDS OF @result.
 

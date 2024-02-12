@@ -1,8 +1,7 @@
 *"* use this source file for your ABAP unit test classes
 
-CLASS ltcl_unit DEFINITION FINAL FOR TESTING
-  DURATION SHORT
-  RISK LEVEL HARMLESS.
+CLASS ltcl_unit DEFINITION FINAL
+  FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
 
   PRIVATE SECTION.
     METHODS test_native_sql_builder FOR TESTING RAISING cx_static_check.
@@ -25,9 +24,9 @@ CLASS ltcl_unit IMPLEMENTATION.
 
     DATA(results) = cut->zif_adcoset_search_scope~next_package( ).
 
-    cl_abap_unit_assert=>assert_equals( act = lines( results-objects )
-                                        exp = COND #( WHEN obj_count >= 50 THEN 50
+    cl_abap_unit_assert=>assert_equals( exp = COND #( WHEN obj_count >= 50 THEN 50
                                                       WHEN obj_count < 50  THEN obj_count
-                                                      ELSE                      0 ) ).
+                                                      ELSE                      0 )
+                                        act = lines( results-objects ) ).
   ENDMETHOD.
 ENDCLASS.

@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Messages that occur during processing</p>
 CLASS zcl_adcoset_log DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.
