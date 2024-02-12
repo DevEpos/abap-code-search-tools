@@ -9,7 +9,7 @@ ABAP Advanced Code Search Tools
 
 Searches Code in ABAP sources like
 
-- [X] Classes (CLAS) 
+- [X] Classes (CLAS)
 - [X] Interfaces (INTF)
 - [X] Programs (PROG)
 - [X] Type Groups (TYPE)
@@ -53,12 +53,12 @@ Install this repository using [abapGit](https://github.com/abapGit/abapGit#abapg
 
 ### Choosing the correct branch for your System
 
-| NW version   | Branch name                |
-| ------------ | -------------------------- |
-| &#8805; 7.51 | **main**                   |
-| 7.50         | nw-740                     |
-| 7.40         | nw-740                     |
-| < 7.40       | *Not officially supported* |
+| NW version   | Branch name                                                             |
+| ------------ | ----------------------------------------------------------------------- |
+| &#8805; 7.51 | **main**                                                                |
+| 7.50         | [nw-740](https://github.com/DevEpos/abap-code-search-tools/tree/nw-740) |
+| 7.40         | [nw-740](https://github.com/DevEpos/abap-code-search-tools/tree/nw-740) |
+| < 7.40       | *Not officially supported*                                              |
 
 ## Supported Databases at branch `nw-740`
 
