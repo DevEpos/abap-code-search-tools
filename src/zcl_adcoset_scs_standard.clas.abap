@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Standard Source Code Searcher</p>
 CLASS zcl_adcoset_scs_standard DEFINITION
   PUBLIC
-  INHERITING FROM zcl_adcoset_scs_base
-  FINAL
+  INHERITING FROM zcl_adcoset_scs_base FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

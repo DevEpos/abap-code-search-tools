@@ -87,9 +87,8 @@ CLASS lcl_test_helper IMPLEMENTATION.
 ENDCLASS.
 
 
-CLASS ltcl_abap_unit DEFINITION FINAL FOR TESTING
-  DURATION SHORT
-  RISK LEVEL HARMLESS.
+CLASS ltcl_abap_unit DEFINITION FINAL
+  FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
 
   PRIVATE SECTION.
     DATA cut TYPE REF TO zcl_adcoset_scs_sequ_extended.
@@ -105,14 +104,14 @@ ENDCLASS.
 CLASS ltcl_abap_unit IMPLEMENTATION.
   METHOD test_match_found1.
     cut = NEW zcl_adcoset_scs_sequ_extended(
-              ignore_comment_lines = abap_true
-              line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
-              matchers             = lcl_test_helper=>create_substring_matchers(
-                  VALUE #( ( content = ' loop'       )
-                           ( content = ' assigning'  )
-                           ( content = '.'           )
-                           ( content = 'control_flags'
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match ) ) ) ).
+                  ignore_comment_lines = abap_true
+                  line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
+                  matchers             = lcl_test_helper=>create_substring_matchers(
+                      VALUE #( ( content = ' loop'       )
+                               ( content = ' assigning'  )
+                               ( content = '.'           )
+                               ( content = 'control_flags'
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match ) ) ) ).
 
     DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
 
@@ -121,16 +120,16 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
 
   METHOD test_match_found2.
     cut = NEW zcl_adcoset_scs_sequ_extended(
-              ignore_comment_lines = abap_true
-              line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
-              matchers             = lcl_test_helper=>create_substring_matchers(
-                  VALUE #( ( content = ' loop'       )
-                           ( content = ' assigning'  )
-                           ( content = '.'           )
-                           ( content = ' if '
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-exclude )
-                           ( content = 'control_flags'
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match ) ) ) ).
+                  ignore_comment_lines = abap_true
+                  line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
+                  matchers             = lcl_test_helper=>create_substring_matchers(
+                      VALUE #( ( content = ' loop'       )
+                               ( content = ' assigning'  )
+                               ( content = '.'           )
+                               ( content = ' if '
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-exclude )
+                               ( content = 'control_flags'
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match ) ) ) ).
 
     DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
 
@@ -139,20 +138,20 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
 
   METHOD test_no_match_found1.
     cut = NEW zcl_adcoset_scs_sequ_extended(
-              ignore_comment_lines = abap_true
-              line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
-              matchers             = lcl_test_helper=>create_substring_matchers(
-                  VALUE #( ( content = ' loop'
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-boundary_start )
-                           ( content = ' assigning' )
-                           ( content = '.'
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-boundary_end )
-                           ( content = ' if '
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-exclude )
-                           ( content = ' append '
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match_start )
-                           ( content = '.'
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match_end ) ) ) ).
+                  ignore_comment_lines = abap_true
+                  line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
+                  matchers             = lcl_test_helper=>create_substring_matchers(
+                      VALUE #( ( content = ' loop'
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-boundary_start )
+                               ( content = ' assigning' )
+                               ( content = '.'
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-boundary_end )
+                               ( content = ' if '
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-exclude )
+                               ( content = ' append '
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match_start )
+                               ( content = '.'
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match_end ) ) ) ).
 
     DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
 
@@ -161,16 +160,16 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
 
   METHOD test_no_match_found2.
     cut = NEW zcl_adcoset_scs_sequ_extended(
-              ignore_comment_lines = abap_true
-              line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
-              matchers             = lcl_test_helper=>create_substring_matchers(
-                  VALUE #( ( content = ' loop'       )
-                           ( content = ' assigning'  )
-                           ( content = '.'           )
-                           ( content = ' if '
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-exclude )
-                           ( content = 'control_flags'
-                             flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match ) ) ) ).
+                  ignore_comment_lines = abap_true
+                  line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
+                  matchers             = lcl_test_helper=>create_substring_matchers(
+                      VALUE #( ( content = ' loop'       )
+                               ( content = ' assigning'  )
+                               ( content = '.'           )
+                               ( content = ' if '
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-exclude )
+                               ( content = 'control_flags'
+                                 flags   = zif_adcoset_c_pattern_matching=>c_pattern_ctrl_flag-match ) ) ) ).
 
     DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
 
@@ -178,12 +177,11 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD test_no_match_found3.
-    cut = NEW zcl_adcoset_scs_sequ_extended(
-              ignore_comment_lines = abap_true
-              line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
-              matchers             = lcl_test_helper=>create_substring_matchers(
-                                         VALUE #( ( content = '(#exclude) loop '       )
-                                                  ( content = ' select '  ) ) ) ).
+    cut = NEW zcl_adcoset_scs_sequ_extended( ignore_comment_lines = abap_true
+                                             line_feed            = |{ cl_abap_char_utilities=>cr_lf }|
+                                             matchers             = lcl_test_helper=>create_substring_matchers(
+                                                                        VALUE #( ( content = '(#exclude) loop '       )
+                                                                                 ( content = ' select '  ) ) ) ).
 
     DATA(matches) = cut->zif_adcoset_src_code_searcher~search( lcl_test_helper=>get_source( ) ).
 

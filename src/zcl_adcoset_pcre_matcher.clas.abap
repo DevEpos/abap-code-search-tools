@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Matcher for PCRE</p>
 CLASS zcl_adcoset_pcre_matcher DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

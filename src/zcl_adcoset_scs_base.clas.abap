@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Base class for source code searcher</p>
 CLASS zcl_adcoset_scs_base DEFINITION
-  PUBLIC
-  ABSTRACT
+  PUBLIC ABSTRACT
   CREATE PROTECTED.
 
   PUBLIC SECTION.
@@ -135,10 +134,9 @@ CLASS zcl_adcoset_scs_base IMPLEMENTATION.
                                                 len = start_line-length )
                       long_snippet = COND #(
                         WHEN end_line-number > start_line-number
-                        THEN substring(
-val = source_code->content[ 1 ]
-off = start_line-offset
-len = raw_match-length + ( raw_match-offset - start_line-offset ) ) ) ).
+                        THEN substring( val = source_code->content[ 1 ]
+                                        off = start_line-offset
+                                        len = raw_match-length + ( raw_match-offset - start_line-offset ) ) ) ).
   ENDMETHOD.
 
   METHOD get_line_index.

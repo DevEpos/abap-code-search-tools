@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Runs parallel tasks</p>
 CLASS zcl_adcoset_parl_task_runner DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -138,7 +137,7 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
     ENDIF.
 
     me->task_prefix  = COND #(
-       WHEN task_prefix IS INITIAL THEN |ADCOSET_{ sy-datum }| ELSE task_prefix ).
+        WHEN task_prefix IS INITIAL THEN |ADCOSET_{ sy-datum }| ELSE task_prefix ).
     me->server_group = server_group.
 
     handler_def = zcl_adcoset_parl_proc_utils=>get_parallel_handler( handler_class  = handler_class
@@ -147,16 +146,16 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD on_end_of_task.
+    " TODO: parameter P_TASK is never used (ABAP cleaner)
+
     DATA error_msg TYPE c LENGTH 200.
     DATA output_buffered TYPE xstring.
 
     RECEIVE RESULTS FROM FUNCTION 'ZADCOSET_NEW_TASK'
-            IMPORTING
-              output = output_buffered
-            EXCEPTIONS
-              error = 1
-              communication_failure = 2 MESSAGE error_msg
-              system_failure = 3 MESSAGE error_msg.
+      IMPORTING  output                = output_buffered
+      EXCEPTIONS error                 = 1
+                 communication_failure = 2 MESSAGE error_msg
+                 system_failure        = 3 MESSAGE error_msg.
 
     IF sy-subrc <> 0.
     ELSE.

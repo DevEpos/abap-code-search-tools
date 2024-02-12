@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Provides available features</p>
 CLASS zcl_adcoset_adt_res_features DEFINITION
   PUBLIC
-  INHERITING FROM cl_adt_rest_resource
-  FINAL
+  INHERITING FROM cl_adt_rest_resource FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -11,13 +10,12 @@ CLASS zcl_adcoset_adt_res_features DEFINITION
   PROTECTED SECTION.
 
   PRIVATE SECTION.
-    CONSTANTS:
-      c_pcre_available_feature    TYPE string VALUE 'pcreAvailable' ##NO_TEXT,
-      c_tags_search_scope_feature TYPE string VALUE 'parameters.tagId' ##NO_TEXT,
+    CONSTANTS c_pcre_available_feature TYPE string VALUE 'pcreAvailable' ##NO_TEXT.
+    CONSTANTS c_tags_search_scope_feature TYPE string VALUE 'parameters.tagId' ##NO_TEXT.
 
-      BEGIN OF c_feature_categories,
-        request_attribute TYPE string VALUE 'RequestAttribute' ##NO_TEXT,
-      END OF c_feature_categories.
+    CONSTANTS: BEGIN OF c_feature_categories,
+                 request_attribute TYPE string VALUE 'RequestAttribute' ##NO_TEXT,
+               END OF c_feature_categories.
 ENDCLASS.
 
 

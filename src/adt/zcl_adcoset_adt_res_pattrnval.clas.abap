@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">Resource for Code Search Pattern Validation</p>
 CLASS zcl_adcoset_adt_res_pattrnval DEFINITION
   PUBLIC
-  FINAL
-  INHERITING FROM cl_adt_rest_resource
+  INHERITING FROM cl_adt_rest_resource FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">ADT Util</p>
 CLASS zcl_adcoset_adt_request_util DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -78,7 +77,7 @@ CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
     ENDIF.
 
     IF upper_case = abap_true.
-      TRANSLATE result TO UPPER CASE.
+      result = to_upper( result ).
     ENDIF.
   ENDMETHOD.
 
@@ -112,7 +111,7 @@ CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
 
     LOOP AT param_values ASSIGNING FIELD-SYMBOL(<value>).
       IF upper_case = abap_true.
-        TRANSLATE <value> TO UPPER CASE.
+        <value> = to_upper( <value> ).
       ENDIF.
 
       IF value_separator IS NOT INITIAL AND <value> CS value_separator.

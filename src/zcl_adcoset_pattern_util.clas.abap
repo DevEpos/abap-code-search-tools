@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Utility for handling patterns</p>
 CLASS zcl_adcoset_pattern_util DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

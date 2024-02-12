@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Source code reader for CDS Access Controls</p>
 CLASS zcl_adcoset_scr_dcls DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -54,9 +53,8 @@ CLASS zcl_adcoset_scr_dcls IMPLEMENTATION.
   METHOD read_dcls.
     DATA(ddlname) = to_upper( name ).
 
-    SELECT SINGLE source
-      FROM acmdclsrc
-      WHERE dclname = @ddlname
+    SELECT SINGLE source FROM acmdclsrc
+      WHERE dclname  = @ddlname
         AND as4local = 'A' " only active source
       INTO @result.
 
