@@ -83,8 +83,7 @@ CLASS zcl_adcoset_search_query IMPLEMENTATION.
       DATA(existing_result) = REF #( search_results[ object_info-name = object-name
                                                      object_info-type = object-type ] ).
       existing_result->match_count  = existing_result->match_count + lines( matches ).
-      existing_result->text_matches = VALUE #( BASE existing_result->text_matches
-                                               ( LINES OF matches ) ).
+      existing_result->text_matches = VALUE #( BASE existing_result->text_matches ( LINES OF matches ) ).
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

@@ -204,8 +204,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-owner
                                 input       = owners
-                                flags       = VALUE #( negation = abap_true
-                                                       patterns = abap_true )
+                                flags       = VALUE #( negation = abap_true patterns = abap_true )
                       IMPORTING range_table = scope_ranges-owner_range ).
 
     LOOP AT scope_ranges-owner_range ASSIGNING FIELD-SYMBOL(<owner_range>) WHERE low = 'ME'.
@@ -218,8 +217,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-package
                                 input       = packages
-                                flags       = VALUE #( negation = abap_true
-                                                       patterns = abap_true )
+                                flags       = VALUE #( negation = abap_true patterns = abap_true )
                       IMPORTING range_table = scope_ranges-package_range ).
   ENDMETHOD.
 
@@ -228,8 +226,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
     split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-appl_comp
                                 input       = appl_comps
-                                flags       = VALUE #( negation             = abap_true
-                                                       auto_prefix_matching = abap_true )
+                                flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
                       IMPORTING range_table = scope_ranges-appl_comp_range ).
   ENDMETHOD.
 
@@ -245,13 +242,12 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
   METHOD extract_object_names.
     DATA(object_names) = to_upper( param_value ).
 
-    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_name
-                                input       = object_names
-                                separator   = ` `
-                                flags       = VALUE #( negation             = abap_true
-                                                       patterns             = abap_true
-                                                       auto_prefix_matching = abap_true )
-                      IMPORTING range_table = scope_ranges-object_name_range ).
+    split_into_range(
+      EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-object_name
+                input       = object_names
+                separator   = ` `
+                flags       = VALUE #( negation = abap_true patterns = abap_true auto_prefix_matching = abap_true )
+      IMPORTING range_table = scope_ranges-object_name_range ).
   ENDMETHOD.
 
   METHOD extract_created_dates.
@@ -329,10 +325,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
           RAISE EXCEPTION TYPE zcx_adcoset_adt_rest
             EXPORTING text = |Parameter '{ filter_name }' does not support patterns|.
         ENDIF.
-        token = replace( val  = token
-                         sub  = '?'
-                         occ  = 0
-                         with = '+' ).
+        token = replace( val = token sub = '?' occ = 0  with = '+' ).
         <option> = 'CP'.
       ELSE.
         <option> = 'EQ'.

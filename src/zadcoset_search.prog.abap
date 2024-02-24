@@ -349,8 +349,7 @@ CLASS lcl_report IMPLEMENTATION.
         sequential_matching  = p_seqma
         ignore_case          = p_ignc
         patterns             = get_patterns( )
-        parallel_processing  = VALUE #( enabled      = p_parlp
-                                        server_group = p_servg )
+        parallel_processing  = VALUE #( enabled = p_parlp server_group = p_servg )
         custom_settings      = VALUE #( class = VALUE #( include_flags = VALUE #( public_section    = abap_true
                                                                                   protected_section = abap_true
                                                                                   private_section   = abap_true
@@ -389,8 +388,7 @@ CLASS lcl_report IMPLEMENTATION.
 
       LOOP AT <result_object>-text_matches ASSIGNING FIELD-SYMBOL(<text_match>).
         flat_match = CORRESPONDING #( BASE ( flat_match ) <text_match> ).
-        results = VALUE #( BASE results
-                           ( flat_match ) ).
+        results = VALUE #( BASE results ( flat_match ) ).
       ENDLOOP.
 
     ENDLOOP.
@@ -469,16 +467,13 @@ CLASS lcl_report IMPLEMENTATION.
     IF p_singpm = abap_true.
 
       DATA text_table TYPE TABLE OF string.
-      text_table = VALUE #( FOR pattern IN s_patt[]
-                            ( CONV #( pattern-low ) ) ).
-      DATA(single_pattern) = concat_lines_of( table = text_table
-                                              sep   = |\r\n| ).
+      text_table = VALUE #( FOR pattern IN s_patt[] ( CONV #( pattern-low ) ) ).
+      DATA(single_pattern) = concat_lines_of( table = text_table sep = |\r\n| ).
       IF single_pattern IS NOT INITIAL.
         result = VALUE #( ( content = single_pattern ) ).
       ENDIF.
     ELSE.
-      result = VALUE #( FOR pattern IN s_patt[]
-                        ( content = pattern-low ) ).
+      result = VALUE #( FOR pattern IN s_patt[] ( content = pattern-low ) ).
     ENDIF.
 
     IF p_seqma = abap_true.

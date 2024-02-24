@@ -182,9 +182,9 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
              tr_request~trfunction,
              tr_request~trstatus
         FROM e070 AS tr_request
-               LEFT OUTER JOIN
-                 e07t AS text ON  tr_request~trkorr = text~trkorr
-                              AND text~langu        = @sy-langu
+             LEFT OUTER JOIN e07t AS text
+               ON  tr_request~trkorr = text~trkorr
+               AND text~langu        = @sy-langu
         WHERE (    tr_request~trkorr IN @name_filter
                 OR text~as4text      IN @text_filter )
           AND tr_request~as4user        IN @owner_filter
@@ -202,9 +202,9 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
              tr_request~trfunction,
              tr_request~trstatus
         FROM e070 AS tr_request
-               LEFT OUTER JOIN
-                 e07t AS text ON  tr_request~trkorr = text~trkorr
-                              AND text~langu        = @sy-langu
+             LEFT OUTER JOIN e07t AS text
+               ON  tr_request~trkorr = text~trkorr
+               AND text~langu        = @sy-langu
         WHERE (    tr_request~trkorr IN @name_filter
                 OR text~as4text      IN @text_filter )
           AND tr_request~as4user        IN @owner_filter
@@ -280,11 +280,9 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
       value = to_upper( value ).
       CASE value.
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-workbench_request.
-          type_filter = VALUE #( BASE type_filter
-                                 ( sign = 'I' option = 'EQ' low = sctsc_type_workbench ) ).
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_workbench ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-dev_corr_task.
-          type_filter = VALUE #( BASE type_filter
-                                 ( sign = 'I' option = 'EQ' low = sctsc_type_correction ) ).
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_correction ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-piece_list.
           type_filter = VALUE #( BASE type_filter
                                  sign   = 'I'
@@ -294,11 +292,9 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
                                  ( low = sctsc_type_upgradelist )
                                  ( low = sctsc_type_patch ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-repair_task.
-          type_filter = VALUE #( BASE type_filter
-                                 ( sign = 'I' option = 'EQ' low = sctsc_type_repair ) ).
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_repair ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-transport_of_copies.
-          type_filter = VALUE #( BASE type_filter
-                                 ( sign = 'I' option = 'EQ' low = sctsc_type_transport ) ).
+          type_filter = VALUE #( BASE type_filter ( sign = 'I' option = 'EQ' low = sctsc_type_transport ) ).
         WHEN zif_adcoset_c_global=>c_trkorr_type_vh-relocation_request.
           type_filter = VALUE #( BASE type_filter
                                  sign   = 'I'

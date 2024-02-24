@@ -73,12 +73,10 @@ CLASS zcl_adcoset_scr_ddls IMPLEMENTATION.
                                                            line_feed = line_feed ).
 
     " remove base info string which is not externally visible anyway
-    DATA(base_info_offset) = find( val   = result
-                                   regex = '\s*[\r\n|\n]\s*/\*\+\[internal\]' ).
+    DATA(base_info_offset) = find( val = result regex = '\s*[\r\n|\n]\s*/\*\+\[internal\]' ).
 
     IF base_info_offset > 0.
-      result = substring( val = result
-                          len = base_info_offset ).
+      result = substring( val = result len = base_info_offset ).
     ENDIF.
   ENDMETHOD.
 

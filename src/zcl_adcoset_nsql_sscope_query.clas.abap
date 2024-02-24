@@ -210,16 +210,12 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
     ENDIF.
 
     LOOP AT cols INTO DATA(col_info).
-      col_parts = VALUE #( BASE col_parts
-                           ( conv_col_info_to_string( col_info ) ) ).
+      col_parts = VALUE #( BASE col_parts ( conv_col_info_to_string( col_info ) ) ).
     ENDLOOP.
 
-    select_parts = VALUE #( BASE select_parts
-                            ( concat_lines_of( table = col_parts
-                                               sep   = ',' ) ) ).
+    select_parts = VALUE #( BASE select_parts ( concat_lines_of( table = col_parts sep = ',' ) ) ).
 
-    select_clause = concat_lines_of( table = select_parts
-                                     sep   = ` ` ).
+    select_clause = concat_lines_of( table = select_parts sep = ` ` ).
 
     adbc_stmnt_cols = target_cols.
   ENDMETHOD.
@@ -319,11 +315,9 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
   METHOD split_including_excluding.
     LOOP AT ranges ASSIGNING FIELD-SYMBOL(<range_entry>).
       IF <range_entry>-sign = 'I'.
-        including = VALUE #( BASE including
-                             ( <range_entry> ) ).
+        including = VALUE #( BASE including ( <range_entry> ) ).
       ELSEIF <range_entry>-sign = 'E'.
-        excluding = VALUE #( BASE excluding
-                             ( <range_entry> ) ).
+        excluding = VALUE #( BASE excluding ( <range_entry> ) ).
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
@@ -356,8 +350,7 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD conv_tab_to_string.
-    result = to_upper( concat_lines_of( table = tab
-                                        sep   = sep ) ).
+    result = to_upper( concat_lines_of( table = tab sep = sep ) ).
   ENDMETHOD.
 
   METHOD conv_col_info_to_string.

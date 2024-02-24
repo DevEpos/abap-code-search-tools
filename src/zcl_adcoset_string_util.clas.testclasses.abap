@@ -59,8 +59,7 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
                                                                         line_feed = |\n| ).
 
     cl_abap_unit_assert=>assert_equals( exp = -1
-                                        act = find( val = adjusted_text
-                                                    sub = |\r\n| ) ).
+                                        act = find( val = adjusted_text sub = |\r\n| ) ).
   ENDMETHOD.
 
   METHOD test_adjust_line_endings2.
@@ -76,8 +75,7 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
                                                                         line_feed = |\r\n| ).
 
     cl_abap_unit_assert=>assert_equals( exp = -1
-                                        act = find( val   = adjusted_text
-                                                    regex = c_lf_regex ) ).
+                                        act = find( val = adjusted_text regex = c_lf_regex ) ).
   ENDMETHOD.
 
   METHOD test_adjust_line_endings3.
@@ -93,7 +91,6 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
                                                                         line_feed = |\r\n| ).
 
     cl_abap_unit_assert=>assert_equals( exp = -1
-                                        act = find( val   = adjusted_text
-                                                    regex = c_lf_regex ) ).
+                                        act = find( val = adjusted_text regex = c_lf_regex ) ).
   ENDMETHOD.
 ENDCLASS.

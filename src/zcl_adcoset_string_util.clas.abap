@@ -37,30 +37,16 @@ CLASS zcl_adcoset_string_util IMPLEMENTATION.
     CHECK text IS NOT INITIAL.
 
     IF line_feed = |\r\n|.
-      IF find( val = text
-               sub = line_feed ) = -1.
-        result = replace( val  = text
-                          sub  = |\n|
-                          with = line_feed
-                          occ  = 0 ).
-      ELSEIF find( val   = text
-                   regex = `^\n|[^\r]\n` ) = -1.
+      IF find( val = text sub = line_feed ) = -1.
+        result = replace( val = text sub = |\n| with = line_feed occ = 0 ).
+      ELSEIF find( val = text regex = `^\n|[^\r]\n` ) = -1.
         result = text.
       ELSE.
-        result = replace( val  = text
-                          sub  = |\r\n|
-                          with = |\n|
-                          occ  = 0 ).
-        result = replace( val  = result
-                          sub  = |\n|
-                          with = |\r\n|
-                          occ  = 0 ).
+        result = replace( val = text sub = |\r\n| with = |\n| occ = 0 ).
+        result = replace( val = result sub = |\n| with = |\r\n| occ = 0 ).
       ENDIF.
     ELSE.
-      result = replace( val  = text
-                        sub  = |\r\n|
-                        with = |\n|
-                        occ  = 0 ).
+      result = replace( val = text sub = |\r\n| with = |\n| occ = 0 ).
     ENDIF.
   ENDMETHOD.
 
@@ -97,7 +83,6 @@ CLASS zcl_adcoset_string_util IMPLEMENTATION.
     indexes = determine_line_indexes( source_table = source_table
                                       line_feed    = line_feed ).
 
-    source_text = concat_lines_of( table = source_table
-                                   sep   = line_feed ).
+    source_text = concat_lines_of( table = source_table sep = line_feed ).
   ENDMETHOD.
 ENDCLASS.

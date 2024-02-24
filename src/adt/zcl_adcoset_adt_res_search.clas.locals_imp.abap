@@ -92,10 +92,7 @@ CLASS lcl_search_query IMPLEMENTATION.
                                                      param_name = zif_adcoset_c_global=>c_search_params-search_pattern
                                                      mandatory  = abap_true
                                                      request    = request )
-                                 ( content = replace( val  = pattern
-                                                      sub  = |\r\n|
-                                                      with = |\n|
-                                                      occ  = 0 ) ) ).
+                                 ( content = replace( val = pattern sub = |\r\n| with = |\n| occ = 0 ) ) ).
 
     IF settings-sequential_matching = abap_true.
       TRY.
@@ -289,8 +286,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
                                                   ( LINES OF incl_match_objects ) ).
       ELSEIF     object_info-type               = zif_adcoset_c_global=>c_source_code_type-program
              AND search_result_object->matches IS NOT INITIAL.
-        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
-                                                  ( search_result_object->* ) ).
+        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects ( search_result_object->* ) ).
       ENDIF.
     ELSE.
       create_std_match_objects( search_result_object = search_result_object
@@ -333,8 +329,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
         CHECK NOT line_exists( packages[ package_name = <read_package>-package_name ] ).
 
         IF <read_package>-parent_package_name IS NOT INITIAL.
-          packages_to_read = VALUE #( BASE packages_to_read
-                                      ( package_name = <read_package>-parent_package_name ) ).
+          packages_to_read = VALUE #( BASE packages_to_read ( package_name = <read_package>-parent_package_name ) ).
         ENDIF.
 
         TRY.
@@ -344,8 +339,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
           CATCH zcx_adcoset_static_error.
         ENDTRY.
 
-        packages = VALUE #( BASE packages
-                            ( <read_package> ) ).
+        packages = VALUE #( BASE packages ( <read_package> ) ).
       ENDLOOP.
 
     ENDWHILE.
@@ -397,8 +391,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
       ENDLOOP.
 
       IF incl_search_result_object-matches IS NOT INITIAL.
-        result = VALUE #( BASE result
-                          ( incl_search_result_object ) ).
+        result = VALUE #( BASE result ( incl_search_result_object ) ).
       ENDIF.
 
     ENDLOOP.
@@ -469,8 +462,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
     " for some reason the URI for the programs of a Business Object Type are generated incorrectly,
     "  so they have to be adjusted
     IF adt_obj_ref-type = 'SOBJ/P'.
-      DATA(source_main_offset) = find( val = adt_obj_ref-uri
-                                       sub = '/source/main' ).
+      DATA(source_main_offset) = find( val = adt_obj_ref-uri sub = '/source/main' ).
       IF source_main_offset > 0.
         adt_obj_ref-uri = adt_obj_ref-uri(source_main_offset).
       ENDIF.

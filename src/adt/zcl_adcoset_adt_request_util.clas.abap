@@ -116,12 +116,9 @@ CLASS zcl_adcoset_adt_request_util IMPLEMENTATION.
 
       IF value_separator IS NOT INITIAL AND <value> CS value_separator.
         SPLIT <value> AT value_separator INTO TABLE tokens.
-        results = VALUE #( BASE results
-                           ( LINES OF VALUE #( FOR token IN tokens
-                                               ( token ) ) ) ).
+        results = VALUE #( BASE results ( LINES OF VALUE #( FOR token IN tokens ( token ) ) ) ).
       ELSE.
-        results = VALUE #( BASE results
-                           ( <value> ) ).
+        results = VALUE #( BASE results ( <value> ) ).
       ENDIF.
     ENDLOOP.
   ENDMETHOD.

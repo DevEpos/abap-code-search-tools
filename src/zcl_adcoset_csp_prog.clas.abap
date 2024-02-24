@@ -49,8 +49,7 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
 
         LOOP AT src_code_searcher->search( source ) ASSIGNING FIELD-SYMBOL(<match>).
           <match>-include = object-name.
-          result = VALUE #( BASE result
-                            ( <match> ) ).
+          result = VALUE #( BASE result ( <match> ) ).
         ENDLOOP.
 
         IF custom_settings-expand_includes = abap_true.
@@ -87,8 +86,7 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
               <match>-include          = <include>.
               <match>-display_name     = <include>.
               <match>-adt_include_type = adt_type.
-              result = VALUE #( BASE result
-                                ( <match> ) ).
+              result = VALUE #( BASE result ( <match> ) ).
             ENDLOOP.
 
           ENDIF.

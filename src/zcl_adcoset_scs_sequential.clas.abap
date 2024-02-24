@@ -150,8 +150,7 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
 
         IF index = seq_match-end_line.
           seq_match-long_snippet = |{ seq_match-long_snippet }{ line_feed }| &&
-            |{ substring( val = source_code->content[ index ]
-                          len = seq_match-end_column ) }|.
+            |{ substring( val = source_code->content[ index ] len = seq_match-end_column ) }|.
         ELSE.
           seq_match-long_snippet = |{ seq_match-long_snippet }{ line_feed }{ source_code->content[ index ] }|.
         ENDIF.
@@ -159,7 +158,6 @@ CLASS zcl_adcoset_scs_sequential IMPLEMENTATION.
       ENDWHILE.
     ENDIF.
 
-    matches = VALUE #( BASE matches
-                       ( seq_match ) ).
+    matches = VALUE #( BASE matches ( seq_match ) ).
   ENDMETHOD.
 ENDCLASS.

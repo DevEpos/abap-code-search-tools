@@ -87,8 +87,7 @@ CLASS zcl_adcoset_scs_base IMPLEMENTATION.
       ENDIF.
 
       IF enhanced_match IS NOT INITIAL.
-        result = VALUE #( BASE result
-                          ( enhanced_match ) ).
+        result = VALUE #( BASE result ( enhanced_match ) ).
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
@@ -168,8 +167,7 @@ CLASS zcl_adcoset_scs_base IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD is_comment_line.
-    result = xsdbool( find( val   = code_line
-                            regex = source_code->comment_regex ) <> -1 ).
+    result = xsdbool( find( val = code_line regex = source_code->comment_regex ) <> -1 ).
   ENDMETHOD.
 
   METHOD range_contains_comment_line.

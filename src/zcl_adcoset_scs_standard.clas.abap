@@ -48,8 +48,7 @@ CLASS zcl_adcoset_scs_standard IMPLEMENTATION.
 
       " not all matchers found a match so quit further searching
       IF enhanced_matches IS NOT INITIAL.
-        result = VALUE #( BASE result
-                          ( LINES OF enhanced_matches ) ).
+        result = VALUE #( BASE result ( LINES OF enhanced_matches ) ).
       ELSEIF match_all = abap_true.
         CLEAR result.
         RETURN.
