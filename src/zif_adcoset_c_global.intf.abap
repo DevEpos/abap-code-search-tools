@@ -112,6 +112,9 @@ INTERFACE zif_adcoset_c_global
       behavior_definition   TYPE trobjtype VALUE 'BDEF',
       simple_transformation TYPE trobjtype VALUE 'XSLT',
       function_group        TYPE trobjtype VALUE 'FUGR',
+      table                 TYPE trobjtype VALUE 'TABL',
+      structure             TYPE trobjtype VALUE 'STRU',
+      database_table        TYPE trobjtype VALUE 'DTAB',
     END OF c_source_code_type.
 
   CONSTANTS:

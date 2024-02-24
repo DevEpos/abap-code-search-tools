@@ -237,21 +237,27 @@ CLASS lcl_result_converter IMPLEMENTATION.
   METHOD convert_matches_to_adt_result.
     LOOP AT raw_result-results ASSIGNING FIELD-SYMBOL(<raw_result>).
 
+      DATA(raw_result_line) = <raw_result>.
+      IF    raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-structure
+         OR raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-database_table.
+        raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
+      ENDIF.
+
       TRY.
           DATA(search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
-              parent_uri      = get_package_uri( <raw_result>-object_info-package_name )
-              adt_main_object = VALUE #( name  = <raw_result>-object_info-name
-                                         owner = <raw_result>-object_info-owner ) ).
+              parent_uri      = get_package_uri( raw_result_line-object_info-package_name )
+              adt_main_object = VALUE #( name  = raw_result_line-object_info-name
+                                         owner = raw_result_line-object_info-owner ) ).
 
-          DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj( type = <raw_result>-object_info-type
-                                                                     name = <raw_result>-object_info-name ).
+          DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj( type = raw_result_line-object_info-type
+                                                                     name = raw_result_line-object_info-name ).
 
           search_result_object-uri = adt_ref-uri.
           search_result_object-adt_main_object-type = adt_ref-type.
 
           create_match_objects( search_result_object = REF #( search_result_object )
-                                object_info          = <raw_result>-object_info
-                                raw_matches          = <raw_result>-text_matches ).
+                                object_info          = raw_result_line-object_info
+                                raw_matches          = raw_result_line-text_matches ).
 
         CATCH zcx_adcoset_static_error ##NEEDED.
           " ignore the result in case of a mapping error
@@ -442,7 +448,8 @@ CLASS lcl_result_converter IMPLEMENTATION.
            zif_adcoset_c_global=>c_source_code_type-type_group OR
            zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
            zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
-           zif_adcoset_c_global=>c_source_code_type-program.
+           zif_adcoset_c_global=>c_source_code_type-program OR
+           zif_adcoset_c_global=>c_source_code_type-table.
 
         result = adt_obj_factory->get_object_ref_for_trobj( type                   = object_info-type
                                                             name                   = object_info-name

@@ -95,7 +95,9 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
                        WHEN zif_adcoset_c_global=>c_source_code_type-access_control OR
                             zif_adcoset_c_global=>c_source_code_type-data_definition OR
                             zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
-                            zif_adcoset_c_global=>c_source_code_type-access_control THEN
+                            zif_adcoset_c_global=>c_source_code_type-access_control OR
+                            zif_adcoset_c_global=>c_source_code_type-structure OR
+                            zif_adcoset_c_global=>c_source_code_type-database_table THEN
                          c_def_string_src_provider ).
   ENDMETHOD.
 ENDCLASS.
