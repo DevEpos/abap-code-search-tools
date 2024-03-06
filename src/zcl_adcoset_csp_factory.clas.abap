@@ -68,6 +68,10 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
                        WHEN zif_adcoset_c_global=>c_source_code_type-program THEN
                          NEW zcl_adcoset_csp_prog( custom_settings = custom_settings-prog )
 
+                       WHEN zif_adcoset_c_global=>c_source_code_type-structure OR
+                            zif_adcoset_c_global=>c_source_code_type-database_table THEN
+                         NEW zcl_adcoset_csp_tabl( )
+
                        WHEN c_def_reposrc_provider THEN
                          NEW zcl_adcoset_csp_repsrc_default( )
 
@@ -83,7 +87,9 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
 
                        WHEN zif_adcoset_c_global=>c_source_code_type-class OR
                             zif_adcoset_c_global=>c_source_code_type-function_group OR
-                            zif_adcoset_c_global=>c_source_code_type-program THEN
+                            zif_adcoset_c_global=>c_source_code_type-program OR
+                            zif_adcoset_c_global=>c_source_code_type-structure OR
+                            zif_adcoset_c_global=>c_source_code_type-database_table THEN
                          original
 
                        WHEN zif_adcoset_c_global=>c_source_code_type-type_group OR
@@ -95,9 +101,7 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
                        WHEN zif_adcoset_c_global=>c_source_code_type-access_control OR
                             zif_adcoset_c_global=>c_source_code_type-data_definition OR
                             zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
-                            zif_adcoset_c_global=>c_source_code_type-access_control OR
-                            zif_adcoset_c_global=>c_source_code_type-structure OR
-                            zif_adcoset_c_global=>c_source_code_type-database_table THEN
+                            zif_adcoset_c_global=>c_source_code_type-access_control THEN
                          c_def_string_src_provider ).
   ENDMETHOD.
 ENDCLASS.
