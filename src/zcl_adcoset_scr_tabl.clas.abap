@@ -27,7 +27,6 @@ CLASS zcl_adcoset_scr_tabl DEFINITION
 
 ENDCLASS.
 
-
 CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
   METHOD constructor.
     me->line_feed    = line_feed.
@@ -48,30 +47,31 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
       SPLIT source_text AT line_feed INTO TABLE source.
     ENDIF.
 
+    " todo Ludwig -> comment_regex not needed right?
     result = NEW zcl_adcoset_source_code( source        = source
                                           line_indexes  = indexes
                                           comment_regex = zif_adcoset_c_global=>c_cds_comment_regex ).
   ENDMETHOD.
 
   METHOD read_tabl.
-    DATA object_pers TYPE REF TO cl_sbd_structure_persist.
     DATA object_data TYPE REF TO if_wb_object_data_model.
 
-    object_pers = NEW #( ).
+    DATA(object_pers) = NEW cl_sbd_structure_persist( ).
     object_pers->if_wb_object_persist~initialize(
         p_object_type = COND #( WHEN type = zif_adcoset_c_global=>c_source_code_type-structure THEN
-                                  VALUE #( objtype_tr =  zif_adcoset_c_global=>c_source_code_type-table subtype_wb = 'DS' )
+                                  VALUE #( objtype_tr = zif_adcoset_c_global=>c_source_code_type-table
+                                           subtype_wb = zif_adcoset_c_global=>c_source_code_sub_type-structure )
                                 WHEN type = zif_adcoset_c_global=>c_source_code_type-database_table THEN
-                                  VALUE #( objtype_tr =  zif_adcoset_c_global=>c_source_code_type-table subtype_wb = 'DT' ) ) ).
+                                  VALUE #(
+                                      objtype_tr = zif_adcoset_c_global=>c_source_code_type-table
+                                      subtype_wb = zif_adcoset_c_global=>c_source_code_sub_type-databasetable ) ) ).
+
     TRY.
-        object_pers->if_wb_object_persist~get( EXPORTING p_object_key              = name
-                                                         p_version                 = 'A'
-                                               " TODO: variable is assigned but never used (ABAP cleaner)
-                                               IMPORTING p_langu_is_not_maintained = DATA(is_langu_maint)
-                                               CHANGING  p_object_data             = object_data ).
+        object_pers->if_wb_object_persist~get( EXPORTING p_object_key  = name
+                                                         p_version     = 'A'
+                                               CHANGING  p_object_data = object_data ).
       CATCH cx_swb_object_does_not_exist.
       CATCH cx_swb_exception.
-
         RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDTRY.
 

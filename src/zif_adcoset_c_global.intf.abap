@@ -131,6 +131,12 @@ INTERFACE zif_adcoset_c_global
     END OF c_source_code_limu_type.
 
   CONSTANTS:
+    BEGIN OF c_source_code_sub_type,
+      structure     TYPE seu_objtyp VALUE 'DS',
+      databasetable TYPE seu_objtyp VALUE 'DT',
+    END OF c_source_code_sub_type.
+
+  CONSTANTS:
     "! Technical identifier for scope types
     BEGIN OF c_scope_type,
       universal_scope   TYPE zadcoset_scope_type VALUE 'US',

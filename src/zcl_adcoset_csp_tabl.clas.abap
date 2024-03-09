@@ -40,7 +40,7 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
                                    CHANGING  all_matches        = result ).
       CATCH zcx_adcoset_src_code_read ##NO_HANDLER.
     ENDTRY.
-
+    " todo Ludwig -> which include determination should we use
     DATA(includes) = get_includes( object-name ).
 
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include>).
@@ -48,10 +48,9 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
              matches.
 
       searched_sources_count = searched_sources_count + 1.
-
       TRY.
           source_code = src_code_reader->get_source_code( name = CONV #( <include> )
-                                                          type = object-type ).
+                                                          type = zif_adcoset_c_global=>c_source_code_type-structure ).
           matches = src_code_searcher->search( source_code ).
           assign_objects_to_matches( EXPORTING unassigned_matches = matches
                                                include            = <include>
@@ -66,9 +65,7 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
   METHOD get_includes.
     DATA include TYPE REF TO cl_abap_structdescr.
 
-*    DATA(struct_descr) = CAST cl_abap_structdescr( cl_abap_typedescr=>describe_by_name( '/IWBEP/S_EPM_PRODUCT_HEADER' ) ).
     DATA(struct_descr) = CAST cl_abap_structdescr( cl_abap_typedescr=>describe_by_name( to_upper( object_name ) ) ).
-    " to_upper( object-name ) ) ).
     DATA(components) = struct_descr->get_components( ).
 
     LOOP AT components ASSIGNING FIELD-SYMBOL(<include>) WHERE as_include = abap_true.
@@ -80,9 +77,7 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
   METHOD get_includes_2.
     DATA(obj_name) = to_upper( object_name ).
     SELECT precfield FROM dd03l
-      " TODO: variable is assigned but never used (ABAP cleaner)
       INTO TABLE includes
-*      WHERE tabname = '/IWBEP/S_EPM_PRODUCT_HEADER'
       WHERE tabname = obj_name
         AND (    fieldname = '.INCLU--AP'
               OR fieldname = '.INCLUDE' ).
@@ -93,10 +88,10 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
       APPEND <match_without_source> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
       <match>-include          = include.
-      <match>-adt_include_type = 'TABL'.
+      <match>-adt_include_type = zif_adcoset_c_global=>c_source_code_type-table.
 
       " set the display name
-        <match>-display_name = include.
+      <match>-display_name     = include.
     ENDLOOP.
   ENDMETHOD.
 ENDCLASS.
