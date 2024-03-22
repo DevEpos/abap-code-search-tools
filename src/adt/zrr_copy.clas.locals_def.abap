@@ -99,7 +99,7 @@ CLASS lcl_result_converter DEFINITION
     METHODS init_result.
     METHODS convert_matches_to_adt_result.
 
-    METHODS append_match
+    METHODS add_main_object_ref
       IMPORTING
         search_result_object TYPE REF TO zif_adcoset_ty_adt_types=>ty_code_search_object
         object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object_info
@@ -123,6 +123,14 @@ CLASS lcl_result_converter DEFINITION
         zcx_adcoset_static_error.
 
     METHODS determine_package_hierarchy.
+
+    METHODS create_deep_match_objects
+      IMPORTING
+        parent_search_result_object TYPE zif_adcoset_ty_adt_types=>ty_code_search_object
+        object_info                 TYPE zif_adcoset_ty_global=>ty_tadir_object_info
+        raw_matches                 TYPE zif_adcoset_ty_global=>ty_search_matches
+      RETURNING
+        VALUE(result)               TYPE zif_adcoset_ty_adt_types=>ty_code_search_objects.
 
     METHODS create_incl_match_objects
       IMPORTING

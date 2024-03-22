@@ -28,13 +28,16 @@ where
     or object  = 'BDEF'
     or object  = 'XSLT'
   )
-union select from tadir as object
-  inner join      dd02l as tabl on object.obj_name = tabl.tabname
-                                and(
-                                  tabl.tabclass    = 'INTTAB'
-                                  or tabl.tabclass = 'TRANSP'
-                                  or tabl.tabclass = 'APPEND'
-                                )
+
+union
+
+select from  tadir as object
+  inner join dd02l as tabl on object.obj_name = tabl.tabname
+                           and(
+                             tabl.tabclass    = 'INTTAB'
+                             or tabl.tabclass = 'TRANSP'
+                             or tabl.tabclass = 'APPEND'
+                           )
 {
   key pgmid      as ProgramId,
   key case

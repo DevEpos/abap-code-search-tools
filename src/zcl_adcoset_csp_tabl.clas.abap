@@ -78,7 +78,8 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
     DATA(obj_name) = to_upper( object_name ).
     SELECT precfield FROM dd03l
       INTO TABLE includes
-      WHERE tabname = obj_name
+      WHERE tabname    = obj_name
+        AND adminfield = 0 " level 1 includes and appends"!
         AND (    fieldname = '.INCLU--AP'
               OR fieldname = '.INCLUDE' ).
   ENDMETHOD.
@@ -87,11 +88,12 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
     LOOP AT unassigned_matches ASSIGNING FIELD-SYMBOL(<match_without_source>).
       APPEND <match_without_source> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
-      <match>-include          = include.
-      <match>-adt_include_type = zif_adcoset_c_global=>c_source_code_type-table.
+      <match>-object_name     = include.
+*      <match>-main_include     = include.
+      <match>-adt_object_type = zif_adcoset_c_global=>c_source_code_type-table.
 
       " set the display name
-      <match>-display_name     = include.
+      <match>-display_name    = include.
     ENDLOOP.
   ENDMETHOD.
 ENDCLASS.

@@ -1,6 +1,15 @@
 INTERFACE zif_adcoset_ty_adt_types
   PUBLIC.
 
+  TYPES:
+    BEGIN OF ty_s_property,
+      key   TYPE string,
+      type  TYPE string,
+      value TYPE string,
+    END OF ty_s_property,
+
+    ty_t_property TYPE SORTED TABLE OF ty_s_property WITH UNIQUE KEY key.
+
   TYPES: BEGIN OF ty_adt_obj_ref,
            "! URI - mandatory client response, optional for client request
            uri          TYPE string,
@@ -16,6 +25,8 @@ INTERFACE zif_adcoset_ty_adt_types
            package_name TYPE string,
            "! Owner of the referenced entity - optional
            owner        TYPE string,
+           "! Additional properties of the object - optional
+           properties   TYPE ty_t_property,
          END OF ty_adt_obj_ref.
 
   TYPES: BEGIN OF ty_code_search_match,
