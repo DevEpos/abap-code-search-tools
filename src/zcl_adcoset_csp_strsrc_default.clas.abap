@@ -20,7 +20,7 @@ CLASS zcl_adcoset_csp_strsrc_default IMPLEMENTATION.
 
   METHOD zif_adcoset_code_search_prov~search.
     TRY.
-        DATA(source) = src_code_reader->get_source_code( object-name ).
+        DATA(source) = src_code_reader->get_source_code( name = object-name type = object-type ).
         result = src_code_searcher->search( source ).
       CATCH zcx_adcoset_src_code_read.
         " handle exception

@@ -34,7 +34,7 @@ CLASS zcl_adcoset_csp_repsrc_default IMPLEMENTATION.
                                                          type = object-type ).
 
         LOOP AT src_code_searcher->search( source ) ASSIGNING FIELD-SYMBOL(<match>).
-          <match>-include = include_name.
+          <match>-object_name = include_name.
           result = VALUE #( BASE result ( <match> ) ).
         ENDLOOP.
 

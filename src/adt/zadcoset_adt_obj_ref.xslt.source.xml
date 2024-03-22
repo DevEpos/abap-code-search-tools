@@ -4,6 +4,7 @@
               xmlns:cl="http://www.sap.com/abapxml/types/class-pool/ZIF_ADCOSET_TY_ADT_TYPES">
 
   <tt:root name="adt_obj_ref" type="cl:ty_adt_obj_ref"/>
+  <tt:root name="properties" type="cl:ty_t_property"/>
 
   <tt:template>
     <tt:apply name="adtObjRef">
@@ -57,6 +58,37 @@
     <tt:cond check="not-initial(adt_obj_ref.description)">
       <tt:attribute name="adtbase:description" value-ref="adt_obj_ref.description"/>
     </tt:cond>
+
+    <tt:cond check="exist(adt_obj_ref.properties)">
+       <tt:apply name="properties">
+         <tt:with-root name="properties" ref="adt_obj_ref.properties"/>
+       </tt:apply>
+    </tt:cond>
   </tt:template>
 
+ <!-- PUBLIC TEMPLATES (can be called from other tranformations) -->
+  <tt:template name="properties">
+    <tt:context>
+      <tt:root name="properties"/>
+    </tt:context>
+
+    <tt:loop ref="properties">
+      <tt:cond check="not-initial($ref.value)">
+        <adtbase:property tt:extensible="deep">
+          <tt:attribute name="adtbase:key" value-ref="$ref.key"/>
+
+          <tt:s-cond check="$ref.type='bool'">
+            <tt:attribute map="xml('true')=val('X'),xml('false')=val('')" name="adtbase:value" value-ref="$ref.value"/>
+          </tt:s-cond>
+          <tt:s-cond check="$ref.type!='bool'">
+            <tt:attribute name="adtbase:value" value-ref="$ref.value"/>
+          </tt:s-cond>
+
+          <tt:d-cond>
+            <tt:attribute name="adtbase:value" value-ref="$ref.value"/>
+          </tt:d-cond>
+        </adtbase:property>
+      </tt:cond>
+    </tt:loop>
+  </tt:template>
 </tt:transform>

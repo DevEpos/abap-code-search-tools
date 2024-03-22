@@ -48,7 +48,7 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
                                                          type = object-type ).
 
         LOOP AT src_code_searcher->search( source ) ASSIGNING FIELD-SYMBOL(<match>).
-          <match>-include = object-name.
+          <match>-object_name = object-name.
           result = VALUE #( BASE result ( <match> ) ).
         ENDLOOP.
 
@@ -83,9 +83,9 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
             DATA(adt_type) = get_adt_type( <include> ).
 
             LOOP AT matches ASSIGNING FIELD-SYMBOL(<match>).
-              <match>-include          = <include>.
-              <match>-display_name     = <include>.
-              <match>-adt_include_type = adt_type.
+              <match>-object_name     = <include>.
+              <match>-display_name    = <include>.
+              <match>-adt_object_type = adt_type.
               result = VALUE #( BASE result ( <match> ) ).
             ENDLOOP.
 

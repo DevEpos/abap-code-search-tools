@@ -99,10 +99,10 @@ CLASS lcl_report DEFINITION.
 
   PRIVATE SECTION.
     TYPES  BEGIN OF ty_search_match.
-    TYPES:   object_name  TYPE sobj_name,
-             object_type  TYPE trobjtype,
-             owner        TYPE responsibl,
-             package_name TYPE devclass.
+    TYPES:   main_object_name TYPE sobj_name,
+             main_object_type TYPE trobjtype,
+             owner            TYPE responsibl,
+             package_name     TYPE devclass.
              INCLUDE TYPE zif_adcoset_ty_global=>ty_search_match.
     TYPES  END OF ty_search_match.
 
@@ -380,8 +380,8 @@ CLASS lcl_report IMPLEMENTATION.
 
     LOOP AT search_result-results ASSIGNING FIELD-SYMBOL(<result_object>).
       DATA(flat_match) = CORRESPONDING ty_search_match( <result_object>-object_info
-        MAPPING object_name = name
-                object_type = type ).
+        MAPPING main_object_name = name
+                main_object_type = type ).
 
       LOOP AT <result_object>-text_matches ASSIGNING FIELD-SYMBOL(<text_match>).
         flat_match = CORRESPONDING #( BASE ( flat_match ) <text_match> ).
@@ -504,7 +504,7 @@ CLASS lcl_report IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    CASE <selected_row>-object_type.
+    CASE <selected_row>-main_object_type.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-class OR
            zif_adcoset_c_global=>c_source_code_type-interface OR
@@ -516,7 +516,7 @@ CLASS lcl_report IMPLEMENTATION.
         CALL FUNCTION 'EDITOR_PROGRAM'
           EXPORTING  appid   = 'PG'
                      display = abap_true
-                     program = <selected_row>-include
+                     program = <selected_row>-object_name
                      line    = <selected_row>-start_line
                      topline = <selected_row>-start_line
           EXCEPTIONS OTHERS  = 0.
@@ -528,9 +528,9 @@ CLASS lcl_report IMPLEMENTATION.
 
         CALL FUNCTION 'RS_TOOL_ACCESS'
           EXPORTING  operation           = 'SHOW'
-                     object_name         = <selected_row>-object_name
-                     object_type         = <selected_row>-object_type
-                     include             = <selected_row>-include
+                     object_name         = <selected_row>-main_object_name
+                     object_type         = <selected_row>-main_object_type
+                     include             = <selected_row>-object_name
                      position            = <selected_row>-start_line
           EXCEPTIONS not_executed        = 1
                      invalid_object_type = 2
@@ -545,13 +545,13 @@ CLASS lcl_report IMPLEMENTATION.
     DATA(adt_obj_factory) = zcl_adcoset_adt_obj_factory=>get_instance( ).
 
     TRY.
-        CASE match-object_type.
+        CASE match-main_object_type.
 
           WHEN zif_adcoset_c_global=>c_source_code_type-class OR
                zif_adcoset_c_global=>c_source_code_type-function_group.
 
-            adt_obj = adt_obj_factory->get_object_ref_for_include( main_program      = match-object_name
-                                                                   include           = match-include
+            adt_obj = adt_obj_factory->get_object_ref_for_include( main_program      = match-main_object_name
+                                                                   include           = match-object_name
                                                                    start_line        = match-start_line
                                                                    start_line_offset = match-start_column
                                                                    end_line          = match-end_line
@@ -566,8 +566,8 @@ CLASS lcl_report IMPLEMENTATION.
                zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
                zif_adcoset_c_global=>c_source_code_type-program.
 
-            adt_obj = adt_obj_factory->get_object_ref_for_trobj( type                   = match-object_type
-                                                                 name                   = match-object_name
+            adt_obj = adt_obj_factory->get_object_ref_for_trobj( type                   = match-main_object_type
+                                                                 name                   = match-main_object_name
                                                                  append_source_uri_path = abap_true ).
 
             adt_obj_factory->add_position_fragment( EXPORTING start_line   = match-start_line

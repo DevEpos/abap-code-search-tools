@@ -282,8 +282,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
     IF    object_info-type = zif_adcoset_c_global=>c_source_code_type-class
        OR object_info-type = zif_adcoset_c_global=>c_source_code_type-function_group
-       OR object_info-type = zif_adcoset_c_global=>c_source_code_type-program
-       OR object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
+       OR object_info-type = zif_adcoset_c_global=>c_source_code_type-program.
 
       DATA(incl_match_objects) = create_incl_match_objects( parent_search_result_object = search_result_object->*
                                                             object_info                 = object_info
@@ -293,9 +292,22 @@ CLASS lcl_result_converter IMPLEMENTATION.
         adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
                                                   ( search_result_object->* )
                                                   ( LINES OF incl_match_objects ) ).
-      ELSEIF     (    object_info-type = zif_adcoset_c_global=>c_source_code_type-program
-                   OR object_info-type = zif_adcoset_c_global=>c_source_code_type-table )
+      ELSEIF     object_info-type               = zif_adcoset_c_global=>c_source_code_type-program
              AND search_result_object->matches IS NOT INITIAL.
+        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects ( search_result_object->* ) ).
+      ENDIF.
+
+    ELSEIF object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
+
+      DATA(deepobj_match_objects) = create_deep_match_objects( parent_search_result_object = search_result_object->*
+                                                               object_info                 = object_info
+                                                               raw_matches                 = l_raw_matches ).
+
+      IF deepobj_match_objects IS NOT INITIAL.
+        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
+                                                  ( search_result_object->* )
+                                                  ( LINES OF deepobj_match_objects ) ).
+      ELSEIF search_result_object->matches IS NOT INITIAL.
         adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects ( search_result_object->* ) ).
       ENDIF.
 
@@ -370,8 +382,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD create_incl_match_objects.
-    DATA incl_object_ref TYPE sadt_object_reference.
+  METHOD create_deep_match_objects.
     FIELD-SYMBOLS <raw_match> TYPE zif_adcoset_ty_global=>ty_search_match.
 
     " Skip matches of program include in result
@@ -379,39 +390,74 @@ CLASS lcl_result_converter IMPLEMENTATION.
          GROUP BY <raw_match_group>-object_name.
 
       TRY.
-          IF <raw_match_group>-adt_object_type = zif_adcoset_c_global=>c_source_code_type-table.
-            incl_object_ref = adt_obj_factory->get_object_ref_for_trobj(
-                                  type = CONV #( <raw_match_group>-adt_object_type )
-                                  name = <raw_match_group>-object_name ).
+          DATA(sub_object_ref) = adt_obj_factory->get_object_ref_for_trobj(
+                                     type = CONV #( <raw_match_group>-adt_object_type )
+                                     name = <raw_match_group>-object_name ).
 
-          ELSE.
-            incl_object_ref = adt_obj_factory->get_object_ref_for_include(
-                                  main_program = object_info-name
-                                  include      = <raw_match_group>-object_name ).
+        CATCH zcx_adcoset_static_error.
+          CONTINUE.
+      ENDTRY.
 
-          ENDIF.
+      DATA(deep_search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
+          uri             = sub_object_ref-uri
+          parent_uri      = parent_search_result_object-uri
+          adt_main_object = VALUE #( name       = <raw_match_group>-display_name
+                                     type       = sub_object_ref-type
+                                     properties = VALUE #( ( key = 'Depth' value = 1 ) ) ) ).
+
+      LOOP AT GROUP <raw_match_group> ASSIGNING <raw_match>.
+        TRY.
+            DATA(match_object_ref) = create_match_object_ref( object_info = CORRESPONDING #( sub_object_ref )
+                                                              match       = <raw_match> ).
+          CATCH zcx_adcoset_static_error.
+            RETURN.
+        ENDTRY.
+
+        deep_search_result_object-matches = VALUE #( BASE deep_search_result_object-matches
+                                                     ( uri          = match_object_ref-uri
+                                                       snippet      = <raw_match>-snippet
+                                                       long_snippet = <raw_match>-long_snippet ) ).
+
+        adt_result-number_of_results = adt_result-number_of_results + 1.
+      ENDLOOP.
+
+      IF deep_search_result_object-matches IS NOT INITIAL.
+        result = VALUE #( BASE result ( deep_search_result_object ) ).
+      ENDIF.
+
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD create_incl_match_objects.
+    FIELD-SYMBOLS <raw_match> TYPE zif_adcoset_ty_global=>ty_search_match.
+
+    " Skip matches of program include in result
+    LOOP AT raw_matches ASSIGNING FIELD-SYMBOL(<raw_match_group>) WHERE object_name <> object_info-name
+         GROUP BY <raw_match_group>-object_name.
+
+      TRY.
+          DATA(incl_object_ref) = adt_obj_factory->get_object_ref_for_include(
+                                      main_program = object_info-name
+                                      include      = <raw_match_group>-object_name ).
         CATCH zcx_adcoset_static_error.
           CONTINUE.
       ENDTRY.
 
       DATA(incl_search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
-          uri             = incl_object_ref-uri
-          parent_uri      = parent_search_result_object-uri
-          adt_main_object = VALUE #(
-              name       = <raw_match_group>-display_name
-              type       = COND #(
-                      WHEN <raw_match_group>-adt_object_type IS NOT INITIAL AND <raw_match_group>-adt_object_type <> zif_adcoset_c_global=>c_source_code_type-table
-                      THEN <raw_match_group>-adt_object_type
-                      ELSE incl_object_ref-type )
-              properties = VALUE #( ( key = 'isDeepObject' value = abap_true type = 'bool' ) ) ) ).
+                                                  uri             = incl_object_ref-uri
+                                                  parent_uri      = parent_search_result_object-uri
+                                                  adt_main_object = VALUE #(
+                                                      name = <raw_match_group>-display_name
+                                                      type = COND #(
+                                                        WHEN <raw_match_group>-adt_object_type IS NOT INITIAL
+                                                        THEN <raw_match_group>-adt_object_type
+                                                        ELSE incl_object_ref-type ) ) ).
 
       LOOP AT GROUP <raw_match_group> ASSIGNING <raw_match>.
-        append_match(
-            search_result_object = REF #( incl_search_result_object )
-            object_info          = COND #( WHEN <raw_match>-adt_object_type = zif_adcoset_c_global=>c_source_code_type-table
-                                           THEN CORRESPONDING #( incl_object_ref )
-                                           ELSE object_info )
-            raw_match            = <raw_match> ).
+*        add/append match
+        add_main_object_ref( search_result_object = REF #( incl_search_result_object )
+                             object_info          = object_info
+                             raw_match            = <raw_match> ).
       ENDLOOP.
 
       IF incl_search_result_object-matches IS NOT INITIAL.
@@ -423,13 +469,13 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
   METHOD create_std_match_objects.
     LOOP AT raw_matches ASSIGNING FIELD-SYMBOL(<raw_match>).
-      append_match( search_result_object = search_result_object
-                    object_info          = object_info
-                    raw_match            = <raw_match> ).
+      add_main_object_ref( search_result_object = search_result_object
+                           object_info          = object_info
+                           raw_match            = <raw_match> ).
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD append_match.
+  METHOD add_main_object_ref.
     TRY.
         DATA(match_object_ref) = create_match_object_ref( object_info = object_info
                                                           match       = raw_match ).
