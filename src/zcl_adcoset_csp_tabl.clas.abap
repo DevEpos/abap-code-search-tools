@@ -14,12 +14,6 @@ CLASS zcl_adcoset_csp_tabl DEFINITION
       RETURNING
         VALUE(includes) TYPE include_list.
 
-    METHODS get_includes_2
-      IMPORTING
-        object_name     TYPE sobj_name
-      RETURNING
-        VALUE(includes) TYPE include_list.
-
     METHODS assign_objects_to_matches
       IMPORTING
         unassigned_matches TYPE zif_adcoset_ty_global=>ty_search_matches
@@ -40,7 +34,7 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
                                    CHANGING  all_matches        = result ).
       CATCH zcx_adcoset_src_code_read ##NO_HANDLER.
     ENDTRY.
-    " todo Ludwig -> which include determination should we use
+
     DATA(includes) = get_includes( object-name ).
 
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include>).
@@ -63,23 +57,11 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_includes.
-    DATA include TYPE REF TO cl_abap_structdescr.
-
-    DATA(struct_descr) = CAST cl_abap_structdescr( cl_abap_typedescr=>describe_by_name( to_upper( object_name ) ) ).
-    DATA(components) = struct_descr->get_components( ).
-
-    LOOP AT components ASSIGNING FIELD-SYMBOL(<include>) WHERE as_include = abap_true.
-      include ?= <include>-type.
-      includes = VALUE #( BASE includes ( include->get_relative_name( ) ) ).
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD get_includes_2.
     DATA(obj_name) = to_upper( object_name ).
     SELECT precfield FROM dd03l
       INTO TABLE includes
       WHERE tabname    = obj_name
-        AND adminfield = 0 " level 1 includes and appends"!
+        AND adminfield = 0 " level 1 includes and appends
         AND (    fieldname = '.INCLU--AP'
               OR fieldname = '.INCLUDE' ).
   ENDMETHOD.
@@ -89,7 +71,6 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
       APPEND <match_without_source> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
       <match>-object_name     = include.
-*      <match>-main_include     = include.
       <match>-adt_object_type = zif_adcoset_c_global=>c_source_code_type-table.
 
       " set the display name

@@ -235,9 +235,8 @@ CLASS lcl_result_converter IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD convert_matches_to_adt_result.
-    LOOP AT raw_result-results ASSIGNING FIELD-SYMBOL(<raw_result>).
+    LOOP AT raw_result-results INTO DATA(raw_result_line).
 
-      DATA(raw_result_line) = <raw_result>.
       IF    raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-structure
          OR raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-database_table.
         raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
@@ -268,37 +267,32 @@ CLASS lcl_result_converter IMPLEMENTATION.
   METHOD create_match_objects.
     DATA(l_raw_matches) = raw_matches.
 
-    IF    object_info-type = zif_adcoset_c_global=>c_source_code_type-program
-       OR object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
-      " handle direct program matches
-      DATA(direct_program_matches) = VALUE zif_adcoset_ty_global=>ty_search_matches( FOR <prog_raw_match> IN l_raw_matches
-                                                                                     WHERE ( object_name = object_info-name )
-                                                                                     ( <prog_raw_match> ) ).
-      DELETE l_raw_matches WHERE object_name = object_info-name.
-      create_std_match_objects( search_result_object = search_result_object
-                                object_info          = object_info
-                                raw_matches          = direct_program_matches ).
-    ENDIF.
-
     IF    object_info-type = zif_adcoset_c_global=>c_source_code_type-class
        OR object_info-type = zif_adcoset_c_global=>c_source_code_type-function_group
        OR object_info-type = zif_adcoset_c_global=>c_source_code_type-program
        OR object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
 
+      IF    object_info-type = zif_adcoset_c_global=>c_source_code_type-program
+         OR object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
+        " handle direct object matches
+        DATA(direct_object_matches) = VALUE zif_adcoset_ty_global=>ty_search_matches( FOR <direct_match> IN l_raw_matches
+                                                                                      WHERE ( object_name = object_info-name )
+                                                                                      ( <direct_match> ) ).
+        DELETE l_raw_matches WHERE object_name = object_info-name.
+        create_std_match_objects( search_result_object = search_result_object
+                                  object_info          = object_info
+                                  raw_matches          = direct_object_matches ).
+      ENDIF.
+
       DATA(incl_match_objects) = create_incl_match_objects( parent_search_result_object = search_result_object->*
                                                             object_info                 = object_info
                                                             raw_matches                 = l_raw_matches ).
 
-      IF incl_match_objects IS NOT INITIAL.
+      IF direct_object_matches IS NOT INITIAL OR incl_match_objects IS NOT INITIAL.
         adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
                                                   ( search_result_object->* )
                                                   ( LINES OF incl_match_objects ) ).
-      ELSEIF     (    object_info-type = zif_adcoset_c_global=>c_source_code_type-program
-                   OR object_info-type = zif_adcoset_c_global=>c_source_code_type-table )
-             AND search_result_object->matches IS NOT INITIAL.
-        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects ( search_result_object->* ) ).
       ENDIF.
-
     ELSE.
       create_std_match_objects( search_result_object = search_result_object
                                 object_info          = object_info

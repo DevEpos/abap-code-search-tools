@@ -31,20 +31,11 @@ where
 
 union
 
-select from  tadir as object
-  inner join dd02l as tabl on object.obj_name = tabl.tabname
-                           and(
-                             tabl.tabclass    = 'INTTAB'
-                             or tabl.tabclass = 'TRANSP'
-                             or tabl.tabclass = 'APPEND'
-                           )
+select from  tadir             as object
+  inner join ZADCOSET_I_Tables as tabl on object.obj_name = tabl.ObjectName
 {
   key pgmid      as ProgramId,
-  key case
-      when tabl.tabclass  = 'INTTAB'
-        or tabl.tabclass  = 'APPEND' then 'STRU'
-      when tabl.tabclass  = 'TRANSP' then 'DTAB'
-  end            as ObjectType,
+  key ObjectType,
   key obj_name   as ObjectName,
       devclass   as DevelopmentPackage,
       created_on as CreatedDate,

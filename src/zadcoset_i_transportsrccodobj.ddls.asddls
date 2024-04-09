@@ -4,22 +4,22 @@
 @EndUserText.label: 'Rep. obj. of Tr. Request for Code Search'
 
 define view ZADCOSET_I_TransportSrcCodObj
-  as select from e071  as TransportObject
-    inner join   tadir as object on  TransportObject.pgmid    = object.pgmid
-                                 and TransportObject.object   = object.object
-                                 and TransportObject.obj_name = object.obj_name
+  as select from e071  as transportObject
+    inner join   tadir as object on  transportObject.pgmid    = object.pgmid
+                                 and transportObject.object   = object.object
+                                 and transportObject.obj_name = object.obj_name
 {
-  key TransportObject.trkorr   as Request,
-  key TransportObject.pgmid    as ProgramId,
-  key TransportObject.object   as ObjectType,
-  key TransportObject.obj_name as ObjectName,
+  key transportObject.trkorr   as Request,
+  key transportObject.pgmid    as ProgramId,
+  key transportObject.object   as ObjectType,
+  key transportObject.obj_name as ObjectName,
       object.devclass          as DevelopmentPackage,
       object.author            as Owner,
       object.created_on        as CreatedDate
 }
 where
-       TransportObject.obj_name not like '______________________________VC'
-  and  TransportObject.pgmid    = 'R3TR'
+       transportObject.obj_name not like '______________________________VC'
+  and  transportObject.pgmid    = 'R3TR'
   and  object.delflag           = ''
   and(
        object.object            = 'CLAS'
@@ -36,34 +36,25 @@ where
 
 union
 
-select from  e071  as TransportObject
-  inner join tadir as object on  TransportObject.pgmid    = object.pgmid
-                             and TransportObject.object   = object.object
-                             and TransportObject.obj_name = object.obj_name
-  inner join dd02l as tabl   on object.obj_name = tabl.tabname
-                             and(
-                               tabl.tabclass    = 'INTTAB'
-                               or tabl.tabclass = 'TRANSP'
-                               or tabl.tabclass = 'APPEND'
-                             )
+select from  e071              as transportObject
+  inner join tadir             as object on  transportObject.pgmid    = object.pgmid
+                                         and transportObject.object   = object.object
+                                         and transportObject.obj_name = object.obj_name
+  inner join ZADCOSET_I_Tables as tabl   on object.obj_name = tabl.ObjectName
 {
-  key TransportObject.trkorr   as Request,
-  key TransportObject.pgmid    as ProgramId,
-  key case
-      when tabl.tabclass  = 'INTTAB'
-        or tabl.tabclass  = 'APPEND' then 'STRU'
-      when tabl.tabclass  = 'TRANSP' then 'DTAB'
-  end                          as ObjectType,
-  key TransportObject.obj_name as ObjectName,
+  key transportObject.trkorr   as Request,
+  key transportObject.pgmid    as ProgramId,
+  key ObjectType,
+  key transportObject.obj_name as ObjectName,
       devclass                 as DevelopmentPackage,
       author                   as Owner,
       created_on               as CreatedDate
 
 }
 where
-      TransportObject.pgmid  = 'R3TR'
+      transportObject.pgmid  = 'R3TR'
   and delflag                = ''
-  and TransportObject.object = 'TABL'
+  and transportObject.object = 'TABL'
 
 union
 
