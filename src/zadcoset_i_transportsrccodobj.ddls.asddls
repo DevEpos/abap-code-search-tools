@@ -36,11 +36,11 @@ where
 
 union
 
-select from  e071              as transportObject
-  inner join tadir             as object on  transportObject.pgmid    = object.pgmid
-                                         and transportObject.object   = object.object
-                                         and transportObject.obj_name = object.obj_name
-  inner join ZADCOSET_I_Tables as tabl   on object.obj_name = tabl.ObjectName
+select from  e071                        as transportObject
+  inner join tadir                       as object on  transportObject.pgmid    = object.pgmid
+                                                   and transportObject.object   = object.object
+                                                   and transportObject.obj_name = object.obj_name
+  inner join ZADCOSET_I_SearchableTables as tabl   on object.obj_name = tabl.ObjectName
 {
   key transportObject.trkorr   as Request,
   key transportObject.pgmid    as ProgramId,

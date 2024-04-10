@@ -31,8 +31,8 @@ where
 
 union
 
-select from  tadir             as object
-  inner join ZADCOSET_I_Tables as tabl on object.obj_name = tabl.ObjectName
+select from  tadir                       as object
+  inner join ZADCOSET_I_SearchableTables as tabl on object.obj_name = tabl.ObjectName
 {
   key pgmid      as ProgramId,
   key ObjectType,
