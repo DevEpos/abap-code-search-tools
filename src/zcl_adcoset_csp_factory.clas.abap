@@ -70,7 +70,7 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
 
                        WHEN zif_adcoset_c_global=>c_source_code_type-structure OR
                             zif_adcoset_c_global=>c_source_code_type-database_table THEN
-                         NEW zcl_adcoset_csp_tabl( )
+                         NEW zcl_adcoset_csp_tabl( custom_settings = custom_settings-tabl )
 
                        WHEN c_def_reposrc_provider THEN
                          NEW zcl_adcoset_csp_repsrc_default( )

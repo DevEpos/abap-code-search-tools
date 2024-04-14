@@ -78,6 +78,9 @@ CLASS lcl_search_query IMPLEMENTATION.
     settings-custom_settings-prog-expand_includes = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
         param_name = zif_adcoset_c_global=>c_search_params-expand_prog_includes
         request    = request ).
+    settings-custom_settings-tabl-expand_includes = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
+        param_name = zif_adcoset_c_global=>c_search_params-expand_table_includes
+        request    = request ).
   ENDMETHOD.
 
   METHOD complete_settings.

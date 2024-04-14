@@ -5,8 +5,14 @@ CLASS zcl_adcoset_csp_tabl DEFINITION
   PUBLIC SECTION.
     INTERFACES zif_adcoset_code_search_prov.
 
+    METHODS constructor
+      IMPORTING
+        custom_settings TYPE zif_adcoset_ty_global=>ty_table_cs_settings.
+
   PRIVATE SECTION.
     TYPES include_list TYPE STANDARD TABLE OF precfield WITH DEFAULT KEY.
+
+    DATA custom_settings TYPE zif_adcoset_ty_global=>ty_table_cs_settings.
 
     METHODS get_includes
       IMPORTING
@@ -20,10 +26,23 @@ CLASS zcl_adcoset_csp_tabl DEFINITION
         !include           TYPE precfield
       CHANGING
         all_matches        TYPE zif_adcoset_ty_global=>ty_search_matches.
+
+    METHODS search_includes
+      IMPORTING
+        object_name            TYPE sobj_name
+        src_code_reader        TYPE REF TO zif_adcoset_src_code_reader
+        src_code_searcher      TYPE REF TO zif_adcoset_src_code_searcher
+      CHANGING
+        searched_sources_count TYPE i
+        all_matches                TYPE zif_adcoset_ty_global=>ty_search_matches.
 ENDCLASS.
 
 
 CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
+  METHOD constructor.
+    me->custom_settings = custom_settings.
+  ENDMETHOD.
+
   METHOD zif_adcoset_code_search_prov~search.
     DATA(searched_sources_count) = 1.
     TRY.
@@ -35,7 +54,22 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
       CATCH zcx_adcoset_src_code_read ##NO_HANDLER.
     ENDTRY.
 
-    DATA(includes) = get_includes( object-name ).
+    IF custom_settings-expand_includes = abap_true.
+      search_includes( EXPORTING object_name            = object-name
+                                 src_code_reader        = src_code_reader
+                                 src_code_searcher      = src_code_searcher
+                       CHANGING  searched_sources_count = searched_sources_count
+                                 all_matches            = result ).
+    ENDIF.
+
+    zcl_adcoset_search_protocol=>increase_searchd_sources_count( searched_sources_count ).
+  ENDMETHOD.
+
+  METHOD search_includes.
+    DATA source_code TYPE REF TO zif_adcoset_source_code.
+    DATA matches TYPE zif_adcoset_ty_global=>ty_search_matches.
+
+    DATA(includes) = get_includes( object_name ).
 
     LOOP AT includes ASSIGNING FIELD-SYMBOL(<include>).
       CLEAR: source_code,
@@ -48,12 +82,11 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
           matches = src_code_searcher->search( source_code ).
           assign_objects_to_matches( EXPORTING unassigned_matches = matches
                                                include            = <include>
-                                     CHANGING  all_matches        = result ).
+                                     CHANGING  all_matches        = all_matches ).
 
         CATCH zcx_adcoset_src_code_read ##NO_HANDLER.
       ENDTRY.
     ENDLOOP.
-    zcl_adcoset_search_protocol=>increase_searchd_sources_count( searched_sources_count ).
   ENDMETHOD.
 
   METHOD get_includes.

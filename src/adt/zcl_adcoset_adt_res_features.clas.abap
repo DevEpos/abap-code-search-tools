@@ -7,6 +7,11 @@ CLASS zcl_adcoset_adt_res_features DEFINITION
   PUBLIC SECTION.
     METHODS get REDEFINITION.
 
+    "! Returns 'X' if STRU or DTAB search is possible in this system
+    CLASS-METHODS is_table_search_possible
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
   PROTECTED SECTION.
 
   PRIVATE SECTION.
@@ -58,5 +63,9 @@ CLASS zcl_adcoset_adt_res_features IMPLEMENTATION.
 
     response->set_body_data( content_handler = zcl_adcoset_adt_ch_factory=>create_feature_list_ch( )
                              data            = features ).
+  ENDMETHOD.
+
+  METHOD is_table_search_possible.
+    result = xsdbool( sy-saprl > '740' ).
   ENDMETHOD.
 ENDCLASS.
