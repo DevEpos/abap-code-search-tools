@@ -74,7 +74,7 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
 
     TRY.
         table_pers->if_wb_object_persist~get( EXPORTING p_object_key  = name
-                                                        p_version     = 'A'
+                                                        p_version     = swbm_version_active
                                               CHANGING  p_object_data = object_data ).
       CATCH cx_swb_object_does_not_exist.
       CATCH cx_swb_exception.
@@ -114,18 +114,15 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
                              WHEN tabl_type = zif_adcoset_c_global=>c_source_code_type-database_table THEN
                                zif_adcoset_c_global=>c_source_code_sub_type-databasetable ) ).
 
-    DATA(param_tab) = VALUE abap_parmbind_tab(
-                                ( name  = c_param_object_type
-                                  kind  = COND #( WHEN param_type_object_type = cl_abap_objectdescr=>exporting
-                                                  THEN cl_abap_objectdescr=>importing
-                                                  ELSE cl_abap_objectdescr=>exporting )
-                                  value = REF #( obj_type_value ) ) ).
-
     tabl_pers = NEW cl_sbd_structure_persist( ).
-
     TRY.
-        CALL METHOD tabl_pers->(c_initialize_method)
-            PARAMETER-TABLE param_tab.
+        IF param_type_object_type = cl_abap_objectdescr=>exporting.
+          CALL METHOD tabl_pers->(c_initialize_method)
+            IMPORTING p_object_type = obj_type_value.
+        ELSE.
+          CALL METHOD tabl_pers->(c_initialize_method)
+            EXPORTING p_object_type = obj_type_value.
+        ENDIF.
       CATCH cx_root.
         RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDTRY.
