@@ -12,11 +12,11 @@ CLASS zcl_adcoset_scr_tabl DEFINITION
         line_feed    TYPE string.
 
   PRIVATE SECTION.
-    CONSTANTS c_tabl_persistence_class TYPE string VALUE 'CL_SBD_STRUCTURE_PERSIST' ##NO_TEXT.
-    CONSTANTS c_initialize_method TYPE string VALUE 'IF_WB_OBJECT_PERSIST~INITIALIZE' ##NO_TEXT.
-    CONSTANTS c_get_method TYPE string VALUE 'IF_WB_OBJECT_PERSIST~GET' ##NO_TEXT.
-    CONSTANTS c_get_content_method TYPE string VALUE 'GET_CONTENT' ##NO_TEXT.
-    CONSTANTS c_param_object_type TYPE string VALUE 'P_OBJECT_TYPE' ##NO_TEXT.
+    CONSTANTS c_tabl_persistence_class TYPE string VALUE 'CL_SBD_STRUCTURE_PERSIST'.
+    CONSTANTS c_initialize_method TYPE string VALUE 'IF_WB_OBJECT_PERSIST~INITIALIZE'.
+    CONSTANTS c_get_method TYPE string VALUE 'IF_WB_OBJECT_PERSIST~GET'.
+    CONSTANTS c_get_content_method TYPE string VALUE 'GET_CONTENT'.
+    CONSTANTS c_param_object_type TYPE string VALUE 'P_OBJECT_TYPE'.
 
     DATA is_multiline TYPE abap_bool.
     DATA line_feed TYPE string.
@@ -79,8 +79,9 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
           EXPORTING p_object_key  = name
                     p_version     = swbm_version_active
           CHANGING  p_object_data = object_data.
-      CATCH cx_swb_object_does_not_exist.
-      CATCH cx_swb_exception.
+      CATCH cx_swb_object_does_not_exist
+            cx_swb_exception
+            cx_sy_dyn_call_error.
         RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDTRY.
 
@@ -127,7 +128,7 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
           CALL METHOD tabl_pers->(c_initialize_method)
             EXPORTING p_object_type = obj_type_value.
         ENDIF.
-      CATCH cx_root.
+      CATCH cx_sy_dyn_call_error.
         RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDTRY.
   ENDMETHOD.
