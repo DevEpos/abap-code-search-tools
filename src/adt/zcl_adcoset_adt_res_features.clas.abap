@@ -15,8 +15,8 @@ CLASS zcl_adcoset_adt_res_features DEFINITION
   PROTECTED SECTION.
 
   PRIVATE SECTION.
-    CONSTANTS c_pcre_available_feature TYPE string VALUE 'pcreAvailable'.
-    CONSTANTS c_tags_search_scope_feature TYPE string VALUE 'parameters.tagId'.
+    CONSTANTS c_pcre_available_feature TYPE string VALUE 'pcreAvailable' ##NO_TEXT.
+    CONSTANTS c_tags_search_scope_feature TYPE string VALUE 'parameters.tagId' ##NO_TEXT.
     CONSTANTS:
       BEGIN OF c_feature_value_type,
         boolean TYPE string VALUE 'Boolean',
@@ -31,7 +31,7 @@ CLASS zcl_adcoset_adt_res_features DEFINITION
 
     CONSTANTS:
       BEGIN OF c_feature_categories,
-        request_attribute TYPE string VALUE 'RequestAttribute',
+        request_attribute TYPE string VALUE 'RequestAttribute' ##NO_TEXT,
       END OF c_feature_categories.
 ENDCLASS.
 

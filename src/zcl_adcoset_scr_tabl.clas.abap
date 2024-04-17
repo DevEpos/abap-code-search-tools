@@ -14,6 +14,8 @@ CLASS zcl_adcoset_scr_tabl DEFINITION
   PRIVATE SECTION.
     CONSTANTS c_tabl_persistence_class TYPE string VALUE 'CL_SBD_STRUCTURE_PERSIST' ##NO_TEXT.
     CONSTANTS c_initialize_method TYPE string VALUE 'IF_WB_OBJECT_PERSIST~INITIALIZE' ##NO_TEXT.
+    CONSTANTS c_get_method TYPE string VALUE 'IF_WB_OBJECT_PERSIST~GET' ##NO_TEXT.
+    CONSTANTS c_get_content_method TYPE string VALUE 'GET_CONTENT' ##NO_TEXT.
     CONSTANTS c_param_object_type TYPE string VALUE 'P_OBJECT_TYPE' ##NO_TEXT.
 
     DATA is_multiline TYPE abap_bool.
@@ -33,7 +35,7 @@ CLASS zcl_adcoset_scr_tabl DEFINITION
       IMPORTING
         tabl_type TYPE trobjtype
       EXPORTING
-        tabl_pers TYPE REF TO cl_sbd_structure_persist
+        tabl_pers TYPE REF TO object
       RAISING
         zcx_adcoset_src_code_read.
 
@@ -73,9 +75,10 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
                                   IMPORTING tabl_pers = DATA(table_pers) ).
 
     TRY.
-        table_pers->if_wb_object_persist~get( EXPORTING p_object_key  = name
-                                                        p_version     = swbm_version_active
-                                              CHANGING  p_object_data = object_data ).
+        CALL METHOD table_pers->(c_get_method)
+          EXPORTING p_object_key  = name
+                    p_version     = swbm_version_active
+          CHANGING  p_object_data = object_data.
       CATCH cx_swb_object_does_not_exist.
       CATCH cx_swb_exception.
         RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
@@ -85,7 +88,8 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDIF.
 
-    object_data->get_content( IMPORTING p_data = result ).
+    CALL METHOD object_data->(c_get_content_method)
+      IMPORTING p_data = result.
 
     " handle line feed
     result = zcl_adcoset_string_util=>adjust_line_endings( text      = result
@@ -114,7 +118,7 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
                              WHEN tabl_type = zif_adcoset_c_global=>c_source_code_type-database_table THEN
                                zif_adcoset_c_global=>c_source_code_sub_type-databasetable ) ).
 
-    tabl_pers = NEW cl_sbd_structure_persist( ).
+    CREATE OBJECT tabl_pers TYPE (c_tabl_persistence_class).
     TRY.
         IF param_type_object_type = cl_abap_objectdescr=>exporting.
           CALL METHOD tabl_pers->(c_initialize_method)
