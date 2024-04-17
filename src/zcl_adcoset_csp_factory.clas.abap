@@ -91,7 +91,7 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
                          original
 
                        WHEN zif_adcoset_c_global=>c_source_code_type-structure OR
-                          zif_adcoset_c_global=>c_source_code_type-database_table THEN
+                            zif_adcoset_c_global=>c_source_code_type-database_table THEN
                          c_def_tabl_src_provider
 
                        WHEN zif_adcoset_c_global=>c_source_code_type-type_group OR
