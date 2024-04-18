@@ -189,8 +189,8 @@ CLASS zcl_adcoset_csp_fugr IMPLEMENTATION.
     LOOP AT unassigned_matches ASSIGNING FIELD-SYMBOL(<match_without_source>).
       APPEND <match_without_source> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
-      <match>-include          = include-name.
-      <match>-adt_include_type = include-adt_type.
+      <match>-object_name     = include-name.
+      <match>-adt_object_type = include-adt_type.
 
       " set the display name
       IF include-func_name IS NOT INITIAL.

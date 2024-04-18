@@ -2,50 +2,61 @@ INTERFACE zif_adcoset_ty_adt_types
   PUBLIC.
 
   TYPES:
-    BEGIN OF ty_adt_obj_ref,
-      "! URI - mandatory client response, optional for client request
-      uri          TYPE string,
-      "! Name of the referenced entity - optional
-      name         TYPE string,
-      "! Alternative Name of the referenced entity - optional
-      alt_name     TYPE string,
-      "! Description of the referenced entity - optional
-      description  TYPE string,
-      "! ADT Type of the referenced entity - optional
-      type         TYPE string,
-      "! Package name of the referenced entity- optional
-      package_name TYPE string,
-      "! Owner of the referenced entity - optional
-      owner        TYPE string,
-    END OF ty_adt_obj_ref,
+    BEGIN OF ty_s_property,
+      key   TYPE string,
+      type  TYPE string,
+      value TYPE string,
+    END OF ty_s_property,
 
-    BEGIN OF ty_code_search_match,
-      uri          TYPE string,
-      snippet      TYPE string,
-      long_snippet TYPE string,
-    END OF ty_code_search_match,
+    ty_t_property TYPE SORTED TABLE OF ty_s_property WITH UNIQUE KEY key.
 
-    ty_code_search_matches TYPE STANDARD TABLE OF ty_code_search_match WITH EMPTY KEY,
+  TYPES: BEGIN OF ty_adt_obj_ref,
+           "! URI - mandatory client response, optional for client request
+           uri          TYPE string,
+           "! Name of the referenced entity - optional
+           name         TYPE string,
+           "! Alternative Name of the referenced entity - optional
+           alt_name     TYPE string,
+           "! Description of the referenced entity - optional
+           description  TYPE string,
+           "! ADT Type of the referenced entity - optional
+           type         TYPE string,
+           "! Package name of the referenced entity- optional
+           package_name TYPE string,
+           "! Owner of the referenced entity - optional
+           owner        TYPE string,
+           "! Additional properties of the object - optional
+           properties   TYPE ty_t_property,
+         END OF ty_adt_obj_ref.
 
-    BEGIN OF ty_code_search_object,
-      uri             TYPE string,
-      parent_uri      TYPE string,
-      adt_main_object TYPE ty_adt_obj_ref,
-      matches         TYPE ty_code_search_matches,
-    END OF ty_code_search_object,
+  TYPES: BEGIN OF ty_code_search_match,
+           uri          TYPE string,
+           snippet      TYPE string,
+           long_snippet TYPE string,
+         END OF ty_code_search_match,
 
-    ty_code_search_objects TYPE STANDARD TABLE OF ty_code_search_object WITH EMPTY KEY,
+         ty_code_search_matches TYPE STANDARD TABLE OF ty_code_search_match WITH EMPTY KEY.
 
-    BEGIN OF ty_code_search_result,
-      code_search_objects        TYPE ty_code_search_objects,
-      messages                   TYPE zif_adcoset_ty_global=>ty_messages,
-      number_of_results          TYPE i,
-      number_of_searched_objects TYPE i,
-      number_of_searched_sources TYPE i,
-      query_time_in_ms           TYPE i,
-      loc                        TYPE f,
-    END OF ty_code_search_result,
+  TYPES: BEGIN OF ty_code_search_object,
+           uri             TYPE string,
+           parent_uri      TYPE string,
+           adt_main_object TYPE ty_adt_obj_ref,
+           matches         TYPE ty_code_search_matches,
+         END OF ty_code_search_object,
 
+         ty_code_search_objects TYPE STANDARD TABLE OF ty_code_search_object WITH EMPTY KEY.
+
+  TYPES: BEGIN OF ty_code_search_result,
+           code_search_objects        TYPE ty_code_search_objects,
+           messages                   TYPE zif_adcoset_ty_global=>ty_messages,
+           number_of_results          TYPE i,
+           number_of_searched_objects TYPE i,
+           number_of_searched_sources TYPE i,
+           query_time_in_ms           TYPE i,
+           loc                        TYPE f,
+         END OF ty_code_search_result.
+
+  TYPES:
     "! Describes a feature of an ADT plugin
     BEGIN OF ty_adt_plugin_feature,
       "! Name of a feature.
@@ -65,8 +76,9 @@ INTERFACE zif_adcoset_ty_adt_types
     END OF ty_adt_plugin_feature,
 
     "! List of ADT plugin features
-    ty_adt_plugin_features TYPE STANDARD TABLE OF ty_adt_plugin_feature WITH EMPTY KEY,
+    ty_adt_plugin_features TYPE STANDARD TABLE OF ty_adt_plugin_feature WITH EMPTY KEY.
 
+  TYPES:
     "! Code Search scope Parameter
     BEGIN OF ty_search_scope_param,
       name  TYPE string,
@@ -74,8 +86,9 @@ INTERFACE zif_adcoset_ty_adt_types
     END OF ty_search_scope_param,
 
     "! List of Code Search Scope Parameters
-    ty_search_scope_params TYPE STANDARD TABLE OF ty_search_scope_param WITH EMPTY KEY,
+    ty_search_scope_params TYPE STANDARD TABLE OF ty_search_scope_param WITH EMPTY KEY.
 
+  TYPES:
     "! Scope for code search
     BEGIN OF ty_search_scope,
       id           TYPE sysuuid_x16,

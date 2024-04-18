@@ -56,27 +56,28 @@ INTERFACE zif_adcoset_c_global
   CONSTANTS:
     "! Names of code search parameters
     BEGIN OF c_search_params,
-      scope_id             TYPE string VALUE 'scopeId',
-      scope_offset         TYPE string VALUE 'scopeOffset',
-      package              TYPE string VALUE 'packageName',
-      owner                TYPE string VALUE 'owner',
-      use_regex            TYPE string VALUE 'useRegex',
-      match_all_patterns   TYPE string VALUE 'matchAll',
-      sequential_matching  TYPE string VALUE 'seqMatching',
-      ignore_comment_lines TYPE string VALUE 'ignoreCommentLines',
-      ignore_case          TYPE string VALUE 'ignoreCase',
-      multi_line           TYPE string VALUE 'multiLine',
-      appl_comp            TYPE string VALUE 'applComp',
-      object_name          TYPE string VALUE 'objectName',
-      object_type          TYPE string VALUE 'objectType',
-      search_pattern       TYPE string VALUE 'searchPattern',
-      created_date         TYPE string VALUE 'createdDate',
-      class_includes       TYPE string VALUE 'classIncludes',
-      fugr_includes        TYPE string VALUE 'fugrIncludes',
-      expand_prog_includes TYPE string VALUE 'expandProgIncl',
-      max_objects          TYPE string VALUE 'maxObjects',
-      tag_id               TYPE string VALUE 'tagId',
-      tr_request           TYPE string VALUE 'transportRequest',
+      scope_id              TYPE string VALUE 'scopeId',
+      scope_offset          TYPE string VALUE 'scopeOffset',
+      package               TYPE string VALUE 'packageName',
+      owner                 TYPE string VALUE 'owner',
+      use_regex             TYPE string VALUE 'useRegex',
+      match_all_patterns    TYPE string VALUE 'matchAll',
+      sequential_matching   TYPE string VALUE 'seqMatching',
+      ignore_comment_lines  TYPE string VALUE 'ignoreCommentLines',
+      ignore_case           TYPE string VALUE 'ignoreCase',
+      multi_line            TYPE string VALUE 'multiLine',
+      appl_comp             TYPE string VALUE 'applComp',
+      object_name           TYPE string VALUE 'objectName',
+      object_type           TYPE string VALUE 'objectType',
+      search_pattern        TYPE string VALUE 'searchPattern',
+      created_date          TYPE string VALUE 'createdDate',
+      class_includes        TYPE string VALUE 'classIncludes',
+      fugr_includes         TYPE string VALUE 'fugrIncludes',
+      expand_prog_includes  TYPE string VALUE 'expandProgIncl',
+      expand_table_includes TYPE string VALUE 'expandTableIncl',
+      max_objects           TYPE string VALUE 'maxObjects',
+      tag_id                TYPE string VALUE 'tagId',
+      tr_request            TYPE string VALUE 'transportRequest',
     END OF c_search_params.
 
   CONSTANTS:
@@ -120,6 +121,9 @@ INTERFACE zif_adcoset_c_global
       behavior_definition   TYPE trobjtype VALUE 'BDEF',
       simple_transformation TYPE trobjtype VALUE 'XSLT',
       function_group        TYPE trobjtype VALUE 'FUGR',
+      table                 TYPE trobjtype VALUE 'TABL',
+      structure             TYPE trobjtype VALUE 'STRU',
+      database_table        TYPE trobjtype VALUE 'DTAB',
     END OF c_source_code_type.
 
   CONSTANTS:
@@ -134,6 +138,12 @@ INTERFACE zif_adcoset_c_global
       class_private_section   TYPE trobjtype VALUE 'CPRI',
       class_include           TYPE trobjtype VALUE 'CINC',
     END OF c_source_code_limu_type.
+
+  CONSTANTS:
+    BEGIN OF c_source_code_sub_type,
+      structure     TYPE seu_objtyp VALUE 'DS',
+      databasetable TYPE seu_objtyp VALUE 'DT',
+    END OF c_source_code_sub_type.
 
   CONSTANTS:
     "! Technical identifier for scope types

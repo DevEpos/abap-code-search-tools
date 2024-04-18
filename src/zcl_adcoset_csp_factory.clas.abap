@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Factory for retrieving code search providers</p>
 CLASS zcl_adcoset_csp_factory DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -18,6 +17,7 @@ CLASS zcl_adcoset_csp_factory DEFINITION
   PRIVATE SECTION.
     CONSTANTS c_def_reposrc_provider TYPE trobjtype VALUE '$REP'.
     CONSTANTS c_def_string_src_provider TYPE trobjtype VALUE '$SRC'.
+    CONSTANTS c_def_tabl_src_provider TYPE trobjtype VALUE 'TABL'.
 
     TYPES:
       BEGIN OF ty_providers,
@@ -69,6 +69,9 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
                        WHEN zif_adcoset_c_global=>c_source_code_type-program THEN
                          NEW zcl_adcoset_csp_prog( custom_settings = custom_settings-prog )
 
+                       WHEN zif_adcoset_c_global=>c_source_code_type-table THEN
+                         NEW zcl_adcoset_csp_tabl( custom_settings = custom_settings-tabl )
+
                        WHEN c_def_reposrc_provider THEN
                          NEW zcl_adcoset_csp_repsrc_default( )
 
@@ -86,6 +89,10 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
                             zif_adcoset_c_global=>c_source_code_type-function_group OR
                             zif_adcoset_c_global=>c_source_code_type-program THEN
                          original
+
+                       WHEN zif_adcoset_c_global=>c_source_code_type-structure OR
+                            zif_adcoset_c_global=>c_source_code_type-database_table THEN
+                         zif_adcoset_c_global=>c_source_code_type-table
 
                        WHEN zif_adcoset_c_global=>c_source_code_type-type_group OR
                             zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
