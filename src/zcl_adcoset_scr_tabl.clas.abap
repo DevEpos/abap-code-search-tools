@@ -12,11 +12,16 @@ CLASS zcl_adcoset_scr_tabl DEFINITION
         line_feed    TYPE string.
 
   PRIVATE SECTION.
-    CONSTANTS c_tabl_persistence_class TYPE string VALUE 'CL_SBD_STRUCTURE_PERSIST'.
-    CONSTANTS c_initialize_method TYPE string VALUE 'IF_WB_OBJECT_PERSIST~INITIALIZE'.
-    CONSTANTS c_get_method TYPE string VALUE 'IF_WB_OBJECT_PERSIST~GET'.
-    CONSTANTS c_get_content_method TYPE string VALUE 'GET_CONTENT'.
-    CONSTANTS c_param_object_type TYPE string VALUE 'P_OBJECT_TYPE'.
+    CONSTANTS:
+      BEGIN OF c_tabl_pers_class,
+        name              TYPE string VALUE 'CL_SBD_STRUCTURE_PERSIST',
+        BEGIN OF methods,
+          initialize  TYPE string VALUE 'IF_WB_OBJECT_PERSIST~INITIALIZE',
+          get         TYPE string VALUE 'IF_WB_OBJECT_PERSIST~GET',
+          get_content TYPE string VALUE 'GET_CONTENT',
+        END OF methods,
+        object_type_param TYPE string VALUE 'P_OBJECT_TYPE',
+      END OF c_tabl_pers_class.
 
     DATA is_multiline TYPE abap_bool.
     DATA line_feed TYPE string.
@@ -75,7 +80,7 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
                                   IMPORTING tabl_pers = DATA(table_pers) ).
 
     TRY.
-        CALL METHOD table_pers->(c_get_method)
+        CALL METHOD table_pers->(c_tabl_pers_class-methods-get)
           EXPORTING p_object_key  = name
                     p_version     = swbm_version_active
           CHANGING  p_object_data = object_data.
@@ -89,7 +94,7 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDIF.
 
-    CALL METHOD object_data->(c_get_content_method)
+    CALL METHOD object_data->(c_tabl_pers_class-methods-get_content)
       IMPORTING p_data = result.
 
     " handle line feed
@@ -100,7 +105,7 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
   METHOD initialize_table_persistence.
     DATA lo_class_descr TYPE REF TO cl_abap_classdescr.
 
-    cl_abap_typedescr=>describe_by_name( EXPORTING  p_name         = c_tabl_persistence_class
+    cl_abap_typedescr=>describe_by_name( EXPORTING  p_name         = c_tabl_pers_class-name
                                          RECEIVING  p_descr_ref    = DATA(lo_type_descr)
                                          EXCEPTIONS type_not_found = 1 ).
     IF sy-subrc = 0 AND lo_type_descr->kind = cl_abap_typedescr=>kind_class.
@@ -109,8 +114,8 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_adcoset_src_code_read.
     ENDIF.
 
-    DATA(param_type_object_type) = lo_class_descr->methods[ name = c_initialize_method ]-parameters[
-        name = c_param_object_type ]-parm_kind.
+    DATA(param_type_object_type) = lo_class_descr->methods[ name = c_tabl_pers_class-methods-initialize ]-parameters[
+        name = c_tabl_pers_class-object_type_param ]-parm_kind.
 
     DATA(obj_type_value) = VALUE wbobjtype(
         objtype_tr = zif_adcoset_c_global=>c_source_code_type-table
@@ -119,13 +124,13 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
                              WHEN tabl_type = zif_adcoset_c_global=>c_source_code_type-database_table THEN
                                zif_adcoset_c_global=>c_source_code_sub_type-databasetable ) ).
 
-    CREATE OBJECT tabl_pers TYPE (c_tabl_persistence_class).
+    CREATE OBJECT tabl_pers TYPE (c_tabl_pers_class-name).
     TRY.
         IF param_type_object_type = cl_abap_objectdescr=>exporting.
-          CALL METHOD tabl_pers->(c_initialize_method)
+          CALL METHOD tabl_pers->(c_tabl_pers_class-methods-initialize)
             IMPORTING p_object_type = obj_type_value.
         ELSE.
-          CALL METHOD tabl_pers->(c_initialize_method)
+          CALL METHOD tabl_pers->(c_tabl_pers_class-methods-initialize)
             EXPORTING p_object_type = obj_type_value.
         ENDIF.
       CATCH cx_sy_dyn_call_error.
