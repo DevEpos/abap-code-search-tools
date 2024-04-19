@@ -67,10 +67,8 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
       SPLIT source_text AT line_feed INTO TABLE source.
     ENDIF.
 
-    " todo Ludwig -> comment_regex not needed right?
-    result = NEW zcl_adcoset_source_code( source        = source
-                                          line_indexes  = indexes
-                                          comment_regex = zif_adcoset_c_global=>c_cds_comment_regex ).
+    result = NEW zcl_adcoset_source_code( source       = source
+                                          line_indexes = indexes ).
   ENDMETHOD.
 
   METHOD read_tabl.
