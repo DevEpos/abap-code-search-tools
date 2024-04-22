@@ -17,7 +17,6 @@ CLASS zcl_adcoset_csp_factory DEFINITION
   PRIVATE SECTION.
     CONSTANTS c_def_reposrc_provider TYPE trobjtype VALUE '$REP'.
     CONSTANTS c_def_string_src_provider TYPE trobjtype VALUE '$SRC'.
-    CONSTANTS c_def_tabl_src_provider TYPE trobjtype VALUE 'TABL'.
 
     TYPES:
       BEGIN OF ty_providers,
