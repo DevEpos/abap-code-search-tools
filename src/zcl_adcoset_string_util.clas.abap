@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Utility for string processing</p>
 CLASS zcl_adcoset_string_util DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.

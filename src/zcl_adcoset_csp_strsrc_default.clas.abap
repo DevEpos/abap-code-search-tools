@@ -9,19 +9,14 @@ CLASS zcl_adcoset_csp_strsrc_default DEFINITION
     "! <p class="shorttext synchronized">Creates new instance of a default search provider</p>
     METHODS constructor.
 
-  PROTECTED SECTION.
   PRIVATE SECTION.
     DATA search_settings TYPE zif_adcoset_ty_global=>ty_search_settings.
 ENDCLASS.
 
 
-
-CLASS ZCL_ADCOSET_CSP_STRSRC_DEFAULT IMPLEMENTATION.
-
-
+CLASS zcl_adcoset_csp_strsrc_default IMPLEMENTATION.
   METHOD constructor.
   ENDMETHOD.
-
 
   METHOD zif_adcoset_code_search_prov~search.
     TRY.

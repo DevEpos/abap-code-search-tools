@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Utilities for parallel processing</p>
 CLASS zcl_adcoset_parl_proc_utils DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

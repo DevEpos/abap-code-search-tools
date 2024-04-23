@@ -3,8 +3,7 @@
 "! detailed search
 CLASS zcl_adcoset_scs_sequ_extended DEFINITION
   PUBLIC
-  FINAL
-  INHERITING FROM zcl_adcoset_scs_sequential
+  INHERITING FROM zcl_adcoset_scs_sequential FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

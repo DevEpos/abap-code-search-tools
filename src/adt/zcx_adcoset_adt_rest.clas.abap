@@ -1,8 +1,7 @@
 "! <p class="shorttext synchronized">General ADT error</p>
 CLASS zcx_adcoset_adt_rest DEFINITION
   PUBLIC
-  INHERITING FROM cx_adt_rest
-  FINAL
+  INHERITING FROM cx_adt_rest FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

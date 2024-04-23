@@ -59,14 +59,14 @@
       <tt:attribute name="adtbase:description" value-ref="adt_obj_ref.description"/>
     </tt:cond>
 
-   <tt:cond check="exist(adt_obj_ref.properties)">
+    <tt:cond check="exist(adt_obj_ref.properties)">
        <tt:apply name="properties">
          <tt:with-root name="properties" ref="adt_obj_ref.properties"/>
        </tt:apply>
     </tt:cond>
   </tt:template>
 
-<!-- PUBLIC TEMPLATES (can be called from other tranformations) -->
+ <!-- PUBLIC TEMPLATES (can be called from other tranformations) -->
   <tt:template name="properties">
     <tt:context>
       <tt:root name="properties"/>

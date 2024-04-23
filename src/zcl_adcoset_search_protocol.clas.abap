@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Protocol that collects information during code search</p>
 CLASS zcl_adcoset_search_protocol DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

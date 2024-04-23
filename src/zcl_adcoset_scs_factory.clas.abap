@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Factory for creating source code searcher</p>
 CLASS zcl_adcoset_scs_factory DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.

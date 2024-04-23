@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Utility to check PCRE support</p>
 CLASS zcl_adcoset_pcre_util DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.

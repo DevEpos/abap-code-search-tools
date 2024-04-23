@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">ADT content handler factory</p>
 CLASS zcl_adcoset_adt_ch_factory DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PRIVATE.
 
   PUBLIC SECTION.

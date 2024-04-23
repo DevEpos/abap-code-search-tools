@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Finds matches in a string for a given (RegExp) pattern</p>
 CLASS zcl_adcoset_substring_matcher DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.

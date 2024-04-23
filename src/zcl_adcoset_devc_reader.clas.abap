@@ -1,7 +1,6 @@
 "! <p class="shorttext synchronized">Access to Packages (DEVC)</p>
 CLASS zcl_adcoset_devc_reader DEFINITION
-  PUBLIC
-  FINAL
+  PUBLIC FINAL
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -47,8 +46,8 @@ CLASS zcl_adcoset_devc_reader IMPLEMENTATION.
     CHECK package_range IS NOT INITIAL.
 
     SELECT devclass AS low,
-           'I' AS sign,
-           'EQ' AS option
+           'I'      AS sign,
+           'EQ'     AS option
       FROM tdevc
       WHERE devclass IN @package_range
       INTO CORRESPONDING FIELDS OF TABLE @result.
@@ -67,8 +66,7 @@ CLASS zcl_adcoset_devc_reader IMPLEMENTATION.
 
     CHECK package_range IS NOT INITIAL.
 
-    SELECT devclass
-      FROM tdevc
+    SELECT devclass FROM tdevc
       WHERE parentcl IN @package_range
       INTO TABLE @package_names.
 
@@ -78,8 +76,7 @@ CLASS zcl_adcoset_devc_reader IMPLEMENTATION.
                         low    = package_name ) ).
 
     WHILE lines( package_names ) > 0.
-      SELECT devclass
-        FROM tdevc
+      SELECT devclass FROM tdevc
         FOR ALL ENTRIES IN @package_names
         WHERE parentcl = @package_names-table_line
         INTO TABLE @package_names.
