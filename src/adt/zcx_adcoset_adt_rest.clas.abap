@@ -26,8 +26,6 @@ ENDCLASS.
 
 CLASS zcx_adcoset_adt_rest IMPLEMENTATION.
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
-    " TODO: parameter TEXTID is never used (ABAP cleaner)
-
     DATA fill_t100key TYPE abap_bool.
 
     super->constructor( previous   = previous

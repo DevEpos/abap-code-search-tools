@@ -34,7 +34,7 @@ CLASS zcl_adcoset_csp_tabl DEFINITION
         src_code_searcher      TYPE REF TO zif_adcoset_src_code_searcher
       CHANGING
         searched_sources_count TYPE i
-        all_matches                TYPE zif_adcoset_ty_global=>ty_search_matches.
+        all_matches            TYPE zif_adcoset_ty_global=>ty_search_matches.
 ENDCLASS.
 
 
