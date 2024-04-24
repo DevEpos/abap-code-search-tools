@@ -1,7 +1,7 @@
 {
   "requiredVersion": 1,
   "programVersion": 24,
-  "ruleCount": 70,
+  "ruleCount": 75,
   "autoActivateNewFeatures": true,
   "rules": [
     {
@@ -327,6 +327,17 @@
       }
     },
     {
+      "ruleID": "STRING_TEMPLATE",
+      "isActive": true,
+      "settingCount": 4,
+      "settings": {
+        "AlwaysConvertLiterals": "1",
+        "IgnoreMultiLineOperands": "1",
+        "KeepControlCharsSeparate": "1",
+        "StringTemplateCondition": "1"
+      }
+    },
+    {
       "ruleID": "NEEDLESS_PARENTHESES",
       "isActive": true,
       "settingCount": 4,
@@ -474,6 +485,34 @@
       }
     },
     {
+      "ruleID": "CONDENSE",
+      "isActive": true,
+      "settingCount": 4,
+      "settings": {
+        "SpecifyFromForNoGaps": "1",
+        "SpecifyValName": "0",
+        "KeepParamsOnOneLine": "0",
+        "SpecifyDel": "0"
+      }
+    },
+    {
+      "ruleID": "DESCRIBE_TABLE",
+      "isActive": true,
+      "settingCount": 0,
+      "settings": {}
+    },
+    {
+      "ruleID": "READ_TABLE",
+      "isActive": true,
+      "settingCount": 4,
+      "settings": {
+        "ReplaceWithLineExists": "1",
+        "ReplaceWithLineIndex": "1",
+        "ReplaceWithAssign": "1",
+        "UseComponentsKeyword": "0"
+      }
+    },
+    {
       "ruleID": "ASSERT_EQUALS_BOOLEAN",
       "isActive": true,
       "settingCount": 1,
@@ -522,6 +561,20 @@
         "DefinitionIdentifierStyle": "1",
         "PragmaStyle": "2",
         "PragmaParameterStyle": "2"
+      }
+    },
+    {
+      "ruleID": "CAMEL_CASE_NAME",
+      "isActive": false,
+      "settingCount": 7,
+      "settings": {
+        "MinLengthOfSureMatch": "11",
+        "ContextWithUnknownAction": "3",
+        "ContextAllKnownAction": "0",
+        "RequireApprovalForSureMatch": "0",
+        "ProcessFieldNames": "1",
+        "DeviationAction": "1",
+        "ProcessViewNames": "1"
       }
     },
     {
