@@ -24,6 +24,9 @@ Searches Code in ABAP sources like
 - [X] Access Controls (DCLS)
 - [X] Behavior Definitions (BDEV)
 - [X] Simple Transformations (XSLT)
+- [X] Structures (STRU)      --> ABAP 7.50
+- [X] Database Tables (DTAB) --> ABAP 7.52
+
 
 The search is done entirely via ABAP (as opposed to the ADT Source Search). There is an option to run the search in parallel for better performance
 
