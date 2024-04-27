@@ -226,13 +226,13 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
           BASE result-items
           ( name        = request->trkorr
             description = request->as4text
-            data        = 'isTask=' && SWITCH string( request->trfunction
+            data        = |isTask=| && SWITCH string( request->trfunction
                                                       WHEN sctsc_type_correction OR
                                                            sctsc_type_repair
                                                       THEN c_true
                                                       ELSE c_false ) &&
                           c_split_marker &&
-                          'isReleased=' && SWITCH string( request->trstatus
+                          |isReleased=| && SWITCH string( request->trstatus
                                                           WHEN sctsc_state_notconfirmed OR sctsc_state_released
                                                           THEN c_true
                                                           ELSE c_false ) ) ).

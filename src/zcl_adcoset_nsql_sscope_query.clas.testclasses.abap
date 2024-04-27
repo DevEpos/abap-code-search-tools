@@ -4,7 +4,7 @@ CLASS ltcl_query_test DEFINITION FINAL
 
   PRIVATE SECTION.
     METHODS test_query_with_where FOR TESTING RAISING cx_static_check.
-    methods test_cte_count_query for testing raising cx_static_check.
+    METHODS test_cte_count_query  FOR TESTING RAISING cx_static_check.
 ENDCLASS.
 
 
@@ -65,5 +65,4 @@ CLASS ltcl_query_test IMPLEMENTATION.
     cl_abap_unit_assert=>assert_not_initial( query->execute_cte_count( ) ).
     cl_abap_unit_assert=>assert_initial( lines( zcl_adcoset_log=>get_messages( ) ) ).
   ENDMETHOD.
-
 ENDCLASS.

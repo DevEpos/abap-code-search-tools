@@ -136,8 +136,7 @@ CLASS zcl_adcoset_parl_task_runner IMPLEMENTATION.
         EXPORTING text = |Not enough tasks available for parallel processing|.
     ENDIF.
 
-    me->task_prefix  = COND #(
-        WHEN task_prefix IS INITIAL THEN |ADCOSET_{ sy-datum }| ELSE task_prefix ).
+    me->task_prefix  = COND #( WHEN task_prefix IS INITIAL THEN |ADCOSET_{ sy-datum }| ELSE task_prefix ).
     me->server_group = server_group.
 
     handler_def = zcl_adcoset_parl_proc_utils=>get_parallel_handler( handler_class  = handler_class
