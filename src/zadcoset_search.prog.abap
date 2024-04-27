@@ -453,8 +453,7 @@ CLASS lcl_report IMPLEMENTATION.
     ENDIF.
 
     IF result IS INITIAL.
-      " TODO: variable is assigned but never used; add pragma ##NEEDED (ABAP cleaner)
-      MESSAGE e001(00) WITH 'You have to select at least one object type' INTO DATA(msg).
+      MESSAGE e001(00) WITH 'You have to select at least one object type' INTO DATA(msg) ##NEEDED.
       SET CURSOR FIELD p_class.
       RAISE EXCEPTION TYPE zcx_adcoset_static_error.
     ENDIF.

@@ -35,7 +35,6 @@ CLASS zcl_adcoset_message_util IMPLEMENTATION.
       ENDIF.
     ENDIF.
 
-    " TODO: variable is assigned but never used; add pragma ##NEEDED (ABAP cleaner)
-    MESSAGE e001(00) WITH msgv1 msgv2 msgv3 msgv4 INTO DATA(msg).
+    MESSAGE e001(00) WITH msgv1 msgv2 msgv3 msgv4 INTO DATA(msg) ##NEEDED.
   ENDMETHOD.
 ENDCLASS.

@@ -3,7 +3,7 @@
   "version": "1.6.0",
   "description": "ABAP Code Search",
   "scripts": {
-    "format": "abap-cleanerc.exe --sourcedir src --recursive --overwrite --release 740 --profile abapcleaner.cfj"
+    "format": "abap-cleanerc.exe --sourcedir src --recursive --overwrite --release 740 --crlf --profile abapcleaner.cfj"
   },
   "repository": {
     "type": "git",
