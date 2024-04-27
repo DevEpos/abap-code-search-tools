@@ -101,6 +101,10 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
                      |\{&{ zif_adcoset_c_global=>c_search_params-ignore_case }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-multi_line }*\}|.
 
+    IF zcl_adcoset_adt_res_features=>is_table_search_possible( ).
+      template = |{ template }\{&{ zif_adcoset_c_global=>c_search_params-expand_table_includes }*\}|.
+    ENDIF.
+
     search_collection->register_disc_res_w_template( relation      = c_root_rel_scheme && c_search_uri
                                                      template      = template
                                                      handler_class = c_handlers-search ).

@@ -78,6 +78,9 @@ CLASS lcl_search_query IMPLEMENTATION.
     settings-custom_settings-prog-expand_includes = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
         param_name = zif_adcoset_c_global=>c_search_params-expand_prog_includes
         request    = request ).
+    settings-custom_settings-tabl-expand_includes = zcl_adcoset_adt_request_util=>get_boolean_query_parameter(
+        param_name = zif_adcoset_c_global=>c_search_params-expand_table_includes
+        request    = request ).
   ENDMETHOD.
 
   METHOD complete_settings.
@@ -235,23 +238,28 @@ CLASS lcl_result_converter IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD convert_matches_to_adt_result.
-    LOOP AT raw_result-results ASSIGNING FIELD-SYMBOL(<raw_result>).
+    LOOP AT raw_result-results INTO DATA(raw_result_line).
+
+      IF    raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-structure
+         OR raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-database_table.
+        raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
+      ENDIF.
 
       TRY.
           DATA(search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
-              parent_uri      = get_package_uri( <raw_result>-object_info-package_name )
-              adt_main_object = VALUE #( name  = <raw_result>-object_info-name
-                                         owner = <raw_result>-object_info-owner ) ).
+              parent_uri      = get_package_uri( raw_result_line-object_info-package_name )
+              adt_main_object = VALUE #( name  = raw_result_line-object_info-name
+                                         owner = raw_result_line-object_info-owner ) ).
 
-          DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj( type = <raw_result>-object_info-type
-                                                                     name = <raw_result>-object_info-name ).
+          DATA(adt_ref) = adt_obj_factory->get_object_ref_for_trobj( type = raw_result_line-object_info-type
+                                                                     name = raw_result_line-object_info-name ).
 
           search_result_object-uri = adt_ref-uri.
           search_result_object-adt_main_object-type = adt_ref-type.
 
           create_match_objects( search_result_object = REF #( search_result_object )
-                                object_info          = <raw_result>-object_info
-                                raw_matches          = <raw_result>-text_matches ).
+                                object_info          = raw_result_line-object_info
+                                raw_matches          = raw_result_line-text_matches ).
 
         CATCH zcx_adcoset_static_error ##NEEDED.
           " ignore the result in case of a mapping error
@@ -262,31 +270,31 @@ CLASS lcl_result_converter IMPLEMENTATION.
   METHOD create_match_objects.
     DATA(l_raw_matches) = raw_matches.
 
-    IF object_info-type = zif_adcoset_c_global=>c_source_code_type-program.
-      " handle direct program matches
-      DATA(direct_program_matches) = VALUE zif_adcoset_ty_global=>ty_search_matches( FOR <prog_raw_match> IN l_raw_matches
-                                                                                     WHERE ( include = object_info-name )
-                                                                                     ( <prog_raw_match> ) ).
-      DELETE l_raw_matches WHERE include = object_info-name.
-      create_std_match_objects( search_result_object = search_result_object
-                                object_info          = object_info
-                                raw_matches          = direct_program_matches ).
-    ENDIF.
-
     IF    object_info-type = zif_adcoset_c_global=>c_source_code_type-class
        OR object_info-type = zif_adcoset_c_global=>c_source_code_type-function_group
-       OR object_info-type = zif_adcoset_c_global=>c_source_code_type-program.
+       OR object_info-type = zif_adcoset_c_global=>c_source_code_type-program
+       OR object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
+
+      IF    object_info-type = zif_adcoset_c_global=>c_source_code_type-program
+         OR object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
+        " handle direct object matches
+        DATA(direct_object_matches) = VALUE zif_adcoset_ty_global=>ty_search_matches( FOR <direct_match> IN l_raw_matches
+                                                                                      WHERE ( object_name = object_info-name )
+                                                                                      ( <direct_match> ) ).
+        DELETE l_raw_matches WHERE object_name = object_info-name.
+        create_std_match_objects( search_result_object = search_result_object
+                                  object_info          = object_info
+                                  raw_matches          = direct_object_matches ).
+      ENDIF.
+
       DATA(incl_match_objects) = create_incl_match_objects( parent_search_result_object = search_result_object->*
                                                             object_info                 = object_info
                                                             raw_matches                 = l_raw_matches ).
 
-      IF incl_match_objects IS NOT INITIAL.
+      IF direct_object_matches IS NOT INITIAL OR incl_match_objects IS NOT INITIAL.
         adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects
                                                   ( search_result_object->* )
                                                   ( LINES OF incl_match_objects ) ).
-      ELSEIF     object_info-type               = zif_adcoset_c_global=>c_source_code_type-program
-             AND search_result_object->matches IS NOT INITIAL.
-        adt_result-code_search_objects = VALUE #( BASE adt_result-code_search_objects ( search_result_object->* ) ).
       ENDIF.
     ELSE.
       create_std_match_objects( search_result_object = search_result_object
@@ -360,34 +368,54 @@ CLASS lcl_result_converter IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD create_incl_match_objects.
+    DATA incl_object_ref TYPE sadt_object_reference.
+    DATA properties TYPE zif_adcoset_ty_adt_types=>ty_t_property.
+    DATA search_result_object_type TYPE string.
+    DATA match_object_info TYPE zif_adcoset_ty_global=>ty_tadir_object_info.
     FIELD-SYMBOLS <raw_match> TYPE zif_adcoset_ty_global=>ty_search_match.
 
     " Skip matches of program include in result
-    LOOP AT raw_matches ASSIGNING FIELD-SYMBOL(<raw_match_group>) WHERE include <> object_info-name
-         GROUP BY <raw_match_group>-include.
+    LOOP AT raw_matches ASSIGNING FIELD-SYMBOL(<raw_match_group>) WHERE object_name <> object_info-name
+         GROUP BY <raw_match_group>-object_name.
 
       TRY.
-          DATA(incl_object_ref) = adt_obj_factory->get_object_ref_for_include(
-                                      main_program = object_info-name
-                                      include      = <raw_match_group>-include ).
+          IF <raw_match_group>-adt_object_type = zif_adcoset_c_global=>c_source_code_type-table.
+            incl_object_ref = adt_obj_factory->get_object_ref_for_trobj(
+                                  type = CONV #( <raw_match_group>-adt_object_type )
+                                  name = <raw_match_group>-object_name ).
+
+            search_result_object_type = incl_object_ref-type.
+            match_object_info = CORRESPONDING #( incl_object_ref ).
+          ELSE.
+            incl_object_ref = adt_obj_factory->get_object_ref_for_include(
+                                  main_program = object_info-name
+                                  include      = <raw_match_group>-object_name ).
+
+            search_result_object_type = COND #( WHEN <raw_match_group>-adt_object_type IS NOT INITIAL
+                                                THEN <raw_match_group>-adt_object_type
+                                                ELSE incl_object_ref-type ).
+            match_object_info = object_info.
+          ENDIF.
         CATCH zcx_adcoset_static_error.
           CONTINUE.
       ENDTRY.
 
+      IF    <raw_match_group>-adt_object_type = zif_adcoset_c_global=>c_source_code_type-table
+         OR <raw_match_group>-adt_object_type = zif_adcoset_c_global=>c_source_code_type-program.
+        properties = VALUE #( ( key = 'isExpandedObject' value = abap_true type = 'bool' ) ).
+      ENDIF.
+
       DATA(incl_search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
                                                   uri             = incl_object_ref-uri
                                                   parent_uri      = parent_search_result_object-uri
-                                                  adt_main_object = VALUE #(
-                                                      name = <raw_match_group>-display_name
-                                                      type = COND #(
-                                                        WHEN <raw_match_group>-adt_include_type IS NOT INITIAL
-                                                        THEN <raw_match_group>-adt_include_type
-                                                        ELSE incl_object_ref-type ) ) ).
+                                                  adt_main_object = VALUE #( name       = <raw_match_group>-display_name
+                                                                             type       = search_result_object_type
+                                                                             properties = properties ) ).
 
       LOOP AT GROUP <raw_match_group> ASSIGNING <raw_match>.
-        add_main_object_ref( search_result_object = REF #( incl_search_result_object )
-                             object_info          = object_info
-                             raw_match            = <raw_match> ).
+        append_match( search_result_object = REF #( incl_search_result_object )
+                      object_info          = match_object_info
+                      raw_match            = <raw_match> ).
       ENDLOOP.
 
       IF incl_search_result_object-matches IS NOT INITIAL.
@@ -399,13 +427,13 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
   METHOD create_std_match_objects.
     LOOP AT raw_matches ASSIGNING FIELD-SYMBOL(<raw_match>).
-      add_main_object_ref( search_result_object = search_result_object
-                           object_info          = object_info
-                           raw_match            = <raw_match> ).
+      append_match( search_result_object = search_result_object
+                    object_info          = object_info
+                    raw_match            = <raw_match> ).
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD add_main_object_ref.
+  METHOD append_match.
     TRY.
         DATA(match_object_ref) = create_match_object_ref( object_info = object_info
                                                           match       = raw_match ).
@@ -429,7 +457,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
            zif_adcoset_c_global=>c_source_code_type-program.
 
         result = adt_obj_factory->get_object_ref_for_include( main_program      = object_info-name
-                                                              include           = match-include
+                                                              include           = match-object_name
                                                               start_line        = match-start_line
                                                               start_line_offset = match-start_column
                                                               end_line          = match-end_line
@@ -442,7 +470,8 @@ CLASS lcl_result_converter IMPLEMENTATION.
            zif_adcoset_c_global=>c_source_code_type-type_group OR
            zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
            zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
-           zif_adcoset_c_global=>c_source_code_type-program.
+           zif_adcoset_c_global=>c_source_code_type-program OR
+           zif_adcoset_c_global=>c_source_code_type-table.
 
         result = adt_obj_factory->get_object_ref_for_trobj( type                   = object_info-type
                                                             name                   = object_info-name

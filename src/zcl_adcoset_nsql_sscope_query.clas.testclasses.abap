@@ -4,7 +4,7 @@ CLASS ltcl_query_test DEFINITION FINAL
 
   PRIVATE SECTION.
     METHODS test_query_with_where FOR TESTING RAISING cx_static_check.
-    METHODS test_cte_count_query  FOR TESTING RAISING cx_static_check.
+    methods test_cte_count_query for testing raising cx_static_check.
 ENDCLASS.
 
 
@@ -49,7 +49,7 @@ CLASS ltcl_query_test IMPLEMENTATION.
 
     obj_type_range = VALUE #( sign = 'I'
                               ( option = 'CP' low = 'C*' )
-                              ( option = 'EQ' low = 'XSLT' ) ).
+                              (  option = 'EQ' low = 'XSLT' ) ).
 
     zcl_adcoset_log=>clear( ).
     DATA(query) = NEW zcl_adcoset_nsql_sscope_query( ).
@@ -59,9 +59,11 @@ CLASS ltcl_query_test IMPLEMENTATION.
                        distinct    = abap_true
                        target_cols = VALUE #( ( 'OBJ_TYPE' ) ) ).
     query->add_range_to_where( ranges   = obj_type_range
-                               col_info = VALUE #( tab_alias = 'tdir' name = 'object' ) ).
+                               col_info = VALUE #( tab_alias = 'tdir'
+                                                   name      = 'object' ) ).
 
     cl_abap_unit_assert=>assert_not_initial( query->execute_cte_count( ) ).
     cl_abap_unit_assert=>assert_initial( lines( zcl_adcoset_log=>get_messages( ) ) ).
   ENDMETHOD.
+
 ENDCLASS.

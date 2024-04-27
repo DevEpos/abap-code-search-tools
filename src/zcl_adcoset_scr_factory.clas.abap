@@ -91,6 +91,14 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
                          NEW zcl_adcoset_scr_dcls( is_multiline = is_multiline
                                                    line_feed    = line_feed )
 
+                       WHEN zif_adcoset_c_global=>c_source_code_type-structure THEN
+                         NEW zcl_adcoset_scr_tabl( is_multiline = is_multiline
+                                                   line_feed    = line_feed )
+
+                       WHEN zif_adcoset_c_global=>c_source_code_type-database_table THEN
+                         NEW zcl_adcoset_scr_tabl( is_multiline = is_multiline
+                                                   line_feed    = line_feed )
+
                        ELSE
                          THROW zcx_adcoset_no_src_code_reader( ) ).
   ENDMETHOD.

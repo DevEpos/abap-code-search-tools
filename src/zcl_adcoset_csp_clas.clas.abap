@@ -142,8 +142,8 @@ CLASS zcl_adcoset_csp_clas IMPLEMENTATION.
     LOOP AT unassigned_matches ASSIGNING FIELD-SYMBOL(<unassigned_match>).
       APPEND <unassigned_match> TO all_matches ASSIGNING FIELD-SYMBOL(<match>).
 
-      <match>-include          = include-name.
-      <match>-adt_include_type = COND #(
+      <match>-object_name     = include-name.
+      <match>-adt_object_type = COND #(
         WHEN include-adt_type IS INITIAL THEN c_include_types-include ELSE include-adt_type ).
 
       " set the display name
