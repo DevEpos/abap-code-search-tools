@@ -93,8 +93,7 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
     DATA(obj_name) = to_upper( object_name ).
     SELECT precfield FROM dd03l
       INTO TABLE includes
-      WHERE tabname    = obj_name
-        AND adminfield = 0 " level 1 includes and appends
+      WHERE tabname = obj_name
         AND (    fieldname = '.INCLU--AP'
               OR fieldname = '.INCLUDE' ).
   ENDMETHOD.
