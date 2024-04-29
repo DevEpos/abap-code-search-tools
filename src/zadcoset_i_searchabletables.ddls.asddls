@@ -4,26 +4,26 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Tables with Source Code'
 define view ZADCOSET_I_SearchableTables
-  as select from dd02l as object
-    inner join   cvers as rel on rel.component = 'SAP_BASIS'
+  as select from dd02l as Object
+    inner join   cvers as Release on Release.component = 'SAP_BASIS'
 
 {
   key case
-      when tabclass  = 'INTTAB'
-        or tabclass  = 'APPEND' then 'STRU'
-      when tabclass  = 'TRANSP' then 'DTAB'
-  end         as ObjectType,
-  key tabname as ObjectName
+      when Object.tabclass  = 'INTTAB'
+        or Object.tabclass  = 'APPEND' then 'STRU'
+      when Object.tabclass  = 'TRANSP' then 'DTAB'
+  end                as ObjectType,
+  key Object.tabname as ObjectName
 }
 where
   (
     (
-         tabclass = 'INTTAB'
-      or tabclass = 'APPEND'
+         Object.tabclass = 'INTTAB'
+      or Object.tabclass = 'APPEND'
     )
-    and  release  > '740'
+    and  Release.release > '740'
   )
   or(
-         tabclass = 'TRANSP'
-    and  release  > '751'
+         Object.tabclass = 'TRANSP'
+    and  Release.release > '751'
   )
