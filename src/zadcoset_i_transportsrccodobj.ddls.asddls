@@ -4,82 +4,82 @@
 @EndUserText.label: 'Rep. obj. of Tr. Request for Code Search'
 
 define view ZADCOSET_I_TransportSrcCodObj
-  as select from e071  as transportObject
-    inner join   tadir as object on  transportObject.pgmid    = object.pgmid
-                                 and transportObject.object   = object.object
-                                 and transportObject.obj_name = object.obj_name
+  as select from e071  as TransportObject
+    inner join   tadir as Object on  TransportObject.pgmid    = Object.pgmid
+                                 and TransportObject.object   = Object.object
+                                 and TransportObject.obj_name = Object.obj_name
 {
-  key transportObject.trkorr   as Request,
-  key transportObject.pgmid    as ProgramId,
-  key transportObject.object   as ObjectType,
-  key transportObject.obj_name as ObjectName,
-      object.devclass          as DevelopmentPackage,
-      object.author            as Owner,
-      object.created_on        as CreatedDate
+  key TransportObject.trkorr   as Request,
+  key TransportObject.pgmid    as ProgramId,
+  key TransportObject.object   as ObjectType,
+  key TransportObject.obj_name as ObjectName,
+      Object.devclass          as DevelopmentPackage,
+      Object.author            as Owner,
+      Object.created_on        as CreatedDate
 }
 where
-       transportObject.obj_name not like '______________________________VC'
-  and  transportObject.pgmid    = 'R3TR'
-  and  object.delflag           = ''
+       TransportObject.obj_name not like '______________________________VC'
+  and  TransportObject.pgmid    = 'R3TR'
+  and  Object.delflag           = ''
   and(
-       object.object            = 'CLAS'
-    or object.object            = 'INTF'
-    or object.object            = 'PROG'
-    or object.object            = 'FUGR'
-    or object.object            = 'TYPE'
-    or object.object            = 'DDLS'
-    or object.object            = 'DCLS'
-    or object.object            = 'DDLX'
-    or object.object            = 'BDEF'
-    or object.object            = 'XSLT'
+       Object.object            = 'CLAS'
+    or Object.object            = 'INTF'
+    or Object.object            = 'PROG'
+    or Object.object            = 'FUGR'
+    or Object.object            = 'TYPE'
+    or Object.object            = 'DDLS'
+    or Object.object            = 'DCLS'
+    or Object.object            = 'DDLX'
+    or Object.object            = 'BDEF'
+    or Object.object            = 'XSLT'
   )
 
-union
+union all
 
-select from  e071                        as transportObject
-  inner join tadir                       as object on  transportObject.pgmid    = object.pgmid
-                                                   and transportObject.object   = object.object
-                                                   and transportObject.obj_name = object.obj_name
-  inner join ZADCOSET_I_SearchableTables as tabl   on object.obj_name = tabl.ObjectName
+select from  e071                        as TransportObject
+  inner join tadir                       as Object on  TransportObject.pgmid    = Object.pgmid
+                                                   and TransportObject.object   = Object.object
+                                                   and TransportObject.obj_name = Object.obj_name
+  inner join ZADCOSET_I_SearchableTables as Tabl   on Object.obj_name = Tabl.ObjectName
 {
-  key transportObject.trkorr   as Request,
-  key transportObject.pgmid    as ProgramId,
-  key ObjectType,
-  key transportObject.obj_name as ObjectName,
-      devclass                 as DevelopmentPackage,
-      author                   as Owner,
-      created_on               as CreatedDate
+  key TransportObject.trkorr   as Request,
+  key TransportObject.pgmid    as ProgramId,
+  key Tabl.ObjectType,
+  key TransportObject.obj_name as ObjectName,
+      Object.devclass          as DevelopmentPackage,
+      Object.author            as Owner,
+      Object.created_on        as CreatedDate
 
 }
 where
-      transportObject.pgmid  = 'R3TR'
-  and delflag                = ''
-  and transportObject.object = 'TABL'
+      TransportObject.pgmid  = 'R3TR'
+  and Object.delflag         = ''
+  and TransportObject.object = 'TABL'
 
-union
+union all
 
-select from e071
+select from e071 as TransportObject
 {
-  key trkorr                  as Request,
-  key pgmid                   as ProgramId,
-  key object                  as ObjectType,
-  key obj_name                as ObjectName,
-      ''                      as DevelopmentPackage,
-      ''                      as Owner,
-      cast( '' as abap.dats ) as CreatedDate
+  key TransportObject.trkorr   as Request,
+  key TransportObject.pgmid    as ProgramId,
+  key TransportObject.object   as ObjectType,
+  key TransportObject.obj_name as ObjectName,
+      ''                       as DevelopmentPackage,
+      ''                       as Owner,
+      cast( '' as abap.dats )  as CreatedDate
 }
 where
   (
-         pgmid    = 'LIMU'
+         TransportObject.pgmid    = 'LIMU'
     and(
-         object   = 'FUNC'
-      or object   = 'METH'
-      or object   = 'REPS'
-      or object   = 'CLSD'
-      or object   = 'CPUB'
-      or object   = 'CPRO'
-      or object   = 'CPRI'
-      or object   = 'CINC'
+         TransportObject.object   = 'FUNC'
+      or TransportObject.object   = 'METH'
+      or TransportObject.object   = 'REPS'
+      or TransportObject.object   = 'CLSD'
+      or TransportObject.object   = 'CPUB'
+      or TransportObject.object   = 'CPRO'
+      or TransportObject.object   = 'CPRI'
+      or TransportObject.object   = 'CINC'
     )
   )
-  and    obj_name not like '______________________________VC'
+  and    TransportObject.obj_name not like '______________________________VC'
