@@ -19,7 +19,7 @@ define view ZADCOSET_I_TransportSrcCodObj
 }
 where
        TransportObject.obj_name not like '______________________________VC'
-  and  TransportObject.pgmid    = 'R3TR'
+  and  Object.pgmid             = 'R3TR'
   and  Object.delflag           = ''
   and(
        Object.object            = 'CLAS'
@@ -52,9 +52,9 @@ select from  e071                        as TransportObject
 
 }
 where
-      TransportObject.pgmid  = 'R3TR'
-  and Object.delflag         = ''
-  and TransportObject.object = 'TABL'
+      Object.pgmid   = 'R3TR'
+  and Object.delflag = ''
+  and Object.object  = 'TABL'
 
 union all
 
