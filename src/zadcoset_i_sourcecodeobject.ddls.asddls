@@ -8,6 +8,7 @@ define view ZADCOSET_I_SourceCodeObject
 {
   key Object.pgmid      as ProgramId,
   key Object.object     as ObjectType,
+  key Object.object     as OriginalType,
   key Object.obj_name   as ObjectName,
       Object.devclass   as DevelopmentPackage,
       Object.created_on as CreatedDate,
@@ -29,13 +30,14 @@ where
     or Object.object  = 'XSLT'
   )
 
-union all
+union
 
 select from  tadir                       as Object
   inner join ZADCOSET_I_SearchableTables as Tabl on Object.obj_name = Tabl.ObjectName
 {
   key Object.pgmid      as ProgramId,
   key Tabl.ObjectType,
+  key Object.object     as OriginalType,
   key Object.obj_name   as ObjectName,
       Object.devclass   as DevelopmentPackage,
       Object.created_on as CreatedDate,

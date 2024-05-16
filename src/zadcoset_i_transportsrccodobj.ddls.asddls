@@ -34,7 +34,7 @@ where
     or Object.object            = 'XSLT'
   )
 
-union all
+union
 
 select from  e071                        as TransportObject
   inner join tadir                       as Object on  TransportObject.pgmid    = Object.pgmid
