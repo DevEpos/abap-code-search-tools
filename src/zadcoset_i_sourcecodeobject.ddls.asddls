@@ -8,7 +8,7 @@ define view ZADCOSET_I_SourceCodeObject
 {
   key Object.pgmid      as ProgramId,
   key Object.object     as ObjectType,
-  key Object.object     as OriginalType,
+  key Object.object     as OriginalObjectType,
   key Object.obj_name   as ObjectName,
       Object.devclass   as DevelopmentPackage,
       Object.created_on as CreatedDate,
@@ -37,7 +37,7 @@ select from  tadir                       as Object
 {
   key Object.pgmid      as ProgramId,
   key Tabl.ObjectType,
-  key Object.object     as OriginalType,
+  key Object.object     as OriginalObjectType,
   key Object.obj_name   as ObjectName,
       Object.devclass   as DevelopmentPackage,
       Object.created_on as CreatedDate,

@@ -102,7 +102,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       dyn_from_clause = dyn_from_clause &&
         |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS tgobj | &&
         |ON  obj~ObjectName = tgobj~object_name | &&
-        |AND obj~OriginalType = tgobj~object_type |.
+        |AND obj~OriginalObjectType = tgobj~object_type |.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
