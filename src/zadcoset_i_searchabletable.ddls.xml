@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <DDLS>
-    <DDLNAME>ZADCOSET_I_SEARCHABLETABLES</DDLNAME>
+    <DDLNAME>ZADCOSET_I_SEARCHABLETABLE</DDLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
-    <DDTEXT>Tables with Source Code</DDTEXT>
+    <DDTEXT>Searchable Table</DDTEXT>
    </DDLS>
   </asx:values>
  </asx:abap>

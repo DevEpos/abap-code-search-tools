@@ -239,12 +239,6 @@ CLASS lcl_result_converter IMPLEMENTATION.
 
   METHOD convert_matches_to_adt_result.
     LOOP AT raw_result-results INTO DATA(raw_result_line).
-
-      IF    raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-structure
-         OR raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-database_table.
-        raw_result_line-object_info-type = zif_adcoset_c_global=>c_source_code_type-table.
-      ENDIF.
-
       TRY.
           DATA(search_result_object) = VALUE zif_adcoset_ty_adt_types=>ty_code_search_object(
               parent_uri      = get_package_uri( raw_result_line-object_info-package_name )

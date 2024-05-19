@@ -27,21 +27,6 @@ where
     or Object.object  = 'DDLX'
     or Object.object  = 'BDEF'
     or Object.object  = 'XSLT'
+    or Object.object  = 'TABL'
   )
 
-union all
-
-select from  tadir                       as Object
-  inner join ZADCOSET_I_SearchableTables as Tabl on Object.obj_name = Tabl.ObjectName
-{
-  key Object.pgmid      as ProgramId,
-  key Tabl.ObjectType,
-  key Object.obj_name   as ObjectName,
-      Object.devclass   as DevelopmentPackage,
-      Object.created_on as CreatedDate,
-      Object.author     as Owner
-}
-where
-      Object.pgmid   = 'R3TR'
-  and Object.delflag = ''
-  and Object.object  = 'TABL'

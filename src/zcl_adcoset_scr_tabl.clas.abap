@@ -37,8 +37,6 @@ CLASS zcl_adcoset_scr_tabl DEFINITION
         zcx_adcoset_src_code_read.
 
     METHODS initialize_table_persistence
-      IMPORTING
-        tabl_type TYPE trobjtype
       EXPORTING
         tabl_pers TYPE REF TO object
       RAISING
@@ -74,14 +72,14 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
   METHOD read_tabl.
     DATA object_data TYPE REF TO if_wb_object_data_model.
 
-    initialize_table_persistence( EXPORTING tabl_type = type
-                                  IMPORTING tabl_pers = DATA(table_pers) ).
+    initialize_table_persistence( IMPORTING tabl_pers = DATA(table_pers) ).
 
     TRY.
         CALL METHOD table_pers->(c_tabl_pers_class-methods-get)
-          EXPORTING p_object_key  = name
-                    p_version     = swbm_version_active
-          CHANGING  p_object_data = object_data.
+          EXPORTING p_object_key     = name
+                    p_version        = swbm_version_active
+                    p_data_selection = if_wb_object_persist=>c_data_content
+          CHANGING  p_object_data    = object_data.
       CATCH cx_swb_object_does_not_exist
             cx_swb_exception
             cx_sy_dyn_call_error.
@@ -115,12 +113,8 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
     DATA(param_type_object_type) = lo_class_descr->methods[ name = c_tabl_pers_class-methods-initialize ]-parameters[
         name = c_tabl_pers_class-object_type_param ]-parm_kind.
 
-    DATA(obj_type_value) = VALUE wbobjtype(
-        objtype_tr = zif_adcoset_c_global=>c_source_code_type-table
-        subtype_wb = COND #( WHEN tabl_type = zif_adcoset_c_global=>c_source_code_type-structure THEN
-                               zif_adcoset_c_global=>c_source_code_sub_type-structure
-                             WHEN tabl_type = zif_adcoset_c_global=>c_source_code_type-database_table THEN
-                               zif_adcoset_c_global=>c_source_code_sub_type-databasetable ) ).
+    DATA(obj_type_value) = VALUE wbobjtype( objtype_tr = zif_adcoset_c_global=>c_source_code_type-table
+                                            subtype_wb = zif_adcoset_c_global=>c_source_code_sub_type-structure ).
 
     CREATE OBJECT tabl_pers TYPE (c_tabl_pers_class-name).
     TRY.

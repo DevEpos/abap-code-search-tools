@@ -123,7 +123,6 @@ INTERFACE zif_adcoset_c_global
       function_group        TYPE trobjtype VALUE 'FUGR',
       table                 TYPE trobjtype VALUE 'TABL',
       structure             TYPE trobjtype VALUE 'STRU',
-      database_table        TYPE trobjtype VALUE 'DTAB',
     END OF c_source_code_type.
 
   CONSTANTS:
@@ -142,7 +141,6 @@ INTERFACE zif_adcoset_c_global
   CONSTANTS:
     BEGIN OF c_source_code_sub_type,
       structure     TYPE seu_objtyp VALUE 'DS',
-      databasetable TYPE seu_objtyp VALUE 'DT',
     END OF c_source_code_sub_type.
 
   CONSTANTS:

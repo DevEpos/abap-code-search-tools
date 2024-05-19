@@ -45,6 +45,12 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
 
   METHOD zif_adcoset_code_search_prov~search.
     DATA(searched_sources_count) = 1.
+
+    SELECT SINGLE @abap_true FROM zadcoset_i_searchabletable INTO @DATA(is_relevant) WHERE objectname = @object-name.
+    IF is_relevant = abap_false.
+      RETURN.
+    ENDIF.
+
     TRY.
         DATA(source_code) = src_code_reader->get_source_code( name = object-name type = object-type ).
         DATA(matches) = src_code_searcher->search( source_code ).
@@ -60,6 +66,7 @@ CLASS zcl_adcoset_csp_tabl IMPLEMENTATION.
                                  src_code_searcher      = src_code_searcher
                        CHANGING  searched_sources_count = searched_sources_count
                                  all_matches            = result ).
+
     ENDIF.
 
     zcl_adcoset_search_protocol=>increase_searchd_sources_count( searched_sources_count ).

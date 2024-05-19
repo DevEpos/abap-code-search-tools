@@ -32,29 +32,8 @@ where
     or Object.object            = 'DDLX'
     or Object.object            = 'BDEF'
     or Object.object            = 'XSLT'
+    or Object.object            = 'TABL'
   )
-
-union all
-
-select from  e071                        as TransportObject
-  inner join tadir                       as Object on  TransportObject.pgmid    = Object.pgmid
-                                                   and TransportObject.object   = Object.object
-                                                   and TransportObject.obj_name = Object.obj_name
-  inner join ZADCOSET_I_SearchableTables as Tabl   on Object.obj_name = Tabl.ObjectName
-{
-  key TransportObject.trkorr   as Request,
-  key TransportObject.pgmid    as ProgramId,
-  key Tabl.ObjectType,
-  key TransportObject.obj_name as ObjectName,
-      Object.devclass          as DevelopmentPackage,
-      Object.author            as Owner,
-      Object.created_on        as CreatedDate
-
-}
-where
-      Object.pgmid   = 'R3TR'
-  and Object.delflag = ''
-  and Object.object  = 'TABL'
 
 union all
 

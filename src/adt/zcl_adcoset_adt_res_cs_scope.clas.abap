@@ -94,6 +94,7 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
 
     METHODS delete_expired_scopes.
     METHODS determine_scope.
+    METHODS postprocess_type_filter.
 ENDCLASS.
 
 
@@ -158,6 +159,8 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
           extract_tr_requests( <param>-value ).
 
       ENDCASE.
+
+      postprocess_type_filter( ).
 
     ENDLOOP.
   ENDMETHOD.
@@ -371,5 +374,18 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD postprocess_type_filter.
+    ASSIGN scope_ranges-object_type_range[ low = zif_adcoset_c_global=>c_source_code_type-structure ] TO FIELD-SYMBOL(<type_stru>).
+    IF sy-subrc = 0.
+      <type_stru>-low = zif_adcoset_c_global=>c_source_code_type-table.
+    ELSE.
+      IF sy-saprl < '750'.
+        scope_ranges-object_type_range = VALUE #(
+            BASE scope_ranges-object_type_range
+            ( sign = 'E' option = 'EQ' low = zif_adcoset_c_global=>c_source_code_type-table ) ).
+      ENDIF.
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.
