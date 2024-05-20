@@ -108,6 +108,7 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
                             IMPORTING data            = scope_params ).
 
     parse_parameters( scope_params ).
+    postprocess_type_filter( ).
     determine_scope( ).
 
     IF scope_ext-object_count > 0.
@@ -159,9 +160,6 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
           extract_tr_requests( <param>-value ).
 
       ENDCASE.
-
-      postprocess_type_filter( ).
-
     ENDLOOP.
   ENDMETHOD.
 

@@ -84,11 +84,9 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
     result = SWITCH #( original
                        WHEN zif_adcoset_c_global=>c_source_code_type-class OR
                             zif_adcoset_c_global=>c_source_code_type-function_group OR
-                            zif_adcoset_c_global=>c_source_code_type-program THEN
+                            zif_adcoset_c_global=>c_source_code_type-program OR
+                            zif_adcoset_c_global=>c_source_code_type-table THEN
                          original
-
-                       WHEN zif_adcoset_c_global=>c_source_code_type-table THEN
-                         zif_adcoset_c_global=>c_source_code_type-table
 
                        WHEN zif_adcoset_c_global=>c_source_code_type-type_group OR
                             zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
