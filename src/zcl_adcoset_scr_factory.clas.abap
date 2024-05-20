@@ -66,10 +66,14 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
                             zif_adcoset_c_global=>c_source_code_type-type_group OR
                             zif_adcoset_c_global=>c_source_code_type-function_group OR
                             zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
-                            zif_adcoset_c_global=>c_source_code_type-behavior_definition
-                       THEN c_generic_reposrc_type
+                            zif_adcoset_c_global=>c_source_code_type-behavior_definition THEN
+                         c_generic_reposrc_type
 
-                       ELSE original ).
+                       WHEN zif_adcoset_c_global=>c_source_code_type-structure OR
+                            zif_adcoset_c_global=>c_source_code_type-database_table THEN
+                         zif_adcoset_c_global=>c_source_code_type-table
+                       ELSE
+                         original ).
   ENDMETHOD.
 
   METHOD create_reader.
@@ -91,14 +95,9 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
                          NEW zcl_adcoset_scr_dcls( is_multiline = is_multiline
                                                    line_feed    = line_feed )
 
-                       WHEN zif_adcoset_c_global=>c_source_code_type-structure THEN
+                       WHEN zif_adcoset_c_global=>c_source_code_type-table THEN
                          NEW zcl_adcoset_scr_tabl( is_multiline = is_multiline
                                                    line_feed    = line_feed )
-
-                       WHEN zif_adcoset_c_global=>c_source_code_type-database_table THEN
-                         NEW zcl_adcoset_scr_tabl( is_multiline = is_multiline
-                                                   line_feed    = line_feed )
-
                        ELSE
                          THROW zcx_adcoset_no_src_code_reader( ) ).
   ENDMETHOD.

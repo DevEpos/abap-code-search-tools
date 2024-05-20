@@ -1,9 +1,9 @@
-@AbapCatalog.sqlViewName: 'ZADCOSETSCTABLES'
+@AbapCatalog.sqlViewName: 'ZADCOSETSCTABLE'
 @AbapCatalog.compiler.compareFilter: true
 @AbapCatalog.preserveKey: true
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Tables with Source Code'
-define view ZADCOSET_I_SearchableTables
+define view ZADCOSET_I_SearchableTable
   as select from dd02l as Object
     inner join   cvers as Release on Release.component = 'SAP_BASIS'
 

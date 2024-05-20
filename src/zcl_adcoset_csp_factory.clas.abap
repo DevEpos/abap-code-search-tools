@@ -58,7 +58,6 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
 
   METHOD create_provider.
     result = SWITCH #( type
-
                        WHEN zif_adcoset_c_global=>c_source_code_type-class THEN
                          NEW zcl_adcoset_csp_clas( custom_settings = custom_settings-class )
 
@@ -83,7 +82,6 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
 
   METHOD map_type.
     result = SWITCH #( original
-
                        WHEN zif_adcoset_c_global=>c_source_code_type-class OR
                             zif_adcoset_c_global=>c_source_code_type-function_group OR
                             zif_adcoset_c_global=>c_source_code_type-program THEN
