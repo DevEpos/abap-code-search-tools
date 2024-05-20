@@ -213,9 +213,9 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
       col_parts = VALUE #( BASE col_parts ( conv_col_info_to_string( col_info ) ) ).
     ENDLOOP.
 
-    select_parts = VALUE #( BASE select_parts ( concat_lines_of( table = col_parts sep   = ',' ) ) ).
+    select_parts = VALUE #( BASE select_parts ( concat_lines_of( table = col_parts sep = ',' ) ) ).
 
-    select_clause = concat_lines_of( table = select_parts sep   = ` ` ).
+    select_clause = concat_lines_of( table = select_parts sep = ` ` ).
 
     adbc_stmnt_cols = target_cols.
   ENDMETHOD.
