@@ -151,29 +151,14 @@ CLASS zcl_adcoset_nsql_cond_builder IMPLEMENTATION.
     ENDIF.
 
     " 1) escape all '%' with '#%'
-    result = replace( val  = value
-                      sub  = '%'
-                      with = '#%'
-                      occ  = 0 ).
+    result = replace( val  = value sub  = '%' with = '#%' occ  = 0 ).
     " 2) escape all '#' with '##'
-    result = replace( val  = result
-                      sub  = '#'
-                      with = '##'
-                      occ  = 0 ).
+    result = replace( val  = result sub  = '#' with = '##' occ  = 0 ).
     " 3) escape all '_' with '#_'
-    result = replace( val  = result
-                      sub  = '_'
-                      with = '#_'
-                      occ  = 0 ).
+    result = replace( val  = result sub  = '_' with = '#_' occ  = 0 ).
     " 4) escape all '*' with '%'
-    result = replace( val  = result
-                      sub  = '*'
-                      with = '%'
-                      occ  = 0 ).
+    result = replace( val  = result sub  = '*' with = '%' occ  = 0 ).
     " 5) escape all '+' with '_'
-    result = replace( val  = result
-                      sub  = '+'
-                      with = '_'
-                      occ  = 0 ).
+    result = replace( val  = result sub  = '+' with = '_' occ  = 0 ).
   ENDMETHOD.
 ENDCLASS.
