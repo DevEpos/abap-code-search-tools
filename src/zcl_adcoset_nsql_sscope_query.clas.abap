@@ -350,7 +350,7 @@ CLASS zcl_adcoset_nsql_sscope_query IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD conv_tab_to_string.
-    result = to_upper( concat_lines_of( table = tab sep   = sep ) ).
+    result = to_upper( concat_lines_of( table = tab sep = sep ) ).
   ENDMETHOD.
 
   METHOD conv_col_info_to_string.
