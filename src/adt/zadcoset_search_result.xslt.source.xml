@@ -58,7 +58,7 @@
           <tt:attribute name="cst:parentUri" value-ref="$ref.parent_uri"/>
         </tt:cond>
 
-        <tt:cond check="not-initial($ref.adt_main_object)">
+        <tt:cond s-check="not-initial($ref.adt_main_object)">
           <adtbase:adtMainObject>
             <tt:apply name="adtObjRefAttributes">
               <tt:with-root name="adt_obj_ref" ref="$ref.adt_main_object"/>
@@ -66,7 +66,7 @@
           </adtbase:adtMainObject>
         </tt:cond>
 
-        <tt:cond check="not-initial($ref.matches)">
+        <tt:cond s-check="not-initial($ref.matches)">
           <tt:apply name="codeSearchMatches">
             <tt:with-root name="code_search_matches" ref="$ref.matches"/>
           </tt:apply>
@@ -106,7 +106,7 @@
       <tt:root name="messages" />
     </tt:context>
 
-    <tt:cond check="not-initial(messages)">
+    <tt:cond s-check="not-initial(messages)">
       <adtbase:responseMessages>
         <tt:loop ref="messages">
 
