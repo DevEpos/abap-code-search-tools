@@ -173,7 +173,9 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     ENDIF.
 
     native_scope_query->set_from( from_clause ).
-    native_scope_query->set_order_by( VALUE #( ( tab_alias = c_tab_alias-obj name = c_cds_field_name-programid  ) ) ).
+    native_scope_query->set_order_by( VALUE #( tab_alias = c_tab_alias-obj
+                                               ( name = c_cds_field_name-objectname )
+                                               ( name = c_cds_field_name-objecttype ) ) ).
 
     native_scope_query->add_range_to_where( ranges   = search_ranges-object_type_range
                                             col_info = VALUE #( tab_alias = c_tab_alias-obj
