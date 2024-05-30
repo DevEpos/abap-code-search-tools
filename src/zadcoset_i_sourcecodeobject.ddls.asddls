@@ -4,27 +4,29 @@
 @EndUserText.label: 'Repository object for code search'
 
 define view ZADCOSET_I_SourceCodeObject
-  as select from tadir
+  as select from tadir as Object
 {
-  key pgmid      as ProgramId,
-  key object     as ObjectType,
-  key obj_name   as ObjectName,
-      devclass   as DevelopmentPackage,
-      created_on as CreatedDate,
-      author     as Owner
+  key Object.pgmid      as ProgramId,
+  key Object.object     as ObjectType,
+  key Object.obj_name   as ObjectName,
+      Object.devclass   as DevelopmentPackage,
+      Object.created_on as CreatedDate,
+      Object.author     as Owner
 }
 where
-       pgmid   = 'R3TR'
-  and  delflag = ''
+       Object.pgmid   = 'R3TR'
+  and  Object.delflag = ''
   and(
-       object  = 'CLAS'
-    or object  = 'INTF'
-    or object  = 'PROG'
-    or object  = 'FUGR'
-    or object  = 'TYPE'
-    or object  = 'DDLS'
-    or object  = 'DCLS'
-    or object  = 'DDLX'
-    or object  = 'BDEF'
-    or object  = 'XSLT'
+       Object.object  = 'CLAS'
+    or Object.object  = 'INTF'
+    or Object.object  = 'PROG'
+    or Object.object  = 'FUGR'
+    or Object.object  = 'TYPE'
+    or Object.object  = 'DDLS'
+    or Object.object  = 'DCLS'
+    or Object.object  = 'DDLX'
+    or Object.object  = 'BDEF'
+    or Object.object  = 'XSLT'
+    or Object.object  = 'TABL'
   )
+

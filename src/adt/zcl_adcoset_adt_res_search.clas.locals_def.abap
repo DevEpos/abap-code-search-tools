@@ -99,7 +99,7 @@ CLASS lcl_result_converter DEFINITION
     METHODS init_result.
     METHODS convert_matches_to_adt_result.
 
-    METHODS add_main_object_ref
+    METHODS append_match
       IMPORTING
         search_result_object TYPE REF TO zif_adcoset_ty_adt_types=>ty_code_search_object
         object_info          TYPE zif_adcoset_ty_global=>ty_tadir_object_info

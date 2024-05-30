@@ -97,4 +97,3 @@ CLASS zcl_adcoset_posix_regex_matchr IMPLEMENTATION.
     ENDTRY.
   ENDMETHOD.
 ENDCLASS.
-

@@ -47,13 +47,13 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD test_adjust_line_endings.
-    DATA(text) = `    zcl_adcoset_string_util=>transform_to_string(` && |\n| &&
-                 `      EXPORTING` && |\n| &&
-                 `        source_table = source_table` && |\r\n| &&
-                 `        line_feed    = line_feed` && |\r\n|  &&
-                 `      IMPORTING` && |\n| &&
-                 `        source_text  = DATA(source_text)` && |\n|  &&
-                 `        indexes      = DATA(indexes) ).`.
+    DATA(text) = |    zcl_adcoset_string_util=>transform_to_string(| && |\n| &&
+                 |      EXPORTING| && |\n| &&
+                 |        source_table = source_table| && |\r\n| &&
+                 |        line_feed    = line_feed| && |\r\n|  &&
+                 |      IMPORTING| && |\n| &&
+                 |        source_text  = DATA(source_text)| && |\n|  &&
+                 |        indexes      = DATA(indexes) ).|.
 
     DATA(adjusted_text) = zcl_adcoset_string_util=>adjust_line_endings( text      = text
                                                                         line_feed = |\n| ).
@@ -63,13 +63,13 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD test_adjust_line_endings2.
-    DATA(text) = `    zcl_adcoset_string_util=>transform_to_string(` && |\n| &&
-                 `      EXPORTING` && |\n| &&
-                 `        source_table = source_table` && |\r\n| &&
-                 `        line_feed    = line_feed` && |\r\n|  &&
-                 `      IMPORTING` && |\n| &&
-                 `        source_text  = DATA(source_text)` && |\n|  &&
-                 `        indexes      = DATA(indexes) ).`.
+    DATA(text) = |    zcl_adcoset_string_util=>transform_to_string(| && |\n| &&
+                 |      EXPORTING| && |\n| &&
+                 |        source_table = source_table| && |\r\n| &&
+                 |        line_feed    = line_feed| && |\r\n|  &&
+                 |      IMPORTING| && |\n| &&
+                 |        source_text  = DATA(source_text)| && |\n|  &&
+                 |        indexes      = DATA(indexes) ).|.
 
     DATA(adjusted_text) = zcl_adcoset_string_util=>adjust_line_endings( text      = text
                                                                         line_feed = |\r\n| ).
@@ -79,13 +79,13 @@ CLASS ltcl_abap_unit IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD test_adjust_line_endings3.
-    DATA(text) = |\n| && `    zcl_adcoset_string_util=>transform_to_string(` && |\r\n| &&
-                 `      EXPORTING` && |\r\n| &&
-                 `        source_table = source_table` && |\r\n| &&
-                 `        line_feed    = line_feed` && |\r\n|  &&
-                 `      IMPORTING` && |\r\n| &&
-                 `        source_text  = DATA(source_text)` && |\r\n| &&
-                 `        indexes      = DATA(indexes) ).`.
+    DATA(text) = |\n| && |    zcl_adcoset_string_util=>transform_to_string(| && |\r\n| &&
+                 |      EXPORTING| && |\r\n| &&
+                 |        source_table = source_table| && |\r\n| &&
+                 |        line_feed    = line_feed| && |\r\n|  &&
+                 |      IMPORTING| && |\r\n| &&
+                 |        source_text  = DATA(source_text)| && |\r\n| &&
+                 |        indexes      = DATA(indexes) ).|.
 
     DATA(adjusted_text) = zcl_adcoset_string_util=>adjust_line_endings( text      = text
                                                                         line_feed = |\r\n| ).

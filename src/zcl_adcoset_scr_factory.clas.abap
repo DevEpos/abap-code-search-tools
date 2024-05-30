@@ -74,7 +74,6 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
 
   METHOD create_reader.
     result = SWITCH #( type
-
                        WHEN c_generic_reposrc_type THEN
                          NEW zcl_adcoset_scr_reposrc( is_multiline = is_multiline
                                                       line_feed    = line_feed )
@@ -89,6 +88,10 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
 
                        WHEN zif_adcoset_c_global=>c_source_code_type-access_control THEN
                          NEW zcl_adcoset_scr_dcls( is_multiline = is_multiline
+                                                   line_feed    = line_feed )
+
+                       WHEN zif_adcoset_c_global=>c_source_code_type-table THEN
+                         NEW zcl_adcoset_scr_tabl( is_multiline = is_multiline
                                                    line_feed    = line_feed )
 
                        ELSE

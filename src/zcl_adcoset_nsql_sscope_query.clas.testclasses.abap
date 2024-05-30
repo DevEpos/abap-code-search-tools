@@ -20,7 +20,7 @@ CLASS ltcl_query_test IMPLEMENTATION.
 
     obj_type_range = VALUE #( sign = 'I'
                               ( option = 'CP' low = 'C*' )
-                              (  option = 'EQ' low = 'XSLT' ) ).
+                              ( option = 'EQ' low = 'XSLT' ) ).
 
     zcl_adcoset_log=>clear( ).
     DATA(query) = NEW zcl_adcoset_nsql_sscope_query( ).
@@ -49,7 +49,7 @@ CLASS ltcl_query_test IMPLEMENTATION.
 
     obj_type_range = VALUE #( sign = 'I'
                               ( option = 'CP' low = 'C*' )
-                              ( option = 'EQ' low = 'XSLT' ) ).
+                              (  option = 'EQ' low = 'XSLT' ) ).
 
     zcl_adcoset_log=>clear( ).
     DATA(query) = NEW zcl_adcoset_nsql_sscope_query( ).

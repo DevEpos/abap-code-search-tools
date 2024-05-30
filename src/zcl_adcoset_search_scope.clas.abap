@@ -126,16 +126,16 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       "       --> add group by clause if tags are supplied (possibly the only solution)
       dyn_from_clause = dyn_from_clause &&
         |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS tgobj | &&
-        `ON  obj~ObjectName = tgobj~object_name ` &&
-        `AND obj~ObjectType = tgobj~object_type `.
+        |ON  obj~ObjectName = tgobj~object_name | &&
+        |AND obj~ObjectType = tgobj~object_type |.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
       dyn_from_clause = dyn_from_clause &&
-        `INNER JOIN tdevc AS pack ` &&
-        `ON obj~DevelopmentPackage = pack~devclass ` &&
-        `INNER JOIN df14l AS appl ` &&
-        `ON pack~component = appl~fctr_id `.
+        |INNER JOIN tdevc AS pack | &&
+        |ON obj~DevelopmentPackage = pack~devclass | &&
+        |INNER JOIN df14l AS appl | &&
+        |ON pack~component = appl~fctr_id |.
 
       appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
     ENDIF.
@@ -160,20 +160,22 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
 
     DATA(from_clause) = `ZADCOSET_ISRCOBJ obj`.
     IF search_ranges-tag_id_range IS NOT INITIAL.
-      from_clause = from_clause && ` ` &&
+      from_clause = |{ from_clause } | &&
         |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } tgobj | &&
-        `ON  obj.objectname = tgobj.object_name ` &&
-        `AND obj.objecttype = tgobj.object_type `.
+        |ON  obj.objectname = tgobj.object_name | &&
+        |AND obj.objecttype = tgobj.object_type |.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
-      from_clause = from_clause && ` ` &&
-        `INNER JOIN tdevc pack ON obj.developmentpackage = pack.devclass ` &&
-        `INNER JOIN df14l appl ON pack.component = appl.fctr_id `.
+      from_clause = |{ from_clause } | &&
+        |INNER JOIN tdevc pack ON obj.developmentpackage = pack.devclass | &&
+        |INNER JOIN df14l appl ON pack.component = appl.fctr_id |.
     ENDIF.
 
     native_scope_query->set_from( from_clause ).
-    native_scope_query->set_order_by( VALUE #( ( tab_alias = c_tab_alias-obj name = c_cds_field_name-programid  ) ) ).
+    native_scope_query->set_order_by( VALUE #( tab_alias = c_tab_alias-obj
+                                               ( name = c_cds_field_name-objectname )
+                                               ( name = c_cds_field_name-objecttype ) ) ).
 
     native_scope_query->add_range_to_where( ranges   = search_ranges-object_type_range
                                             col_info = VALUE #( tab_alias = c_tab_alias-obj

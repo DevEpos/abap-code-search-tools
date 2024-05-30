@@ -11,6 +11,7 @@
 *&  - Access Controls
 *&  - Metadata Extensions
 *&  - Behavior Definitions
+*&  - Structures (NW > 7.40)
 *&---------------------------------------------------------------------*
 REPORT zadcoset_search.
 
@@ -62,7 +63,8 @@ SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
       p_ddls  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_dcls  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_ddlx  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_bdef  TYPE abap_bool AS CHECKBOX MODIF ID tch.
+      p_bdef  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+      p_stru  TYPE abap_bool AS CHECKBOX MODIF ID tch.
   SELECTION-SCREEN END OF BLOCK types.
 
 SELECTION-SCREEN END OF BLOCK scope.
@@ -99,10 +101,10 @@ CLASS lcl_report DEFINITION.
 
   PRIVATE SECTION.
     TYPES  BEGIN OF ty_search_match.
-    TYPES:   object_name  TYPE sobj_name,
-             object_type  TYPE trobjtype,
-             owner        TYPE responsibl,
-             package_name TYPE devclass.
+    TYPES:   main_object_name TYPE sobj_name,
+             main_object_type TYPE trobjtype,
+             owner            TYPE responsibl,
+             package_name     TYPE devclass.
              INCLUDE TYPE zif_adcoset_ty_global=>ty_search_match.
     TYPES  END OF ty_search_match.
 
@@ -111,6 +113,7 @@ CLASS lcl_report DEFINITION.
     DATA search_count TYPE i.
     DATA duration TYPE string.
     DATA pcre_available TYPE abap_bool.
+    DATA stru_supported TYPE abap_bool.
 
     METHODS run_search
       RAISING
@@ -156,9 +159,6 @@ CLASS lcl_report DEFINITION.
 ENDCLASS.
 
 INITIALIZATION.
-  IF NOT zcl_adcoset_db_support_util=>is_db_supported( ).
-    MESSAGE |DB { sy-dbsys } is not supported by the Code Search| TYPE 'A'.
-  ENDIF.
   DATA(report) = NEW lcl_report( ).
 
 START-OF-SELECTION.
@@ -173,6 +173,8 @@ AT SELECTION-SCREEN.
 CLASS lcl_report IMPLEMENTATION.
   METHOD constructor.
     pcre_available = zcl_adcoset_pcre_util=>is_pcre_supported( ).
+    stru_supported = xsdbool( sy-saprl > '740' ).
+
     set_icon( EXPORTING icon_name = 'ICON_SELECT_ALL'
               IMPORTING target    = pb_tsela ).
 
@@ -188,7 +190,8 @@ CLASS lcl_report IMPLEMENTATION.
                                ( REF #( p_ddls  ) )
                                ( REF #( p_dcls  ) )
                                ( REF #( p_ddlx  ) )
-                               ( REF #( p_bdef  ) ) ).
+                               ( REF #( p_bdef  ) )
+                               ( REF #( p_stru  ) ) ).
   ENDMETHOD.
 
   METHOD pbo.
@@ -196,7 +199,9 @@ CLASS lcl_report IMPLEMENTATION.
       IF screen-group1 = 'TCH'.
         screen-input = COND #( WHEN p_typal = abap_true THEN '0' ELSE '1' ).
         MODIFY SCREEN.
-      ELSEIF screen-name = 'S_PATT-LOW'.
+      ENDIF.
+
+      IF screen-name = 'S_PATT-LOW'.
         screen-required = '2'.
         MODIFY SCREEN.
       ELSEIF screen-name = 'P_PCRE'.
@@ -232,6 +237,9 @@ CLASS lcl_report IMPLEMENTATION.
                                  OR p_multil = abap_true
                                THEN '0'
                                ELSE '1' ).
+        MODIFY SCREEN.
+      ELSEIF screen-name = 'P_STRU'.
+        screen-input = COND #( WHEN p_typsp = abap_true AND stru_supported = abap_true THEN '1' ELSE '0' ).
         MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
@@ -383,8 +391,8 @@ CLASS lcl_report IMPLEMENTATION.
 
     LOOP AT search_result-results ASSIGNING FIELD-SYMBOL(<result_object>).
       DATA(flat_match) = CORRESPONDING ty_search_match( <result_object>-object_info
-        MAPPING object_name = name
-                object_type = type ).
+        MAPPING main_object_name = name
+                main_object_type = type ).
 
       LOOP AT <result_object>-text_matches ASSIGNING FIELD-SYMBOL(<text_match>).
         flat_match = CORRESPONDING #( BASE ( flat_match ) <text_match> ).
@@ -455,11 +463,14 @@ CLASS lcl_report IMPLEMENTATION.
                         ( sign = 'I' option = 'EQ' low = zif_adcoset_c_global=>c_source_code_type-behavior_definition ) ).
     ENDIF.
 
+    IF p_stru = abap_true.
+      result = VALUE #( BASE result
+                        ( sign = 'I' option = 'EQ' low = zif_adcoset_c_global=>c_source_code_type-structure ) ).
+    ENDIF.
+
     IF result IS INITIAL.
-      " TODO: variable is assigned but never used; add pragma ##NEEDED (ABAP cleaner)
-      MESSAGE e001(00) WITH 'You have to select at least one object type' INTO DATA(msg).
-      SET CURSOR FIELD p_class.
-      RAISE EXCEPTION TYPE zcx_adcoset_static_error.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error
+        EXPORTING text = 'You have to select at least one object type'.
     ENDIF.
   ENDMETHOD.
 
@@ -494,6 +505,10 @@ CLASS lcl_report IMPLEMENTATION.
     LOOP AT type_check_refs INTO DATA(type_check).
       type_check->* = checked.
     ENDLOOP.
+
+    IF checked = abap_true.
+      p_stru = COND #( WHEN stru_supported = abap_true THEN abap_true ).
+    ENDIF.
   ENDMETHOD.
 
   METHOD on_link_click.
@@ -507,7 +522,7 @@ CLASS lcl_report IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    CASE <selected_row>-object_type.
+    CASE <selected_row>-main_object_type.
 
       WHEN zif_adcoset_c_global=>c_source_code_type-class OR
            zif_adcoset_c_global=>c_source_code_type-interface OR
@@ -519,7 +534,7 @@ CLASS lcl_report IMPLEMENTATION.
         CALL FUNCTION 'EDITOR_PROGRAM'
           EXPORTING  appid   = 'PG'
                      display = abap_true
-                     program = <selected_row>-include
+                     program = <selected_row>-object_name
                      line    = <selected_row>-start_line
                      topline = <selected_row>-start_line
           EXCEPTIONS OTHERS  = 0.
@@ -531,9 +546,9 @@ CLASS lcl_report IMPLEMENTATION.
 
         CALL FUNCTION 'RS_TOOL_ACCESS'
           EXPORTING  operation           = 'SHOW'
-                     object_name         = <selected_row>-object_name
-                     object_type         = <selected_row>-object_type
-                     include             = <selected_row>-include
+                     object_name         = <selected_row>-main_object_name
+                     object_type         = <selected_row>-main_object_type
+                     include             = <selected_row>-object_name
                      position            = <selected_row>-start_line
           EXCEPTIONS not_executed        = 1
                      invalid_object_type = 2
@@ -548,13 +563,13 @@ CLASS lcl_report IMPLEMENTATION.
     DATA(adt_obj_factory) = zcl_adcoset_adt_obj_factory=>get_instance( ).
 
     TRY.
-        CASE match-object_type.
+        CASE match-main_object_type.
 
           WHEN zif_adcoset_c_global=>c_source_code_type-class OR
                zif_adcoset_c_global=>c_source_code_type-function_group.
 
-            adt_obj = adt_obj_factory->get_object_ref_for_include( main_program      = match-object_name
-                                                                   include           = match-include
+            adt_obj = adt_obj_factory->get_object_ref_for_include( main_program      = match-main_object_name
+                                                                   include           = match-object_name
                                                                    start_line        = match-start_line
                                                                    start_line_offset = match-start_column
                                                                    end_line          = match-end_line
@@ -569,8 +584,8 @@ CLASS lcl_report IMPLEMENTATION.
                zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
                zif_adcoset_c_global=>c_source_code_type-program.
 
-            adt_obj = adt_obj_factory->get_object_ref_for_trobj( type                   = match-object_type
-                                                                 name                   = match-object_name
+            adt_obj = adt_obj_factory->get_object_ref_for_trobj( type                   = match-main_object_type
+                                                                 name                   = match-main_object_name
                                                                  append_source_uri_path = abap_true ).
 
             adt_obj_factory->add_position_fragment( EXPORTING start_line   = match-start_line
