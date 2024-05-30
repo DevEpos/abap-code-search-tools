@@ -96,6 +96,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_DTAB</KEY>
+     <ENTRY>Database Table</ENTRY>
+     <LENGTH>22</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_FUGR</KEY>
      <ENTRY>Function Groups</ENTRY>
      <LENGTH>23</LENGTH>
@@ -174,6 +180,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_STRU</KEY>
+     <ENTRY>Structure</ENTRY>
+     <LENGTH>17</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_TYPAL</KEY>
      <ENTRY>All Types</ENTRY>
      <LENGTH>17</LENGTH>
@@ -205,28 +217,28 @@
     <item>
      <ID>S</ID>
      <KEY>S_AUTH</KEY>
-     <ENTRY>.</ENTRY>
+     <ENTRY>Person Responsible</ENTRY>
      <LENGTH>26</LENGTH>
      <SPLIT>D</SPLIT>
     </item>
     <item>
      <ID>S</ID>
      <KEY>S_CRTD</KEY>
-     <ENTRY>.</ENTRY>
+     <ENTRY>Created On</ENTRY>
      <LENGTH>18</LENGTH>
      <SPLIT>D</SPLIT>
     </item>
     <item>
      <ID>S</ID>
      <KEY>S_OBJN</KEY>
-     <ENTRY>.</ENTRY>
+     <ENTRY>Object Name</ENTRY>
      <LENGTH>19</LENGTH>
      <SPLIT>D</SPLIT>
     </item>
     <item>
      <ID>S</ID>
      <KEY>S_PACK</KEY>
-     <ENTRY>.</ENTRY>
+     <ENTRY>Package</ENTRY>
      <LENGTH>15</LENGTH>
      <SPLIT>D</SPLIT>
     </item>
@@ -239,8 +251,8 @@
     <item>
      <ID>S</ID>
      <KEY>S_TRRQ</KEY>
-     <ENTRY>.</ENTRY>
-     <LENGTH>9</LENGTH>
+     <ENTRY>Request/Task</ENTRY>
+     <LENGTH>20</LENGTH>
      <SPLIT>D</SPLIT>
     </item>
    </TPOOL>

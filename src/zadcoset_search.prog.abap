@@ -11,6 +11,8 @@
 *&  - Access Controls
 *&  - Metadata Extensions
 *&  - Behavior Definitions
+*&  - Structures
+*&  - Database Tables (NW > 7.51)
 *&---------------------------------------------------------------------*
 REPORT zadcoset_search.
 
@@ -62,7 +64,9 @@ SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
       p_ddls  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_dcls  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_ddlx  TYPE abap_bool AS CHECKBOX MODIF ID tch,
-      p_bdef  TYPE abap_bool AS CHECKBOX MODIF ID tch.
+      p_bdef  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+      p_stru  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+      p_dtab  TYPE abap_bool AS CHECKBOX MODIF ID tch.
   SELECTION-SCREEN END OF BLOCK types.
 
 SELECTION-SCREEN END OF BLOCK scope.
@@ -111,6 +115,7 @@ CLASS lcl_report DEFINITION.
     DATA search_count TYPE i.
     DATA duration TYPE string.
     DATA pcre_available TYPE abap_bool.
+    DATA dtab_supported TYPE abap_bool.
 
     METHODS run_search
       RAISING
@@ -170,6 +175,8 @@ AT SELECTION-SCREEN.
 CLASS lcl_report IMPLEMENTATION.
   METHOD constructor.
     pcre_available = zcl_adcoset_pcre_util=>is_pcre_supported( ).
+    dtab_supported = xsdbool( sy-saprl > '751' ).
+
     set_icon( EXPORTING icon_name = 'ICON_SELECT_ALL'
               IMPORTING target    = pb_tsela ).
 
@@ -185,7 +192,9 @@ CLASS lcl_report IMPLEMENTATION.
                                ( REF #( p_ddls  ) )
                                ( REF #( p_dcls  ) )
                                ( REF #( p_ddlx  ) )
-                               ( REF #( p_bdef  ) ) ).
+                               ( REF #( p_bdef  ) )
+                               ( REF #( p_stru  ) )
+                               ( REF #( p_dtab  ) ) ).
   ENDMETHOD.
 
   METHOD pbo.
@@ -193,7 +202,9 @@ CLASS lcl_report IMPLEMENTATION.
       IF screen-group1 = 'TCH'.
         screen-input = COND #( WHEN p_typal = abap_true THEN '0' ELSE '1' ).
         MODIFY SCREEN.
-      ELSEIF screen-name = 'S_PATT-LOW'.
+      ENDIF.
+
+      IF screen-name = 'S_PATT-LOW'.
         screen-required = '2'.
         MODIFY SCREEN.
       ELSEIF screen-name = 'P_PCRE'.
@@ -229,6 +240,9 @@ CLASS lcl_report IMPLEMENTATION.
                                  OR p_multil = abap_true
                                THEN '0'
                                ELSE '1' ).
+        MODIFY SCREEN.
+      ELSEIF screen-name = 'P_DTAB'.
+        screen-input = COND #( WHEN p_typsp = abap_true AND dtab_supported = abap_true THEN '1' ELSE '0' ).
         MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
@@ -452,10 +466,19 @@ CLASS lcl_report IMPLEMENTATION.
                         ( sign = 'I' option = 'EQ' low = zif_adcoset_c_global=>c_source_code_type-behavior_definition ) ).
     ENDIF.
 
+    IF p_dtab = abap_true.
+      result = VALUE #( BASE result
+                        ( sign = 'I' option = 'EQ' low = zif_adcoset_c_global=>c_source_code_type-database_table ) ).
+    ENDIF.
+
+    IF p_stru = abap_true.
+      result = VALUE #( BASE result
+                        ( sign = 'I' option = 'EQ' low = zif_adcoset_c_global=>c_source_code_type-structure ) ).
+    ENDIF.
+
     IF result IS INITIAL.
-      MESSAGE e001(00) WITH 'You have to select at least one object type' INTO DATA(msg) ##NEEDED.
-      SET CURSOR FIELD p_class.
-      RAISE EXCEPTION TYPE zcx_adcoset_static_error.
+      RAISE EXCEPTION TYPE zcx_adcoset_static_error
+        EXPORTING text = 'You have to select at least one object type'.
     ENDIF.
   ENDMETHOD.
 
@@ -490,6 +513,10 @@ CLASS lcl_report IMPLEMENTATION.
     LOOP AT type_check_refs INTO DATA(type_check).
       type_check->* = checked.
     ENDLOOP.
+
+    IF checked = abap_true.
+      p_dtab = COND #( WHEN dtab_supported = abap_true THEN abap_true ).
+    ENDIF.
   ENDMETHOD.
 
   METHOD on_link_click.
