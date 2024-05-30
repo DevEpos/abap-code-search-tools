@@ -9,7 +9,7 @@ Legend
 + : added
 - : removed
 
-2024-05-01 v1.6.0
+2024-05-30 v1.6.0
 -------------------
 
 + New source code object types: STRU, DTAB (#23,#24)
