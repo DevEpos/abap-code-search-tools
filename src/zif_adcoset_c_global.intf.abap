@@ -140,7 +140,7 @@ INTERFACE zif_adcoset_c_global
 
   CONSTANTS:
     BEGIN OF c_source_code_sub_type,
-      structure     TYPE seu_objtyp VALUE 'DS',
+      structure TYPE seu_objtyp VALUE 'DS',
     END OF c_source_code_sub_type.
 
   CONSTANTS:
