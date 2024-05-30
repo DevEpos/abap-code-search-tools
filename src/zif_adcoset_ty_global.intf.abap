@@ -108,16 +108,15 @@ INTERFACE zif_adcoset_ty_global
   TYPES:
     "! Uniquely identifies a match
     BEGIN OF ty_match_identifier,
-      display_name     TYPE string,
-      main_include     TYPE program,
-      include          TYPE program,
+      display_name    TYPE string,
+      object_name     TYPE program,
       "! ADT type for the include - if the include is filled<br>
       "! <br>
       "! Reason:<br>
       "! the uri mapper does not create the most suitable type which will be used
       "! to fetch the right image in ADT, so we write the correct one in this
       "! component
-      adt_include_type TYPE string,
+      adt_object_type TYPE string,
     END OF ty_match_identifier.
   TYPES: BEGIN OF ty_search_match.
            INCLUDE TYPE ty_match_identifier.
@@ -177,6 +176,11 @@ INTERFACE zif_adcoset_ty_global
       expand_includes TYPE abap_bool,
     END OF ty_prog_cs_settings.
   TYPES:
+    "! Structure/Db Table settings for code search
+    BEGIN OF ty_table_cs_settings,
+      expand_includes TYPE abap_bool,
+    END OF ty_table_cs_settings.
+  TYPES:
     "! Basic search settings
     BEGIN OF ty_search_settings,
       line_feed             TYPE string,
@@ -192,6 +196,7 @@ INTERFACE zif_adcoset_ty_global
       class TYPE ty_clas_cs_settings,
       fugr  TYPE ty_fugr_cs_settings,
       prog  TYPE ty_prog_cs_settings,
+      tabl  TYPE ty_table_cs_settings,
     END OF ty_custom_search_settings.
   TYPES:
     BEGIN OF ty_parl_processing,

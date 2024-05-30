@@ -97,6 +97,7 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
                      |\{&{ zif_adcoset_c_global=>c_search_params-class_includes }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-fugr_includes }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-expand_prog_includes }*\}| &&
+                     |\{&{ zif_adcoset_c_global=>c_search_params-expand_table_includes }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-ignore_comment_lines }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-ignore_case }*\}| &&
                      |\{&{ zif_adcoset_c_global=>c_search_params-multi_line }*\}|.

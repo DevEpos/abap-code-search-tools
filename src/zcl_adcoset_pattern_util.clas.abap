@@ -83,11 +83,11 @@ CLASS zcl_adcoset_pattern_util IMPLEMENTATION.
         ( low = c_pattern_ctrl_flag-match_start BIT-OR c_pattern_ctrl_flag-boundary_start )
         ( low = c_pattern_ctrl_flag-match_end BIT-OR c_pattern_ctrl_flag-boundary_end ) ).
 
-    ctrl_sequences_regex = c_pattern_ctrl_sequence-boundary_start && `|` &&
-                           c_pattern_ctrl_sequence-boundary_end && `|` &&
-                           c_pattern_ctrl_sequence-match && `|` &&
-                           c_pattern_ctrl_sequence-match_start && `|` &&
-                           c_pattern_ctrl_sequence-match_end && `|` &&
+    ctrl_sequences_regex = |{ c_pattern_ctrl_sequence-boundary_start }\|| &&
+                           |{ c_pattern_ctrl_sequence-boundary_end }\|| &&
+                           |{ c_pattern_ctrl_sequence-match }\|| &&
+                           |{ c_pattern_ctrl_sequence-match_start }\|| &&
+                           |{ c_pattern_ctrl_sequence-match_end }\|| &&
                            c_pattern_ctrl_sequence-exclude.
     ctrl_sequences_regex = replace( val = ctrl_sequences_regex sub = '(' with = '\(' occ = 0 ).
     ctrl_sequences_regex = replace( val = ctrl_sequences_regex sub = ')' with = '\)' occ = 0 ).

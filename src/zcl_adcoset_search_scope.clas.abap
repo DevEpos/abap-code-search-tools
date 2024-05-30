@@ -45,7 +45,8 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         AND obj~owner IN @search_ranges-owner_range
         AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
-      ORDER BY obj~programid
+      ORDER BY obj~objectname,
+               obj~objecttype
       INTO CORRESPONDING FIELDS OF TABLE @result-objects
       UP TO @max_rows ROWS
       OFFSET @current_offset.
@@ -101,16 +102,16 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       "       --> add group by clause if tags are supplied (possibly the only solution)
       dyn_from_clause = dyn_from_clause &&
         |INNER JOIN { zcl_adcoset_extensions_util=>get_current_tgobj_table( ) } AS tgobj | &&
-        `ON  obj~ObjectName = tgobj~object_name ` &&
-        `AND obj~ObjectType = tgobj~object_type `.
+        |ON  obj~ObjectName = tgobj~object_name | &&
+        |AND obj~OriginalObjectType = tgobj~object_type |.
     ENDIF.
 
     IF search_ranges-appl_comp_range IS NOT INITIAL.
       dyn_from_clause = dyn_from_clause &&
-        `INNER JOIN tdevc AS pack ` &&
-        `ON obj~DevelopmentPackage = pack~devclass ` &&
-        `INNER JOIN df14l AS appl ` &&
-        `ON pack~component = appl~fctr_id `.
+        |INNER JOIN tdevc AS pack | &&
+        |ON obj~DevelopmentPackage = pack~devclass | &&
+        |INNER JOIN df14l AS appl | &&
+        |ON pack~component = appl~fctr_id |.
 
       appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
     ENDIF.
