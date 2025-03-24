@@ -23,7 +23,8 @@ CLASS lcl_test_helper IMPLEMENTATION.
                                   type        = zif_adcoset_c_global=>c_matcher_type-substring
                                   pattern     = pattern
                                   ignore_case = abap_true ) ) ).
-        CATCH zcx_adcoset_no_matcher cx_sy_regex.
+        CATCH zcx_adcoset_no_matcher
+              cx_sy_regex.
       ENDTRY.
     ENDLOOP.
   ENDMETHOD.

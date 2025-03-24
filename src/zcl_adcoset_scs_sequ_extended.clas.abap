@@ -146,9 +146,9 @@ CLASS zcl_adcoset_scs_sequ_extended IMPLEMENTATION.
       ENDIF.
 
       " # Check if match is inside the boundary - if currently there is a boundary active
-      IF          boundary_end       IS NOT INITIAL
-              AND current_match-line  > boundary_end-line
-         OR (     current_match-line  = boundary_end-line AND current_match-offset >= boundary_end-offset ).
+      IF        boundary_end       IS NOT INITIAL
+            AND current_match-line  > boundary_end-line
+         OR ( current_match-line = boundary_end-line AND current_match-offset >= boundary_end-offset ).
         " match was found but steps out of the end boundary
         current_line_offset = boundary_end-line.
         current_col_offset = boundary_end-offset + boundary_end-length.
