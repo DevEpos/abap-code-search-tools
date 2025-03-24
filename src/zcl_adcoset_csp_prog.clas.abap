@@ -54,9 +54,10 @@ CLASS zcl_adcoset_csp_prog IMPLEMENTATION.
 
         IF custom_settings-expand_includes = abap_true.
           result = VALUE #( BASE result
-                            ( LINES OF search_dependent_includes( src_code_reader   = src_code_reader
-                                                                  src_code_searcher = src_code_searcher
-                                                                  object_info       = object-info ) ) ).
+                            ( LINES OF
+                              search_dependent_includes( src_code_reader   = src_code_reader
+                                                         src_code_searcher = src_code_searcher
+                                                         object_info       = object-info ) ) ).
         ENDIF.
       CATCH zcx_adcoset_src_code_read.
     ENDTRY.

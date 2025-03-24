@@ -316,12 +316,14 @@ CLASS zcl_adcoset_adt_res_trreq_vh IMPLEMENTATION.
     LOOP AT values INTO DATA(value).
       value = to_lower( value ).
       IF value = c_tr_status_ext-modifiable.
-        status_filter = VALUE #( BASE status_filter sign   = 'I'
+        status_filter = VALUE #( BASE status_filter
+                                 sign   = 'I'
                                  option = 'EQ'
                                  ( low = sctsc_state_changeable )
                                  ( low = sctsc_state_protected  ) ).
       ELSEIF value = c_tr_status_ext-released.
-        status_filter = VALUE #( BASE status_filter sign   = 'I'
+        status_filter = VALUE #( BASE status_filter
+                                 sign   = 'I'
                                  option = 'EQ'
                                  ( low = sctsc_state_export_started )
                                  ( low = sctsc_state_notconfirmed )

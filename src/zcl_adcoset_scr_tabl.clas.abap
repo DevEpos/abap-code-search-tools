@@ -70,6 +70,8 @@ CLASS zcl_adcoset_scr_tabl IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD read_tabl.
+    " TODO: parameter TYPE is never used (ABAP cleaner)
+
     DATA object_data TYPE REF TO if_wb_object_data_model.
 
     initialize_table_persistence( IMPORTING tabl_pers = DATA(table_pers) ).
