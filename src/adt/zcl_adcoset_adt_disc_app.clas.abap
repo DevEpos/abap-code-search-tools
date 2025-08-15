@@ -35,6 +35,7 @@ CLASS zcl_adcoset_adt_disc_app DEFINITION
         search_settings       TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_CONFIG',
         search_scope          TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_CS_SCOPE',
         appl_comp_vh          TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_APPLC_VH',
+        soft_comp_vh          TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_SWCOMP_VH',
         server_group_vh       TYPE string VALUE 'ZCL_ADCOSET_RES_SERVER_GRP_VH',
         plugin_features       TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_FEATURES',
         pattern_validator     TYPE string VALUE 'ZCL_ADCOSET_ADT_RES_PATTRNVAL',
@@ -159,6 +160,11 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
                                               description     = 'Application Component value help'
                                               category_scheme = c_root_scheme
                                               category_term   = 'applcomp' ).
+    registry->register_discoverable_resource( url             = '/softwarecomp'
+                                              handler_class   = c_handlers-soft_comp_vh
+                                              description     = 'Software Component value help'
+                                              category_scheme = c_root_scheme
+                                              category_term   = 'softwarecomp' ).
     registry->register_discoverable_resource( url             = '/transportRequest'
                                               handler_class   = c_handlers-transport_request_vh
                                               description     = 'Transport Request value help'

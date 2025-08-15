@@ -60,6 +60,7 @@ INTERFACE zif_adcoset_c_global
       scope_offset          TYPE string VALUE 'scopeOffset',
       package               TYPE string VALUE 'packageName',
       owner                 TYPE string VALUE 'owner',
+      software_component    TYPE string VALUE 'comp',
       use_regex             TYPE string VALUE 'useRegex',
       match_all_patterns    TYPE string VALUE 'matchAll',
       sequential_matching   TYPE string VALUE 'seqMatching',

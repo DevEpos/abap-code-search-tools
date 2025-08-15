@@ -29,6 +29,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
       BEGIN OF c_table_field_name,
         tag_id      TYPE string VALUE 'tag_id',
         ps_posid    TYPE string VALUE 'ps_posid',
+        softwcomp   TYPE string VALUE 'dlvunit',
         object_name TYPE string VALUE 'object_name',
         object_type TYPE string VALUE 'object_type',
         devclass    TYPE string VALUE 'devclass',
@@ -45,11 +46,13 @@ CLASS zcl_adcoset_search_scope DEFINITION
         obj   TYPE string VALUE 'obj',
         tgobj TYPE string VALUE 'tgobj',
         appl  TYPE string VALUE 'appl',
+        pack  TYPE string VALUE 'pack',
       END OF c_tab_alias.
 
     DATA dyn_from_clause TYPE string.
     DATA tags_dyn_where_cond TYPE string.
     DATA appl_comp_dyn_where_cond TYPE string.
+    DATA softwcomp_dyn_where_cond TYPE string.
     DATA native_scope_query TYPE REF TO zcl_adcoset_nsql_sscope_query.
 
     METHODS config_dyn_where_clauses.
@@ -100,6 +103,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         AND obj~owner       IN @search_ranges-owner_range
         AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
+        and (softwcomp_dyn_where_cond)
       INTO @object_count
       UP TO @selection_limit ROWS.
 
@@ -130,14 +134,22 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         |AND obj~ObjectType = tgobj~object_type |.
     ENDIF.
 
-    IF search_ranges-appl_comp_range IS NOT INITIAL.
+    IF search_ranges-appl_comp_range IS NOT INITIAL OR search_ranges-softwcomp_range IS NOT INITIAL.
       dyn_from_clause = dyn_from_clause &&
         |INNER JOIN tdevc AS pack | &&
-        |ON obj~DevelopmentPackage = pack~devclass | &&
+        |ON obj~DevelopmentPackage = pack~devclass |.
+
+      IF search_ranges-appl_comp_range IS NOT INITIAL.
+        dyn_from_clause = dyn_from_clause &&
         |INNER JOIN df14l AS appl | &&
         |ON pack~component = appl~fctr_id |.
 
-      appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
+        appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
+      ENDIF.
+
+      IF search_ranges-softwcomp_range IS NOT INITIAL.
+        softwcomp_dyn_where_cond = `pack~dlvunit IN @search_ranges-softwcomp_range`.
+      ENDIF.
     ENDIF.
   ENDMETHOD.
 
@@ -166,10 +178,13 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         |AND obj.objecttype = tgobj.object_type |.
     ENDIF.
 
-    IF search_ranges-appl_comp_range IS NOT INITIAL.
+    IF search_ranges-appl_comp_range IS NOT INITIAL OR search_ranges-softwcomp_range IS NOT INITIAL.
       from_clause = |{ from_clause } | &&
-        |INNER JOIN tdevc pack ON obj.developmentpackage = pack.devclass | &&
-        |INNER JOIN df14l appl ON pack.component = appl.fctr_id |.
+        |INNER JOIN tdevc pack ON obj.developmentpackage = pack.devclass |.
+      IF search_ranges-appl_comp_range IS NOT INITIAL.
+        from_clause = |{ from_clause }| &&
+          |INNER JOIN df14l appl ON pack.component = appl.fctr_id |.
+      ENDIF.
     ENDIF.
 
     native_scope_query->set_from( from_clause ).
@@ -198,5 +213,8 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
     native_scope_query->add_range_to_where( ranges   = search_ranges-appl_comp_range
                                             col_info = VALUE #( tab_alias = c_tab_alias-appl
                                                                 name      = c_table_field_name-ps_posid ) ).
+    native_scope_query->add_range_to_where( ranges   = search_ranges-softwcomp_range
+                                            col_info = VALUE #( tab_alias = c_tab_alias-pack
+                                                                name      = c_table_field_name-softwcomp ) ).
   ENDMETHOD.
 ENDCLASS.

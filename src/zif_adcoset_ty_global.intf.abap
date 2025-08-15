@@ -80,6 +80,7 @@ INTERFACE zif_adcoset_ty_global
     "! Ranges for determining the search scope
     BEGIN OF ty_search_scope_ranges,
       package_range     TYPE ty_package_name_range,
+      softwcomp_range   TYPE RANGE OF dlvunit,
       object_type_range TYPE RANGE OF trobjtype,
       object_name_range TYPE RANGE OF sobj_name,
       owner_range       TYPE RANGE OF uname,
