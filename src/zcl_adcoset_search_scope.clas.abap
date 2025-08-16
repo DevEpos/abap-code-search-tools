@@ -19,6 +19,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
     DATA dyn_from_clause TYPE string.
     DATA tags_dyn_where_cond TYPE string.
     DATA appl_comp_dyn_where_cond TYPE string.
+    DATA softwcomp_dyn_where_cond TYPE string.
 
     METHODS config_dyn_where_clauses.
 ENDCLASS.
@@ -45,6 +46,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         AND obj~owner IN @search_ranges-owner_range
         AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
+        AND (softwcomp_dyn_where_cond)
       ORDER BY obj~objectname,
                obj~objecttype
       INTO CORRESPONDING FIELDS OF TABLE @result-objects
@@ -76,6 +78,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         AND obj~owner       IN @search_ranges-owner_range
         AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
+        and (softwcomp_dyn_where_cond)
       INTO @object_count
       UP TO @selection_limit ROWS.
 
@@ -106,14 +109,22 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         |AND obj~OriginalObjectType = tgobj~object_type |.
     ENDIF.
 
-    IF search_ranges-appl_comp_range IS NOT INITIAL.
+    IF search_ranges-appl_comp_range IS NOT INITIAL OR search_ranges-softwcomp_range IS NOT INITIAL.
       dyn_from_clause = dyn_from_clause &&
         |INNER JOIN tdevc AS pack | &&
-        |ON obj~DevelopmentPackage = pack~devclass | &&
+        |ON obj~DevelopmentPackage = pack~devclass |.
+
+      IF search_ranges-appl_comp_range IS NOT INITIAL.
+        dyn_from_clause = dyn_from_clause &&
         |INNER JOIN df14l AS appl | &&
         |ON pack~component = appl~fctr_id |.
 
-      appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
+        appl_comp_dyn_where_cond = `appl~ps_posid IN @search_ranges-appl_comp_range`.
+      ENDIF.
+
+      IF search_ranges-softwcomp_range IS NOT INITIAL.
+        softwcomp_dyn_where_cond = `pack~dlvunit IN @search_ranges-softwcomp_range`.
+      ENDIF.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

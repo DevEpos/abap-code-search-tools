@@ -43,6 +43,12 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
       RAISING
         cx_adt_rest.
 
+    METHODS extract_softw_comps
+      IMPORTING
+        param_value TYPE string
+      RAISING
+        cx_adt_rest.
+
     METHODS extract_appl_comps
       IMPORTING
         param_value TYPE string
@@ -139,6 +145,9 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
         WHEN zif_adcoset_c_global=>c_search_params-package.
           extract_packages( <param>-value ).
 
+        WHEN zif_adcoset_c_global=>c_search_params-software_component.
+          extract_softw_comps( <param>-value ).
+
         WHEN zif_adcoset_c_global=>c_search_params-appl_comp.
           extract_appl_comps( <param>-value ).
 
@@ -219,6 +228,15 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
                                 input       = packages
                                 flags       = VALUE #( negation = abap_true patterns = abap_true )
                       IMPORTING range_table = scope_ranges-package_range ).
+  ENDMETHOD.
+
+  METHOD extract_softw_comps.
+    DATA(softw_comps) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-software_component
+                                input       = softw_comps
+                                flags       = VALUE #( negation = abap_true patterns = abap_false )
+                      IMPORTING range_table = scope_ranges-softwcomp_range ).
   ENDMETHOD.
 
   METHOD extract_appl_comps.
