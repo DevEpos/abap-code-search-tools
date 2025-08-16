@@ -65,6 +65,7 @@ SELECTION-SCREEN BEGIN OF BLOCK scope WITH FRAME TITLE TEXT-b02.
       p_dcls  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_ddlx  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_bdef  TYPE abap_bool AS CHECKBOX MODIF ID tch,
+      p_srvd  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_stru  TYPE abap_bool AS CHECKBOX MODIF ID tch,
       p_dtab  TYPE abap_bool AS CHECKBOX MODIF ID tch.
   SELECTION-SCREEN END OF BLOCK types.
@@ -116,6 +117,7 @@ CLASS lcl_report DEFINITION.
     DATA duration TYPE string.
     DATA pcre_available TYPE abap_bool.
     DATA dtab_supported TYPE abap_bool.
+    DATA srvd_supported TYPE abap_bool.
 
     METHODS run_search
       RAISING
@@ -151,6 +153,12 @@ CLASS lcl_report DEFINITION.
         !column
         !row.
 
+    METHODS map_trobjtype
+      IMPORTING
+        !type         TYPE trobjtype
+      RETURNING
+        VALUE(result) TYPE trobjtype.
+
     METHODS navigate_to_adt
       IMPORTING
         !match TYPE ty_search_match.
@@ -176,6 +184,7 @@ CLASS lcl_report IMPLEMENTATION.
   METHOD constructor.
     pcre_available = zcl_adcoset_pcre_util=>is_pcre_supported( ).
     dtab_supported = xsdbool( sy-saprl > '751' ).
+    srvd_supported = zcl_adcoset_adt_res_features=>srvd_tab_exists( ).
 
     set_icon( EXPORTING icon_name = 'ICON_SELECT_ALL'
               IMPORTING target    = pb_tsela ).
@@ -193,6 +202,7 @@ CLASS lcl_report IMPLEMENTATION.
                                ( REF #( p_dcls  ) )
                                ( REF #( p_ddlx  ) )
                                ( REF #( p_bdef  ) )
+                               ( REF #( p_srvd  ) )
                                ( REF #( p_stru  ) )
                                ( REF #( p_dtab  ) ) ).
   ENDMETHOD.
@@ -243,6 +253,9 @@ CLASS lcl_report IMPLEMENTATION.
         MODIFY SCREEN.
       ELSEIF screen-name = 'P_DTAB'.
         screen-input = COND #( WHEN p_typsp = abap_true AND dtab_supported = abap_true THEN '1' ELSE '0' ).
+        MODIFY SCREEN.
+      ELSEIF screen-name = 'P_SRVD'.
+        screen-input = COND #( WHEN p_typsp = abap_true AND srvd_supported = abap_true THEN '1' ELSE '0' ).
         MODIFY SCREEN.
       ENDIF.
     ENDLOOP.
@@ -476,6 +489,11 @@ CLASS lcl_report IMPLEMENTATION.
                         ( sign = 'I' option = 'EQ' low = zif_adcoset_c_global=>c_source_code_type-structure ) ).
     ENDIF.
 
+    IF p_srvd = abap_true.
+      result = VALUE #( BASE result
+                        ( sign = 'I' option = 'EQ' low = zif_adcoset_c_global=>c_source_code_type-service_definition ) ).
+    ENDIF.
+
     IF result IS INITIAL.
       RAISE EXCEPTION TYPE zcx_adcoset_static_error
         EXPORTING text = 'You have to select at least one object type'.
@@ -519,6 +537,14 @@ CLASS lcl_report IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+  METHOD map_trobjtype.
+    result = SWITCH #( type
+                       WHEN zif_adcoset_c_global=>c_source_code_type-database_table OR
+                           zif_adcoset_c_global=>c_source_code_type-database_table
+                       THEN zif_adcoset_c_global=>c_source_code_type-table
+                       ELSE type ).
+  ENDMETHOD.
+
   METHOD on_link_click.
     ASSIGN results[ row ] TO FIELD-SYMBOL(<selected_row>).
     IF sy-subrc <> 0.
@@ -550,14 +576,26 @@ CLASS lcl_report IMPLEMENTATION.
       WHEN zif_adcoset_c_global=>c_source_code_type-data_definition OR
            zif_adcoset_c_global=>c_source_code_type-access_control OR
            zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
-           zif_adcoset_c_global=>c_source_code_type-behavior_definition.
+           zif_adcoset_c_global=>c_source_code_type-behavior_definition OR
+           zif_adcoset_c_global=>c_source_code_type-service_definition.
 
         CALL FUNCTION 'RS_TOOL_ACCESS'
           EXPORTING  operation           = 'SHOW'
                      object_name         = <selected_row>-main_object_name
-                     object_type         = <selected_row>-main_object_type
+                     object_type         = map_trobjtype( <selected_row>-main_object_type )
                      include             = <selected_row>-object_name
                      position            = <selected_row>-start_line
+          EXCEPTIONS not_executed        = 1
+                     invalid_object_type = 2
+                     OTHERS              = 3.
+
+      WHEN zif_adcoset_c_global=>c_source_code_type-structure OR
+           zif_adcoset_c_global=>c_source_code_type-database_table.
+        CALL FUNCTION 'RS_TOOL_ACCESS'
+          EXPORTING  operation           = 'SHOW'
+                     object_name         = <selected_row>-main_object_name
+                     object_type         = map_trobjtype( <selected_row>-main_object_type )
+*                     include             = <selected_row>-object_name
           EXCEPTIONS not_executed        = 1
                      invalid_object_type = 2
                      OTHERS              = 3.
@@ -586,15 +624,19 @@ CLASS lcl_report IMPLEMENTATION.
           WHEN zif_adcoset_c_global=>c_source_code_type-interface OR
                zif_adcoset_c_global=>c_source_code_type-access_control OR
                zif_adcoset_c_global=>c_source_code_type-behavior_definition OR
+               zif_adcoset_c_global=>c_source_code_type-service_definition OR
+               zif_adcoset_c_global=>c_source_code_type-database_table OR
+               zif_adcoset_c_global=>c_source_code_type-structure OR
                zif_adcoset_c_global=>c_source_code_type-data_definition OR
                zif_adcoset_c_global=>c_source_code_type-type_group OR
                zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
                zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
                zif_adcoset_c_global=>c_source_code_type-program.
 
-            adt_obj = adt_obj_factory->get_object_ref_for_trobj( type                   = match-main_object_type
-                                                                 name                   = match-main_object_name
-                                                                 append_source_uri_path = abap_true ).
+            adt_obj = adt_obj_factory->get_object_ref_for_trobj(
+                          type                   = map_trobjtype( match-main_object_type )
+                          name                   = match-main_object_name
+                          append_source_uri_path = abap_true ).
 
             adt_obj_factory->add_position_fragment( EXPORTING start_line   = match-start_line
                                                               start_column = match-start_column

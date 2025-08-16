@@ -7,6 +7,10 @@ CLASS zcl_adcoset_adt_res_features DEFINITION
   PUBLIC SECTION.
     METHODS get REDEFINITION.
 
+    CLASS-METHODS srvd_tab_exists
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
   PROTECTED SECTION.
 
   PRIVATE SECTION.
@@ -30,9 +34,6 @@ CLASS zcl_adcoset_adt_res_features DEFINITION
         request_attribute TYPE string VALUE 'RequestAttribute',
       END OF c_feature_categories.
 
-    METHODS srvd_tab_exists
-      RETURNING
-        VALUE(result) TYPE abap_bool.
 ENDCLASS.
 
 

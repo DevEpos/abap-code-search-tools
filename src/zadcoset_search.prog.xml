@@ -180,6 +180,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_SRVD</KEY>
+     <ENTRY>Service Definitions</ENTRY>
+     <LENGTH>27</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_STRU</KEY>
      <ENTRY>Structure</ENTRY>
      <LENGTH>17</LENGTH>
