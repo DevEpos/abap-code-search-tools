@@ -99,6 +99,7 @@ CLASS zcl_adcoset_csp_factory IMPLEMENTATION.
 
                        WHEN zif_adcoset_c_global=>c_source_code_type-access_control OR
                             zif_adcoset_c_global=>c_source_code_type-data_definition OR
+                            zif_adcoset_c_global=>c_source_code_type-service_definition OR
                             zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
                             zif_adcoset_c_global=>c_source_code_type-access_control THEN
                          c_def_string_src_provider ).

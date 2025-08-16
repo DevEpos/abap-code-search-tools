@@ -463,16 +463,7 @@ CLASS lcl_result_converter IMPLEMENTATION.
                                                               end_line          = match-end_line
                                                               end_line_offset   = match-end_column ).
 
-      WHEN zif_adcoset_c_global=>c_source_code_type-interface OR
-           zif_adcoset_c_global=>c_source_code_type-access_control OR
-           zif_adcoset_c_global=>c_source_code_type-behavior_definition OR
-           zif_adcoset_c_global=>c_source_code_type-data_definition OR
-           zif_adcoset_c_global=>c_source_code_type-type_group OR
-           zif_adcoset_c_global=>c_source_code_type-metadata_extension OR
-           zif_adcoset_c_global=>c_source_code_type-simple_transformation OR
-           zif_adcoset_c_global=>c_source_code_type-program OR
-           zif_adcoset_c_global=>c_source_code_type-table.
-
+      WHEN OTHERS.
         result = adt_obj_factory->get_object_ref_for_trobj( type                   = object_info-type
                                                             name                   = object_info-name
                                                             append_source_uri_path = abap_true ).

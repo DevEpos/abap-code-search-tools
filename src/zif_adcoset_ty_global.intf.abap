@@ -17,6 +17,8 @@ INTERFACE zif_adcoset_ty_global
   TYPES ty_duration_in_micros TYPE p LENGTH 12 DECIMALS 2.
   "! Type for DDLX Source name (not available on 7.40)
   TYPES ty_ddlxname TYPE progname.
+  "! Type for SRVD Source name (not available on < 7.54)
+  TYPES ty_srvdname TYPE c LENGTH 40.
   TYPES ty_limu_obj_name TYPE c LENGTH 61.
   TYPES:
     BEGIN OF ty_message,

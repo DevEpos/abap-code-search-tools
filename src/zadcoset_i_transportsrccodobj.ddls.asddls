@@ -36,6 +36,7 @@ where TransportObject.obj_name not like '______________________________VC'
     or Object.object            = 'DCLS'
     or Object.object            = 'DDLX'
     or Object.object            = 'BDEF'
+    or Object.object            = 'SRVD'
     or Object.object            = 'XSLT')
 
 union

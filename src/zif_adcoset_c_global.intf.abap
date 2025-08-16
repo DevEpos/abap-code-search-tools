@@ -112,6 +112,7 @@ INTERFACE zif_adcoset_c_global
       metadata_extension    TYPE trobjtype VALUE 'DDLX',
       access_control        TYPE trobjtype VALUE 'DCLS',
       behavior_definition   TYPE trobjtype VALUE 'BDEF',
+      service_definition    TYPE trobjtype VALUE 'SRVD',
       simple_transformation TYPE trobjtype VALUE 'XSLT',
       function_group        TYPE trobjtype VALUE 'FUGR',
       table                 TYPE trobjtype VALUE 'TABL',

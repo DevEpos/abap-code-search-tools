@@ -30,6 +30,7 @@ where Object.pgmid   = 'R3TR'
        or Object.object = 'DCLS'
        or Object.object = 'DDLX'
        or Object.object = 'BDEF'
+       or Object.object = 'SRVD'
        or Object.object = 'XSLT')
 
 union

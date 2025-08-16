@@ -87,6 +87,10 @@ CLASS zcl_adcoset_scr_factory IMPLEMENTATION.
                          NEW zcl_adcoset_scr_ddls( is_multiline = is_multiline
                                                    line_feed    = line_feed )
 
+                       WHEN zif_adcoset_c_global=>c_source_code_type-service_definition THEN
+                         NEW zcl_adcoset_scr_srvd( is_multiline = is_multiline
+                                                   line_feed    = line_feed )
+
                        WHEN zif_adcoset_c_global=>c_source_code_type-metadata_extension THEN
                          NEW zcl_adcoset_scr_ddlx( is_multiline = is_multiline
                                                    line_feed    = line_feed )
