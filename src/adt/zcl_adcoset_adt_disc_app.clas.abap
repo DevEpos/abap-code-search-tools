@@ -170,5 +170,13 @@ CLASS zcl_adcoset_adt_disc_app IMPLEMENTATION.
                                               description     = 'Transport Request Type value help'
                                               category_scheme = c_root_scheme
                                               category_term   = 'transportRequestType' ).
+
+    IF zcl_adcoset_api_state_util=>is_api_state_available( ).
+      registry->register_discoverable_resource( url             = '/releasestate'
+                                                handler_class   = 'CL_RIS_ADT_RES_RELEASE_STATES'
+                                                description     = 'Search for Release API states'
+                                                category_scheme = c_root_scheme
+                                                category_term   = 'releaseState' ).
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.

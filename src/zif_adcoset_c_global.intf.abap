@@ -53,6 +53,7 @@ INTERFACE zif_adcoset_c_global
       package               TYPE string VALUE 'packageName',
       owner                 TYPE string VALUE 'owner',
       software_component    TYPE string VALUE 'comp',
+      api_state             TYPE string VALUE 'api',
       use_regex             TYPE string VALUE 'useRegex',
       match_all_patterns    TYPE string VALUE 'matchAll',
       sequential_matching   TYPE string VALUE 'seqMatching',

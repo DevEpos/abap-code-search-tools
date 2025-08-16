@@ -20,6 +20,7 @@ CLASS zcl_adcoset_search_scope DEFINITION
     DATA tags_dyn_where_cond TYPE string.
     DATA appl_comp_dyn_where_cond TYPE string.
     DATA softwcomp_dyn_where_cond TYPE string.
+    DATA api_state_dyn_where_cond TYPE string.
 
     METHODS config_dyn_where_clauses.
 ENDCLASS.
@@ -47,6 +48,7 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
         AND (softwcomp_dyn_where_cond)
+        AND (api_state_dyn_where_cond)
       ORDER BY obj~objectname,
                obj~objecttype
       INTO CORRESPONDING FIELDS OF TABLE @result-objects
@@ -78,7 +80,8 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
         AND obj~owner       IN @search_ranges-owner_range
         AND obj~createddate IN @search_ranges-created_on_range
         AND (appl_comp_dyn_where_cond)
-        and (softwcomp_dyn_where_cond)
+        AND (softwcomp_dyn_where_cond)
+        AND (api_state_dyn_where_cond)
       INTO @object_count
       UP TO @selection_limit ROWS.
 
@@ -125,6 +128,14 @@ CLASS zcl_adcoset_search_scope IMPLEMENTATION.
       IF search_ranges-softwcomp_range IS NOT INITIAL.
         softwcomp_dyn_where_cond = `pack~dlvunit IN @search_ranges-softwcomp_range`.
       ENDIF.
+    ENDIF.
+
+    IF search_ranges-api_state_range IS NOT INITIAL.
+      dyn_from_clause = dyn_from_clause &&
+        |INNER JOIN { zcl_adcoset_api_state_util=>c_api_state_view } as api | &&
+        |ON  obj~ObjectName = api~{ zcl_adcoset_api_state_util=>c_fields-object_name } | &&
+        |AND obj~ObjectType = api~{ zcl_adcoset_api_state_util=>c_fields-object_type } |.
+      api_state_dyn_where_cond = |api~{ zcl_adcoset_api_state_util=>c_fields-api_state } in @search_ranges-api_state_range|.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

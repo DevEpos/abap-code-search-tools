@@ -7,10 +7,14 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
   PUBLIC SECTION.
     METHODS post REDEFINITION.
 
+    CLASS-METHODS class_constructor.
+
   PROTECTED SECTION.
 
   PRIVATE SECTION.
     CONSTANTS c_value_separator TYPE string VALUE ',' ##NO_TEXT.
+
+    CLASS-DATA range_sort_tab TYPE abap_sortorder_tab.
 
     TYPES:
       BEGIN OF ty_param_flags,
@@ -50,6 +54,12 @@ CLASS zcl_adcoset_adt_res_cs_scope DEFINITION
         cx_adt_rest.
 
     METHODS extract_appl_comps
+      IMPORTING
+        param_value TYPE string
+      RAISING
+        cx_adt_rest.
+
+    METHODS extract_api_states
       IMPORTING
         param_value TYPE string
       RAISING
@@ -104,6 +114,10 @@ ENDCLASS.
 
 
 CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
+  METHOD class_constructor.
+    range_sort_tab = VALUE #( ( name = 'SIGN' ) ( name = 'OPTION' ) ( name = 'LOW' ) ( name = 'HIGH' ) ).
+  ENDMETHOD.
+
   METHOD post.
     DATA scope_params TYPE zif_adcoset_ty_adt_types=>ty_search_scope_params.
 
@@ -150,6 +164,9 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
 
         WHEN zif_adcoset_c_global=>c_search_params-appl_comp.
           extract_appl_comps( <param>-value ).
+
+        WHEN zif_adcoset_c_global=>c_search_params-api_state.
+          extract_api_states( <param>-value ).
 
         WHEN zif_adcoset_c_global=>c_search_params-object_type.
           extract_object_types( <param>-value ).
@@ -246,6 +263,17 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
                                 input       = appl_comps
                                 flags       = VALUE #( negation = abap_true auto_prefix_matching = abap_true )
                       IMPORTING range_table = scope_ranges-appl_comp_range ).
+  ENDMETHOD.
+
+  METHOD extract_api_states.
+    DATA(api_states) = to_upper( param_value ).
+
+    split_into_range( EXPORTING filter_name = zif_adcoset_c_global=>c_search_params-api_state
+                                input       = api_states
+                                flags       = VALUE #( negation = abap_true )
+                      IMPORTING range_table = scope_ranges-api_state_range ).
+
+    zcl_adcoset_api_state_util=>adjust_api_states_for_filter( CHANGING api_state_range = scope_ranges-api_state_range ).
   ENDMETHOD.
 
   METHOD extract_object_types.
@@ -387,7 +415,9 @@ CLASS zcl_adcoset_adt_res_cs_scope IMPLEMENTATION.
       IF <low> IS NOT INITIAL.
         APPEND <new_range> TO range_table.
       ENDIF.
-
     ENDLOOP.
+
+    SORT range_table BY (range_sort_tab).
+    DELETE ADJACENT DUPLICATES FROM range_table COMPARING ALL FIELDS.
   ENDMETHOD.
 ENDCLASS.
