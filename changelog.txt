@@ -9,6 +9,14 @@ Legend
 + : added
 - : removed
 
+2025-08-15 v1.7.0
+-------------------
+
++ New source code object type SRVD
++ New search filter 'comp' (Software Component)
++ New search filter 'api' (API State)
+
+
 2024-05-30 v1.6.0
 -------------------
 
